@@ -172,27 +172,42 @@ class EquipmentController extends Controller
             $remark = $_POST['remark'] ?? null;
 
             $errors = [];
-            $validCodes = array_filter(array_map('trim', $codes));
+            $validCodes = array_values(array_unique(array_map('trim', $codes)));
 
             if (empty($itemId)) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
             if (empty($validCodes)) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์อย่างน้อย 1 รายการ';
 
             $added = 0;
+            $skipped = 0;
             if (empty($errors)) {
+                // เช็ค code ซ้ำในระบบครั้งเดียว แล้ว insert ทั้งหมดใน transaction เดียว
+                $existingSet = array_flip(Equipment::getExistingCodes($validCodes));
+                $rows = [];
                 foreach ($validCodes as $code) {
-                    if (Equipment::isCodeTaken($code)) continue;
-                    Equipment::create([
+                    if (isset($existingSet[$code])) {
+                        $skipped++;
+                        continue;
+                    }
+                    $rows[] = [
                         'code' => $code,
                         'item_id' => $itemId,
                         'room_id' => $roomId ?: null,
                         'holder_id' => $holderId ?: null,
                         'status' => $status,
                         'remark' => $remark,
-                    ]);
-                    $added++;
+                    ];
                 }
+
+                if (!empty($rows)) {
+                    $added = Equipment::bulkCreate($rows);
+                }
+
                 logActivity(getCurrentUserId(), 'Bulk Add Equipment', 'เพิ่มครุภัณฑ์จำนวนมาก: ' . $added . ' รายการ');
-                $this->flash('success', "เพิ่มครุภัณฑ์สำเร็จ {$added} รายการ");
+                $msg = "เพิ่มครุภัณฑ์สำเร็จ {$added} รายการ";
+                if ($skipped > 0) {
+                    $msg .= " (ข้าม {$skipped} รายการที่ซ้ำกัน)";
+                }
+                $this->flash('success', $msg);
                 $this->redirect(SITE_URL . '/equipment');
             }
 

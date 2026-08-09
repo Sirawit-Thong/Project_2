@@ -111,8 +111,7 @@ class User extends Model
 
     public static function rejectPending($id)
     {
-        $sql = "DELETE FROM users WHERE id = ? AND status = 'pending'";
-        return self::query($sql, [$id]);
+        return self::update($id, ['status' => 'rejected']);
     }
 
     public static function getAllForExport()

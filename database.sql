@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL UNIQUE, -- อีเมล (ใช้สำหรับ Login ห้ามซ้ำ)
     password VARCHAR(255) NOT NULL, -- รหัสผ่าน (เข้ารหัส Hash)
     role ENUM('admin', 'staff', 'teacher', 'student') DEFAULT 'student', -- บทบาท: ผู้ดูแล, เจ้าหน้าที่, อาจารย์, นักศึกษา
-    status ENUM('pending', 'approved') DEFAULT 'pending', -- สถานะบัญชี: รออนุมัติ, อนุมัติแล้ว
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending', -- สถานะบัญชี: รออนุมัติ, อนุมัติแล้ว, ถูกปฏิเสธ
     class VARCHAR(50) DEFAULT NULL, -- ชั้นปี/ห้องเรียน (สำหรับนักศึกษา) เช่น ITS36641N
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- วันที่สร้าง
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- วันที่แก้ไขล่าสุด
@@ -148,6 +148,17 @@ CREATE TABLE IF NOT EXISTS repair_img (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: login_attempts (Rate Limiting)
+-- ตาราง: บันทึกความพยายามเข้าสู่ระบบ ใช้กัน brute force แบบต่อ IP
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL, -- IP ผู้พยายามเข้าสู่ระบบ
+    email VARCHAR(100) DEFAULT NULL, -- อีเมลที่ใช้พยายาม
+    success TINYINT(1) NOT NULL DEFAULT 0, -- สำเร็จ=1, ล้มเหลว=0
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ip_time (ip_address, attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: system_logs (Audit Trail / Activity Logs)

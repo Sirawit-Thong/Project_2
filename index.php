@@ -18,9 +18,7 @@ $router->get('/register/student', 'AuthController@registerStudent');
 $router->post('/register/student', 'AuthController@registerStudent');
 $router->get('/register/teacher', 'AuthController@registerTeacher');
 $router->post('/register/teacher', 'AuthController@registerTeacher');
-$router->get('/logout', 'AuthController@logout');
 $router->post('/logout', 'AuthController@logout');
-
 // ============================================
 // Authenticated Routes — Profile
 // ============================================

@@ -43,7 +43,11 @@ class UserController extends Controller
             if (empty($data['firstname'])) $errors[] = 'กรุณากรอกชื่อ';
             if (empty($data['lastname'])) $errors[] = 'กรุณากรอกนามสกุล';
             if (empty($data['email'])) $errors[] = 'กรุณากรอกอีเมล';
-            if (empty($data['password'])) $errors[] = 'กรุณากรอกรหัสผ่าน';
+            if (empty($data['password'])) {
+                $errors[] = 'กรุณากรอกรหัสผ่าน';
+            } elseif (strlen($data['password']) < 8) {
+                $errors[] = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+            }
 
             if (!empty($data['email']) && User::isEmailTaken($data['email'])) {
                 $errors[] = 'อีเมลนี้ถูกใช้งานแล้ว';
@@ -90,6 +94,9 @@ class UserController extends Controller
             if (empty($data['firstname'])) $errors[] = 'กรุณากรอกชื่อ';
             if (empty($data['lastname'])) $errors[] = 'กรุณากรอกนามสกุล';
             if (empty($data['email'])) $errors[] = 'กรุณากรอกอีเมล';
+            if (!empty($password) && strlen($password) < 8) {
+                $errors[] = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+            }
             if (!empty($data['email']) && User::isEmailTaken($data['email'], $id)) {
                 $errors[] = 'อีเมลนี้ถูกใช้งานแล้ว';
             }

@@ -197,8 +197,8 @@ class AuthController extends Controller
 
                 if (empty($newPassword)) {
                     $errors[] = 'กรุณากรอกรหัสผ่านใหม่';
-                } elseif (strlen($newPassword) < 6) {
-                    $errors[] = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร';
+                } elseif (strlen($newPassword) < 8) {
+                    $errors[] = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร';
                 }
 
                 if ($newPassword !== $confirmPassword) {
@@ -253,26 +253,15 @@ class AuthController extends Controller
 
     private function doLogin($email, $password)
     {
-        // Rate limiting: max 5 attempts per 15 minutes
+        // Rate limiting: max 5 ครั้งล้มเหลวต่อ IP ภายใน 15 นาที (กัน brute force ข้าม session)
         $maxAttempts = 5;
-        $lockoutTime = 900; // 15 minutes
-        $rateKey = 'login_attempts';
+        $lockoutMinutes = 15;
+        $ip = $this->clientIp();
 
-        if (!isset($_SESSION[$rateKey])) {
-            $_SESSION[$rateKey] = ['count' => 0, 'first_attempt' => time()];
-        }
+        $failedCount = LoginAttempt::recentFailures($ip, $lockoutMinutes);
 
-        $attempts = &$_SESSION[$rateKey];
-
-        // Reset if lockout period has passed
-        if ((time() - $attempts['first_attempt']) > $lockoutTime) {
-            $attempts = ['count' => 0, 'first_attempt' => time()];
-        }
-
-        if ($attempts['count'] >= $maxAttempts) {
-            $remaining = $lockoutTime - (time() - $attempts['first_attempt']);
-            $minutes = ceil($remaining / 60);
-            return ['success' => false, 'error' => "ลองเข้าสู่ระบบมากเกินไป กรุณารอ {$minutes} นาที"];
+        if ($failedCount >= $maxAttempts) {
+            return ['success' => false, 'error' => "ลองเข้าสู่ระบบมากเกินไป กรุณารอ {$lockoutMinutes} นาที"];
         }
 
         $input = strtolower(trim($email));
@@ -294,12 +283,12 @@ class AuthController extends Controller
         }
 
         if (!$user) {
-            $attempts['count']++;
+            LoginAttempt::record($ip, false, $input);
             return ['success' => false, 'error' => 'ไม่พบอีเมลหรือรหัสนักศึกษานี้ในระบบ'];
         }
 
         if (!password_verify($password, $user['password'])) {
-            $attempts['count']++;
+            LoginAttempt::record($ip, false, $user['email']);
             return ['success' => false, 'error' => 'รหัสผ่านไม่ถูกต้อง'];
         }
 
@@ -314,8 +303,12 @@ class AuthController extends Controller
         // Regenerate session ID to prevent session fixation
         session_regenerate_id(true);
 
+        // Rotate CSRF token — token เก่าของ pre-login session ใช้ไม่ได้อีกต่อไป
+        unset($_SESSION['csrf_token']);
+
         // Reset rate limiting on successful login
-        unset($_SESSION[$rateKey]);
+        LoginAttempt::record($ip, true, $user['email']);
+        LoginAttempt::clearForIp($ip);
 
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_role'] = $user['role'];
@@ -325,6 +318,11 @@ class AuthController extends Controller
         logActivity($user['id'], 'Login', 'เข้าสู่ระบบสำเร็จ');
 
         return ['success' => true, 'user' => $user];
+    }
+
+    private function clientIp()
+    {
+        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 
     private function doRegister($data)

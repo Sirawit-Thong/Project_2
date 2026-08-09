@@ -107,6 +107,57 @@ class Equipment extends Model {
         return (int) self::fetchColumn($sql, [$code, $excludeId]) > 0;
     }
 
+    /**
+     * คืนค่า code ที่มีอยู่แล้วในระบบ (เช็คครั้งเดียวสำหรับหลาย code)
+     */
+    public static function getExistingCodes(array $codes) {
+        if (empty($codes)) return [];
+        $placeholders = implode(', ', array_fill(0, count($codes), '?'));
+        $sql = "SELECT code FROM equipment WHERE code IN ({$placeholders})";
+        $rows = self::fetchAll($sql, $codes);
+        return array_column($rows, 'code');
+    }
+
+    /**
+     * INSERT หลายรายการใน transaction เดียว (กันข้อมูลครึ่งเดียว)
+     */
+    public static function bulkCreate(array $rows, $chunkSize = 500) {
+        if (empty($rows)) return 0;
+
+        $pdo = self::db();
+        $total = 0;
+
+        try {
+            $pdo->beginTransaction();
+
+            foreach (array_chunk($rows, $chunkSize) as $chunk) {
+                $values = [];
+                $params = [];
+                foreach ($chunk as $row) {
+                    $values[] = '(?, ?, ?, ?, ?, ?)';
+                    array_push($params,
+                        $row['code'], $row['item_id'],
+                        $row['room_id'] ?? null, $row['holder_id'] ?? null,
+                        $row['status'] ?? 'available', $row['remark'] ?? null
+                    );
+                }
+                $sql = "INSERT INTO equipment (code, item_id, room_id, holder_id, status, remark)
+                    VALUES " . implode(', ', $values);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $total += (int) $stmt->rowCount();
+            }
+
+            $pdo->commit();
+            return $total;
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
     public static function countByItem($itemId) {
         $sql = "SELECT COUNT(*) FROM equipment WHERE item_id = ?";
         return (int) self::fetchColumn($sql, [$itemId]);
