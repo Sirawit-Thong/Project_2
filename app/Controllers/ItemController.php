@@ -1,0 +1,76 @@
+<?php
+/**
+ * Item Controller
+ * จัดการรายการครุภัณฑ์ — CRUD
+ */
+class ItemController extends Controller
+{
+    public function index()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $pageTitle = 'จัดการรายการครุภัณฑ์';
+        $viewPath = 'crud/items';
+        $setFilter = $_GET['set_id'] ?? null;
+        $deptFilter = $_GET['dept_id'] ?? null;
+        $page = max(1, (int)($_GET['page'] ?? 1));
+
+        $result = Item::getFiltered($setFilter, $deptFilter, $page);
+        $departments = Department::getAll();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+
+            $action = $_POST['action'] ?? '';
+            $id = $_POST['id'] ?? null;
+
+            if ($action === 'save') {
+                $data = [
+                    'set_id' => $_POST['set_id'] ?? null,
+                    'name' => trim($_POST['name'] ?? ''),
+                    'brand' => trim($_POST['brand'] ?? ''),
+                    'model' => trim($_POST['model'] ?? ''),
+                    'qty' => (int)($_POST['qty'] ?? 1),
+                    'unit' => trim($_POST['unit'] ?? ''),
+                    'price' => (float)($_POST['price'] ?? 0),
+                    'price_remark' => trim($_POST['price_remark'] ?? ''),
+                    'remark' => trim($_POST['remark'] ?? ''),
+                ];
+
+                if (empty($data['name'])) {
+                    $this->flash('danger', 'กรุณากรอกชื่อรายการครุภัณฑ์');
+                    $this->redirect(SITE_URL . '/items');
+                }
+
+                if (!empty($id) && $id !== '0') {
+                    Item::update($id, $data);
+                    logActivity(getCurrentUserId(), 'Edit Item', 'แก้ไขรายการ: ' . $data['name']);
+                } else {
+                    Item::create($data);
+                    logActivity(getCurrentUserId(), 'Add Item', 'เพิ่มรายการ: ' . $data['name']);
+                }
+                $this->flash('success', 'บันทึกสำเร็จ');
+                $this->redirect(SITE_URL . '/items');
+            }
+        }
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function delete($id)
+    {
+        $this->requireLogin();
+        $this->authorize(['admin']);
+
+        if (Item::childEquipmentCount($id) > 0) {
+            $this->flash('danger', 'ไม่สามารถลบได้ มีครุภัณฑ์ที่เกี่ยวข้อง');
+            $this->redirect(SITE_URL . '/items');
+        }
+
+        Item::delete($id);
+        logActivity(getCurrentUserId(), 'Delete Item', 'ลบรายการ ID: ' . $id);
+        $this->flash('success', 'ลบรายการสำเร็จ');
+        $this->redirect(SITE_URL . '/items');
+    }
+}

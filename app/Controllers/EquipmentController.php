@@ -1,0 +1,283 @@
+<?php
+/**
+ * Equipment Controller
+ * จัดการครุภัณฑ์ — list, add, edit, detail, bulk-add, inspection, disposal
+ */
+class EquipmentController extends Controller
+{
+    public function index()
+    {
+        $this->requireLogin();
+        $role = getCurrentRole();
+
+        if (!in_array($role, ['admin', 'staff', 'teacher'])) {
+            ErrorHandler::page403();
+        }
+
+        $search = $_GET['search'] ?? '';
+        $status = $_GET['status'] ?? '';
+        $room = $_GET['room'] ?? '';
+        $item = $_GET['item'] ?? '';
+        $dept = $_GET['dept'] ?? '';
+        $set = $_GET['set'] ?? '';
+        $page = max(1, (int)($_GET['page'] ?? 1));
+
+        $result = Equipment::getFiltered(
+            compact('search', 'status', 'room', 'item', 'dept', 'set'),
+            $page
+        );
+
+        $departments = Department::getAll();
+        $rooms = Room::getAll();
+
+        $pageTitle = $role === 'teacher' ? 'ตรวจสอบครุภัณฑ์' : 'รายการครุภัณฑ์';
+        $viewPath = 'equipment/index';
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function add()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $departments = Department::getAll();
+        $rooms = Room::getAll();
+        $holders = User::getHolders();
+        $allItems = Item::getAllForDropdown();
+        $allSets = SetModel::getAllWithDept();
+        $pageTitle = 'เพิ่มครุภัณฑ์';
+        $viewPath = 'equipment/form';
+        $equipment = null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+
+            $data = $this->inputs([
+                'code' => '', 'item_id' => '', 'room_id' => null,
+                'status' => 'available', 'purchase_date' => null,
+                'check_date' => null, 'price' => null, 'price_remark' => null,
+                'holder_id' => null, 'remark' => null,
+            ]);
+
+            $errors = [];
+            if (empty($data['code'])) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์';
+            if (empty($data['item_id'])) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
+            if (!empty($data['code']) && Equipment::isCodeTaken($data['code'])) {
+                $errors[] = 'รหัสครุภัณฑ์นี้มีในระบบแล้ว';
+            }
+
+            if (empty($errors)) {
+                $id = Equipment::create($data);
+                logActivity(getCurrentUserId(), 'Add Equipment', 'เพิ่มครุภัณฑ์: ' . $data['code']);
+                $this->flash('success', 'เพิ่มครุภัณฑ์สำเร็จ');
+                $this->redirect(SITE_URL . '/equipment');
+            }
+
+            $this->flash('danger', implode('<br>', $errors));
+        }
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function edit($id)
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $equipment = Equipment::find($id);
+        if (!$equipment) ErrorHandler::page404();
+
+        $departments = Department::getAll();
+        $rooms = Room::getAll();
+        $holders = User::getHolders();
+        $allItems = Item::getAllForDropdown();
+        $allSets = SetModel::getAllWithDept();
+        $pageTitle = 'แก้ไขครุภัณฑ์';
+        $viewPath = 'equipment/form';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+
+            $data = $this->inputs([
+                'code' => '', 'item_id' => '', 'room_id' => null,
+                'status' => 'available', 'purchase_date' => null,
+                'check_date' => null, 'price' => null, 'price_remark' => null,
+                'holder_id' => null, 'remark' => null,
+            ]);
+
+            $errors = [];
+            if (empty($data['code'])) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์';
+            if (empty($data['item_id'])) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
+            if (!empty($data['code']) && Equipment::isCodeTaken($data['code'], $id)) {
+                $errors[] = 'รหัสครุภัณฑ์นี้มีในระบบแล้ว';
+            }
+
+            if (empty($errors)) {
+                Equipment::update($id, $data);
+                logActivity(getCurrentUserId(), 'Edit Equipment', 'แก้ไขครุภัณฑ์: ' . $data['code']);
+                $this->flash('success', 'แก้ไขครุภัณฑ์สำเร็จ');
+                $this->redirect(SITE_URL . '/equipment/' . $id);
+            }
+
+            $this->flash('danger', implode('<br>', $errors));
+        }
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function detail($id)
+    {
+        $this->requireLogin();
+        $role = getCurrentRole();
+
+        if ($role === 'teacher') {
+            $equipment = Equipment::getDetail($id, getCurrentUserId());
+        } else {
+            $this->authorize(['admin', 'staff']);
+            $equipment = Equipment::getDetail($id);
+        }
+
+        if (!$equipment) ErrorHandler::page404();
+
+        $images = Equipment::getImages($id);
+        $repairHistory = Equipment::getRepairHistory($id, 10);
+        $pageTitle = 'รายละเอียดครุภัณฑ์';
+        $viewPath = 'equipment/detail';
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function bulkAdd()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $departments = Department::getAll();
+        $rooms = Room::getAll();
+        $holders = User::getHolders();
+        $allItems = Item::getAllForDropdown();
+        $allSets = SetModel::getAllWithDept();
+        $pageTitle = 'เพิ่มครุภัณฑ์จำนวนมาก';
+        $viewPath = 'equipment/bulk_add';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+
+            $codes = $_POST['codes'] ?? [];
+            $itemId = $_POST['item_id'] ?? null;
+            $roomId = $_POST['room_id'] ?? null;
+            $holderId = $_POST['holder_id'] ?? null;
+            $status = $_POST['status'] ?? 'available';
+            $remark = $_POST['remark'] ?? null;
+
+            $errors = [];
+            $validCodes = array_filter(array_map('trim', $codes));
+
+            if (empty($itemId)) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
+            if (empty($validCodes)) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์อย่างน้อย 1 รายการ';
+
+            $added = 0;
+            if (empty($errors)) {
+                foreach ($validCodes as $code) {
+                    if (Equipment::isCodeTaken($code)) continue;
+                    Equipment::create([
+                        'code' => $code,
+                        'item_id' => $itemId,
+                        'room_id' => $roomId ?: null,
+                        'holder_id' => $holderId ?: null,
+                        'status' => $status,
+                        'remark' => $remark,
+                    ]);
+                    $added++;
+                }
+                logActivity(getCurrentUserId(), 'Bulk Add Equipment', 'เพิ่มครุภัณฑ์จำนวนมาก: ' . $added . ' รายการ');
+                $this->flash('success', "เพิ่มครุภัณฑ์สำเร็จ {$added} รายการ");
+                $this->redirect(SITE_URL . '/equipment');
+            }
+
+            $this->flash('danger', implode('<br>', $errors));
+        }
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function inspection()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $rooms = Room::getAll();
+        $pageTitle = 'ตรวจนับประจำปี';
+        $viewPath = 'equipment/inspection';
+        $selectedRoom = $_GET['room_id'] ?? null;
+        $equipment = [];
+
+        if ($selectedRoom) {
+            $equipment = Equipment::getByRoomForInspection($selectedRoom);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+
+            $items = $_POST['items'] ?? [];
+            $updated = 0;
+
+            foreach ($items as $eqId => $data) {
+                $status = $data['status'] ?? null;
+                $remark = $data['remark'] ?? null;
+                $checked = isset($data['checked']);
+
+                if ($checked && $status) {
+                    Equipment::inspectionUpdate($eqId, $status, $remark, true);
+                    $updated++;
+                }
+            }
+
+            logActivity(getCurrentUserId(), 'Inspection', "ตรวจนับครุภัณฑ์: {$updated} รายการ");
+            $this->flash('success', "บันทึกผลตรวจนับสำเร็จ {$updated} รายการ");
+            $this->redirect(SITE_URL . '/equipment/inspection?room_id=' . $selectedRoom);
+        }
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function disposal()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $pageTitle = 'จำหน่ายครุภัณฑ์';
+        $viewPath = 'equipment/disposal';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+            $action = $_POST['action'] ?? '';
+            $eqId = $_POST['equipment_id'] ?? null;
+
+            if ($eqId) {
+                switch ($action) {
+                    case 'propose':
+                        Equipment::updateStatus($eqId, 'pending_disposal');
+                        logActivity(getCurrentUserId(), 'Propose Disposal', 'เสนอจำหน่ายครุภัณฑ์ ID: ' . $eqId);
+                        break;
+                    case 'dispose':
+                        Equipment::dispose($eqId);
+                        logActivity(getCurrentUserId(), 'Dispose', 'จำหน่ายครุภัณฑ์ ID: ' . $eqId);
+                        break;
+                    case 'restore':
+                        Equipment::updateStatus($eqId, 'available');
+                        logActivity(getCurrentUserId(), 'Restore Equipment', 'กู้คืนครุภัณฑ์ ID: ' . $eqId);
+                        break;
+                }
+            }
+            $this->redirect(SITE_URL . '/equipment/disposal');
+        }
+
+        $pendingDisposal = Equipment::getDisposalList();
+        $broken = Equipment::getByStatus('broken', 1, 50);
+        $disposed = Equipment::getByStatus('disposed', 1, 50);
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+}

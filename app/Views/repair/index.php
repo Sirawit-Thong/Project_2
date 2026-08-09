@@ -1,0 +1,135 @@
+<?php
+$pageTitle = 'รายการแจ้งซ่อม';
+?>
+
+<div class="page-header">
+    <h1><i class="bi bi-tools me-2"></i>รายการแจ้งซ่อม</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
+            <li class="breadcrumb-item active">รายการแจ้งซ่อม</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-start border-primary border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">ทั้งหมด</div>
+                        <h4 class="mb-0"><?= number_format($result['total']) ?></h4>
+                    </div>
+                    <i class="bi bi-tools fs-1 text-primary opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-start border-warning border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">รอดำเนินการ</div>
+                        <h4 class="mb-0"><?= number_format($statusCounts['pending'] ?? 0) ?></h4>
+                    </div>
+                    <i class="bi bi-hourglass-split fs-1 text-warning opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-start border-info border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">กำลังซ่อม</div>
+                        <h4 class="mb-0"><?= number_format($statusCounts['in_progress'] ?? 0) ?></h4>
+                    </div>
+                    <i class="bi bi-gear fs-1 text-info opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-start border-success border-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">ซ่อมเสร็จ</div>
+                        <h4 class="mb-0"><?= number_format($statusCounts['completed'] ?? 0) ?></h4>
+                    </div>
+                    <i class="bi bi-check-circle fs-1 text-success opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-ul me-2"></i>รายการทั้งหมด</span>
+        <a href="<?= SITE_URL ?>/repairs/submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>แจ้งซ่อมใหม่
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <?php if (empty($result['repairs'])): ?>
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                <p>ยังไม่มีรายการแจ้งซ่อม</p>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">#</th>
+                            <th>รหัสครุภัณฑ์</th>
+                            <th>ผู้แจ้ง</th>
+                            <th>ปัญหา</th>
+                            <th class="text-center">สถานะ</th>
+                            <th>วันที่แจ้ง</th>
+                            <th class="text-center" style="width: 80px;">ดู</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($result['repairs'] as $i => $repair): ?>
+                            <tr>
+                                <td class="text-muted"><?= ($result['pagination']['current_page'] - 1) * 10 + $i + 1 ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($repair['eq_code']) ?></strong>
+                                </td>
+                                <td><?= htmlspecialchars($repair['firstname'] . ' ' . $repair['lastname']) ?></td>
+                                <td>
+                                    <span class="d-inline-block text-truncate" style="max-width: 250px;" title="<?= htmlspecialchars($repair['issue']) ?>">
+                                        <?= htmlspecialchars($repair['issue']) ?>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-<?= getStatusBadgeClass($repair['status']) ?>">
+                                        <?= translateRepairStatus($repair['status']) ?>
+                                    </span>
+                                </td>
+                                <td class="text-nowrap"><?= formatDateThai($repair['created_at']) ?></td>
+                                <td class="text-center">
+                                    <a href="<?= SITE_URL ?>/repairs/<?= $repair['id'] ?>" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+    <?php if (!empty($result['pagination'])): ?>
+        <div class="card-footer">
+            <?= paginationLinks($result['pagination'], SITE_URL . '/repairs?search=' . urlencode($_GET['search'] ?? '')) ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+
