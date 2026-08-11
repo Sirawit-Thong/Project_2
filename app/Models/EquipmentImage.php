@@ -34,4 +34,8 @@ class EquipmentImage extends Model {
         self::delete(static::$table, $imageId);
         return $image['path'];
     }
+
+    public static function deleteByEquipment($equipmentId) {
+        return self::query("DELETE FROM equipment_img WHERE equipment_id = ?", [$equipmentId]);
+    }
 }

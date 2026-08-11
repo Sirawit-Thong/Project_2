@@ -1,9 +1,11 @@
 <?php
-$pageTitle = $pageTitle ?? 'จำหน่ายครุภัณฑ์';
-
-$activeTab = $_GET['tab'] ?? 'broken';
-$brokenBaseUrl = SITE_URL . '/equipment/disposal?tab=broken';
-$disposedBaseUrl = SITE_URL . '/equipment/disposal?tab=disposed';
+/**
+ * Equipment Disposal View
+ * บริหารจัดการจำหน่ายครุภัณฑ์ออก — ตามแบบเว็บออริจินอล
+ *
+ * Variables from controller:
+ *   $tab, $counts, $items, $pagination, $perPage, $perPageOptions
+ */
 ?>
 
 <div class="page-header mb-4">
@@ -16,220 +18,119 @@ $disposedBaseUrl = SITE_URL . '/equipment/disposal?tab=disposed';
     </nav>
 </div>
 
-<?php
-$totalTabs = count($pendingDisposal) + $broken['total'] + $disposed['total'];
-?>
-
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item" role="presentation">
-        <a class="nav-link <?= $activeTab === 'pending_disposal' ? 'active' : '' ?>"
-            href="<?= SITE_URL ?>/equipment/disposal?tab=pending_disposal">
-            <i class="bi bi-hourglass-split me-1"></i>รอจำหน่ายออก
-            <?php if (!empty($pendingDisposal)): ?>
-                <span class="badge bg-warning text-dark ms-1"><?= count($pendingDisposal) ?></span>
-            <?php endif; ?>
-        </a>
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link <?= $tab === 'pending' ? 'active' : '' ?>"
+            href="<?= SITE_URL ?>/equipment/disposal?tab=pending">รอจำหน่ายออก
+            (<?= number_format($counts['pending']) ?>)</a>
     </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link <?= $activeTab === 'broken' ? 'active' : '' ?>"
-            href="<?= SITE_URL ?>/equipment/disposal?tab=broken">
-            <i class="bi bi-exclamation-triangle me-1"></i>ซ่อมไม่ได้
-            <?php if ($broken['total'] > 0): ?>
-                <span class="badge bg-danger ms-1"><?= number_format($broken['total']) ?></span>
-            <?php endif; ?>
-        </a>
+    <li class="nav-item">
+        <a class="nav-link <?= $tab === 'broken' ? 'active' : '' ?>"
+            href="<?= SITE_URL ?>/equipment/disposal?tab=broken">ซ่อมไม่ได้
+            (<?= number_format($counts['broken']) ?>)</a>
     </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link <?= $activeTab === 'disposed' ? 'active' : '' ?>"
-            href="<?= SITE_URL ?>/equipment/disposal?tab=disposed">
-            <i class="bi bi-check-circle me-1"></i>จำหน่ายแล้ว
-            <?php if ($disposed['total'] > 0): ?>
-                <span class="badge bg-secondary ms-1"><?= number_format($disposed['total']) ?></span>
-            <?php endif; ?>
-        </a>
+    <li class="nav-item">
+        <a class="nav-link <?= $tab === 'disposed' ? 'active' : '' ?>"
+            href="<?= SITE_URL ?>/equipment/disposal?tab=disposed">จำหน่ายออก
+            (<?= number_format($counts['disposed']) ?>)</a>
     </li>
 </ul>
 
-<?php if ($activeTab === 'pending_disposal'): ?>
-    <?php if (empty($pendingDisposal)): ?>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>ไม่มีครุภัณฑ์ที่รอจำหน่ายออกในขณะนี้
-        </div>
-    <?php else: ?>
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-hourglass-split me-1"></i>ครุภัณฑ์ที่รอจำหน่ายออก <?= count($pendingDisposal) ?> รายการ
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        <form method="GET" class="row g-2 align-items-center">
+            <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
+            <div class="col-auto">
+                <label class="form-label mb-0 me-2">แสดง:</label>
             </div>
+            <div class="col-auto">
+                <select name="per_page" class="form-select form-select-sm" style="min-width: 120px;"
+                    onchange="this.form.submit()">
+                    <?php foreach ($perPageOptions as $opt): ?>
+                        <option value="<?= $opt ?>" <?= $perPage === $opt ? 'selected' : '' ?>><?= $opt ?> รายการ</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <?php if (empty($items)): ?>
+            <div class="empty-state py-4">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="mt-3">ไม่มีรายการ</p>
+            </div>
+        <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover mb-0">
+                    <thead>
                         <tr>
-                            <th style="width:50px;">#</th>
                             <th>รหัส</th>
-                            <th>ชื่อครุภัณฑ์</th>
-                            <th>ยี่ห้อ</th>
-                            <th>ห้อง</th>
-                            <th class="text-center">สถานะ</th>
-                            <th class="text-center" style="width:180px;">จัดการ</th>
+                            <th>ชื่อ</th>
+                            <?php if ($tab !== 'disposed'): ?>
+                                <th>ห้อง</th>
+                            <?php else: ?>
+                                <th>วันที่จำหน่ายออก</th>
+                            <?php endif; ?>
+                            <?php if ($tab !== 'disposed'): ?>
+                                <th width="200">ดำเนินการ</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($pendingDisposal as $i => $eq): ?>
+                        <?php foreach ($items as $eq): ?>
                             <tr>
-                                <td class="text-muted"><?= $i + 1 ?></td>
                                 <td><a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="fw-semibold text-decoration-none"><?= sanitize($eq['code']) ?></a></td>
                                 <td><?= sanitize($eq['item_name']) ?></td>
-                                <td><?= sanitize($eq['brand'] ?? '-') ?></td>
-                                <td><i class="bi bi-door-open me-1 text-muted"></i><?= sanitize($eq['room_name'] ?? '-') ?></td>
-                                <td class="text-center"><span class="badge bg-<?= getStatusBadgeClass($eq['status']) ?>"><?= translateEquipmentStatus($eq['status']) ?></span></td>
-                                <td class="text-center">
-                                    <div class="d-flex gap-1 justify-content-center">
-                                        <a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="btn btn-sm btn-outline-primary" title="ดูรายละเอียด">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <form method="POST" action="<?= SITE_URL ?>/equipment/disposal" class="d-inline" onsubmit="return confirm('ยืนยันจำหน่ายครุภัณฑ์นี้ออกจากระบบ?');">
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="action" value="dispose">
-                                            <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger" title="จำหน่ายออก">
-                                                <i class="bi bi-trash3"></i> จำหน่าย
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="<?= SITE_URL ?>/equipment/disposal" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนครุภัณฑ์นี้กลับเป็นพร้อมใช้งาน?');">
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="action" value="restore">
-                                            <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-success" title="กู้คืน">
-                                                <i class="bi bi-arrow-counterclockwise"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
+
+                                <?php if ($tab !== 'disposed'): ?>
+                                    <td><i class="bi bi-door-open me-1 text-muted"></i><?= sanitize($eq['room_name'] ?? '-') ?></td>
+
+                                    <td>
+                                        <?php if ($tab === 'pending'): ?>
+                                            <form method="POST" action="<?= SITE_URL ?>/equipment/disposal"
+                                                class="d-inline" onsubmit="return confirm('ยืนยันจำหน่าย?');">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="action" value="dispose">
+                                                <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
+                                                <input type="hidden" name="tab" value="pending">
+                                                <button type="submit" class="btn btn-sm btn-danger">จำหน่ายออก</button>
+                                            </form>
+                                            <form method="POST" action="<?= SITE_URL ?>/equipment/disposal"
+                                                class="d-inline" onsubmit="return confirm('ยกเลิกการเสนอจำหน่าย?');">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="action" value="restore">
+                                                <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
+                                                <input type="hidden" name="tab" value="pending">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">ยกเลิก</button>
+                                            </form>
+                                        <?php elseif ($tab === 'broken'): ?>
+                                            <form method="POST" action="<?= SITE_URL ?>/equipment/disposal"
+                                                class="d-inline" onsubmit="return confirm('เสนอเรื่องจำหน่ายออก?');">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="action" value="propose">
+                                                <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
+                                                <input type="hidden" name="tab" value="broken">
+                                                <button type="submit" class="btn btn-sm btn-warning">เสนอเรื่องจำหน่ายออก</button>
+                                            </form>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php else: ?>
+                                    <td><?= formatDateThai($eq['updated_at']) ?></td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
+        <?php endif; ?>
+    </div>
+    <?php if ($pagination['total_pages'] > 1): ?>
+        <div class="card-footer">
+            <?= paginationLinks($pagination, SITE_URL . '/equipment/disposal?tab=' . $tab . '&per_page=' . $perPage) ?>
         </div>
     <?php endif; ?>
-
-<?php elseif ($activeTab === 'broken'): ?>
-    <div class="card">
-        <div class="card-header">
-            <i class="bi bi-exclamation-triangle me-1"></i>ครุภัณฑ์ที่ซ่อมไม่ได้ <?= number_format($broken['total']) ?> รายการ
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width:50px;">#</th>
-                        <th>รหัส</th>
-                        <th>ชื่อครุภัณฑ์</th>
-                        <th>ยี่ห้อ</th>
-                        <th>ห้อง</th>
-                        <th class="text-center">สถานะ</th>
-                        <th class="text-center" style="width:140px;">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($broken['equipment'])): ?>
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>ไม่มีครุภัณฑ์ในสถานะนี้
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($broken['equipment'] as $i => $eq): ?>
-                            <tr>
-                                <td class="text-muted"><?= ($broken['pagination']['current_page'] - 1) * $broken['pagination']['per_page'] + $i + 1 ?></td>
-                                <td><a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="fw-semibold text-decoration-none"><?= sanitize($eq['code']) ?></a></td>
-                                <td><?= sanitize($eq['item_name']) ?></td>
-                                <td><?= sanitize($eq['brand'] ?? '-') ?></td>
-                                <td><i class="bi bi-door-open me-1 text-muted"></i><?= sanitize($eq['room_name'] ?? '-') ?></td>
-                                <td class="text-center"><span class="badge bg-<?= getStatusBadgeClass($eq['status']) ?>"><?= translateEquipmentStatus($eq['status']) ?></span></td>
-                                <td class="text-center">
-                                    <div class="d-flex gap-1 justify-content-center">
-                                        <a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="btn btn-sm btn-outline-primary" title="ดูรายละเอียด">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <form method="POST" action="<?= SITE_URL ?>/equipment/disposal" class="d-inline" onsubmit="return confirm('เสนอจำหน่ายครุภัณฑ์นี้?');">
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="action" value="propose">
-                                            <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-warning" title="เสนอจำหน่าย">
-                                                <i class="bi bi-trash3"></i> เสนอจำหน่าย
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer">
-            <?= paginationLinks($broken['pagination'], $brokenBaseUrl) ?>
-        </div>
-    </div>
-
-<?php elseif ($activeTab === 'disposed'): ?>
-    <div class="card">
-        <div class="card-header">
-            <i class="bi bi-check-circle me-1"></i>ครุภัณฑ์ที่จำหน่ายแล้ว <?= number_format($disposed['total']) ?> รายการ
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width:50px;">#</th>
-                        <th>รหัส</th>
-                        <th>ชื่อครุภัณฑ์</th>
-                        <th>ยี่ห้อ</th>
-                        <th>ห้อง</th>
-                        <th class="text-center">สถานะ</th>
-                        <th class="text-center" style="width:140px;">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($disposed['equipment'])): ?>
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>ไม่มีครุภัณฑ์ในสถานะนี้
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($disposed['equipment'] as $i => $eq): ?>
-                            <tr>
-                                <td class="text-muted"><?= ($disposed['pagination']['current_page'] - 1) * $disposed['pagination']['per_page'] + $i + 1 ?></td>
-                                <td><a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="fw-semibold text-decoration-none"><?= sanitize($eq['code']) ?></a></td>
-                                <td><?= sanitize($eq['item_name']) ?></td>
-                                <td><?= sanitize($eq['brand'] ?? '-') ?></td>
-                                <td><i class="bi bi-door-open me-1 text-muted"></i><?= sanitize($eq['room_name'] ?? '-') ?></td>
-                                <td class="text-center"><span class="badge bg-<?= getStatusBadgeClass($eq['status']) ?>"><?= translateEquipmentStatus($eq['status']) ?></span></td>
-                                <td class="text-center">
-                                    <div class="d-flex gap-1 justify-content-center">
-                                        <a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="btn btn-sm btn-outline-primary" title="ดูรายละเอียด">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <form method="POST" action="<?= SITE_URL ?>/equipment/disposal" class="d-inline" onsubmit="return confirm('กู้คืนครุภัณฑ์นี้กลับเป็นพร้อมใช้งาน?');">
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="action" value="restore">
-                                            <input type="hidden" name="equipment_id" value="<?= $eq['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-success" title="กู้คืน">
-                                                <i class="bi bi-arrow-counterclockwise"></i> กู้คืน
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer">
-            <?= paginationLinks($disposed['pagination'], $disposedBaseUrl) ?>
-        </div>
-    </div>
-<?php endif; ?>
+</div>

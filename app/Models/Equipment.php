@@ -53,8 +53,10 @@ class Equipment extends Model {
         $pagination = self::paginate($total, $page, $perPage);
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT e.*, i.name AS item_name, i.brand, i.model, i.set_id,
-            s.name AS set_name, s.year, d.name AS dept_name,
+        $sql = "SELECT e.*, e.price_remark AS eq_price_remark,
+            i.name AS item_name, i.brand, i.model, i.set_id, i.price_remark AS item_price_remark,
+            s.name AS set_name, s.year, s.price_remark AS set_price_remark,
+            d.name AS dept_name,
             u.firstname AS holder_firstname, u.lastname AS holder_lastname,
             rm.name AS room_name
             FROM equipment e
@@ -105,6 +107,26 @@ class Equipment extends Model {
     public static function isCodeTaken($code, $excludeId = 0) {
         $sql = "SELECT COUNT(*) FROM equipment WHERE code = ? AND id != ?";
         return (int) self::fetchColumn($sql, [$code, $excludeId]) > 0;
+    }
+
+    public static function hasRepairHistory($id) {
+        $sql = "SELECT COUNT(*) FROM repair WHERE equipment_id = ?";
+        return (int) self::fetchColumn($sql, [$id]) > 0;
+    }
+
+    public static function deleteWithImages($id) {
+        $pdo = self::db();
+        try {
+            $pdo->beginTransaction();
+            EquipmentImage::deleteByEquipment($id);
+            self::delete(static::$table, $id);
+            $pdo->commit();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -265,7 +287,7 @@ class Equipment extends Model {
         return self::fetchAll($sql, [$roomId]);
     }
 
-    public static function getByStatus($status, $page = 1, $perPage = 20, $orderBy = 'code') {
+    public static function getByStatus($status, $page = 1, $perPage = 20, $orderBy = 'code', $orderDir = 'ASC') {
         $countSql = "SELECT COUNT(*) FROM equipment WHERE status = ?";
         $total = (int) self::fetchColumn($countSql, [$status]);
         $pagination = self::paginate($total, $page, $perPage);
@@ -276,13 +298,14 @@ class Equipment extends Model {
         if (!in_array($orderBy, $allowedColumns, true)) {
             $orderBy = 'code';
         }
+        $orderDir = strtoupper($orderDir) === 'DESC' ? 'DESC' : 'ASC';
 
         $sql = "SELECT e.*, i.name AS item_name, i.brand, rm.name AS room_name
             FROM equipment e
             JOIN items i ON e.item_id = i.id
             LEFT JOIN rooms rm ON e.room_id = rm.id
             WHERE e.status = ?
-            ORDER BY e.{$orderBy}
+            ORDER BY e.{$orderBy} {$orderDir}
             LIMIT {$perPage} OFFSET {$offset}";
         $equipment = self::fetchAll($sql, [$status]);
 

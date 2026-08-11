@@ -22,18 +22,53 @@ class EquipmentController extends Controller
         $set = $_GET['set'] ?? '';
         $page = max(1, (int)($_GET['page'] ?? 1));
 
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPageOptions, true)
+            ? (int) $_GET['per_page'] : 20;
+
         $result = Equipment::getFiltered(
             compact('search', 'status', 'room', 'item', 'dept', 'set'),
-            $page
+            $page,
+            $perPage
         );
 
         $departments = Department::getAll();
         $rooms = Room::getAll();
+        $sets = SetModel::getAllWithDept();
+        $items = Item::getAllForDropdown();
 
-        $pageTitle = $role === 'teacher' ? 'ตรวจสอบครุภัณฑ์' : 'รายการครุภัณฑ์';
+        $pageTitle = $role === 'teacher' ? 'ตรวจสอบครุภัณฑ์' : 'ทะเบียนครุภัณฑ์';
         $viewPath = 'equipment/index';
 
         require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function delete($id)
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+        $this->validateCsrf();
+
+        $equipment = Equipment::find($id);
+        if (!$equipment) ErrorHandler::page404();
+
+        if (Equipment::hasRepairHistory($id)) {
+            $this->flash('danger', 'ไม่สามารถลบได้ เนื่องจากมีประวัติการซ่อม');
+            $this->redirect(SITE_URL . '/equipment');
+        }
+
+        $images = Equipment::getImages($id);
+        Equipment::deleteWithImages($id);
+        foreach ($images as $img) {
+            $filepath = UPLOAD_PATH . $img['path'];
+            if (file_exists($filepath)) {
+                unlink($filepath);
+            }
+        }
+
+        logActivity(getCurrentUserId(), 'Delete Equipment', 'ลบครุภัณฑ์ ID: ' . $id);
+        $this->flash('success', 'ลบครุภัณฑ์สำเร็จ');
+        $this->redirect(SITE_URL . '/equipment');
     }
 
     public function add()
@@ -295,13 +330,14 @@ class EquipmentController extends Controller
         $this->requireLogin();
         $this->authorize(['admin', 'staff']);
 
-        $pageTitle = 'จำหน่ายครุภัณฑ์';
+        $pageTitle = 'บริหารจัดการจำหน่ายครุภัณฑ์ออก';
         $viewPath = 'equipment/disposal';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
             $action = $_POST['action'] ?? '';
             $eqId = $_POST['equipment_id'] ?? null;
+            $returnTab = $_POST['tab'] ?? 'pending';
 
             if ($eqId) {
                 switch ($action) {
@@ -319,12 +355,39 @@ class EquipmentController extends Controller
                         break;
                 }
             }
-            $this->redirect(SITE_URL . '/equipment/disposal');
+            $this->redirect(SITE_URL . '/equipment/disposal?tab=' . urlencode($returnTab));
         }
 
-        $pendingDisposal = Equipment::getDisposalList();
-        $broken = Equipment::getByStatus('broken', 1, 50);
-        $disposed = Equipment::getByStatus('disposed', 1, 50);
+        $tab = $_GET['tab'] ?? 'pending';
+
+        $statusMap = [
+            'pending' => 'pending_disposal',
+            'broken' => 'broken',
+            'disposed' => 'disposed',
+        ];
+
+        if (!array_key_exists($tab, $statusMap)) {
+            $tab = 'pending';
+        }
+        $activeStatus = $statusMap[$tab];
+
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPageOptions)
+            ? (int) $_GET['per_page'] : 20;
+
+        $counts = [];
+        foreach ($statusMap as $key => $status) {
+            $counts[$key] = EquipmentStats::countByStatus($status);
+        }
+
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $orderMap = ['pending' => 'code', 'broken' => 'code', 'disposed' => 'updated_at'];
+        $orderDir = $tab === 'disposed' ? 'DESC' : 'ASC';
+
+        $result = Equipment::getByStatus($activeStatus, $page, $perPage, $orderMap[$tab], $orderDir);
+
+        $items = $result['equipment'];
+        $pagination = $result['pagination'];
 
         require __DIR__ . '/../Views/layouts/main.php';
     }
