@@ -24,6 +24,9 @@ jobs:
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
+            ls;
+            pwd;
             mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .git --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md . /htdocs/;
+            ls /htdocs/;
             quit
           "
