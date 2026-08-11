@@ -1,5 +1,12 @@
 RewriteEngine On
 
+# InfinityFree Database Environment Variables
+SetEnv DB_HOST sql103.infinityfree.com
+SetEnv DB_NAME if0_40083938_equipment_db
+SetEnv DB_USER if0_40083938
+SetEnv DB_PASS tRWdRx6inu7F
+SetEnv SITE_URL https://khuruphan-rus.free.je
+
 # Handle requests that don't match existing files or directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

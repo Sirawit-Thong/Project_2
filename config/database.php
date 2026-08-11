@@ -7,11 +7,12 @@
  * for sensitive credentials. Never commit passwords to version control.
  */
 
-// Development defaults — override via .env or environment in production
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'equipment_db');
-define('DB_USER', 'root');
-define('DB_PASS', ''); // Change in production!
+// Auto-detect: local (XAMPP) or production (InfinityFree)
+// On InfinityFree, env vars are set via .htaccess SetEnv
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'equipment_db');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_CHARSET', 'utf8mb4');
 
 /**
@@ -40,7 +41,7 @@ function getDB() {
 
 // Application settings
 define('SITE_NAME', 'ระบบแจ้งซ่อมครุภัณฑ์');
-define('SITE_URL', 'http://localhost/P');
+define('SITE_URL', getenv('SITE_URL') ?: 'http://localhost/P');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
 // Start session with secure settings
