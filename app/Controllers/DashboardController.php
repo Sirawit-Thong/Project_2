@@ -71,7 +71,7 @@ class DashboardController extends Controller
         $totalRepairs = Repair::countByUser($userId);
         $pendingRepairs = Repair::pendingCountByUser($userId);
         $recentRepairs = Repair::getRecentByUser($userId, 5);
-        $managedRooms = RoomManager::getManagedRooms($userId);
+        $managedRooms = RoomManager::getManagedRoomCount($userId);
 
         require __DIR__ . '/../Views/layouts/main.php';
     }
