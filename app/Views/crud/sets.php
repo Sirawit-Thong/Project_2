@@ -134,16 +134,17 @@ $pagination = $result['pagination'] ?? null;
                         <input type="text" class="form-control" name="name" required placeholder="กรอกชื่อชุดอุปกรณ์">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">ปี</label>
-                        <input type="text" class="form-control" name="year" placeholder="เช่น 2567">
+                        <label class="form-label">ปี <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="year" required placeholder="เช่น 2567"
+                            value="<?= date('Y') + 543 ?>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">มูลค่า</label>
-                        <input type="number" step="0.01" class="form-control" name="price" placeholder="0.00">
+                        <input type="number" step="0.01" class="form-control" name="price" id="addPrice" placeholder="0.00">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">หมายเหตุมูลค่า</label>
-                        <input type="text" class="form-control" name="price_remark">
+                        <label class="form-label" id="addPriceRemarkLabel">หมายเหตุมูลค่า</label>
+                        <input type="text" class="form-control" name="price_remark" id="addPriceRemark">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">หมายเหตุ</label>
@@ -185,15 +186,15 @@ $pagination = $result['pagination'] ?? null;
                         <input type="text" class="form-control" id="edit_name" name="name" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">ปี</label>
-                        <input type="text" class="form-control" id="edit_year" name="year">
+                        <label class="form-label">ปี <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="edit_year" name="year" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">มูลค่า</label>
                         <input type="number" step="0.01" class="form-control" id="edit_price" name="price">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">หมายเหตุมูลค่า</label>
+                        <label class="form-label" id="editPriceRemarkLabel">หมายเหตุมูลค่า</label>
                         <input type="text" class="form-control" id="edit_price_remark" name="price_remark">
                     </div>
                     <div class="mb-3">
@@ -211,6 +212,31 @@ $pagination = $result['pagination'] ?? null;
 </div>
 
 <script>
+function toggleRemarkRequirement(prefix) {
+    var priceInput = document.getElementById(prefix === 'add' ? 'addPrice' : 'edit_price');
+    var remarkInput = document.getElementById(prefix === 'add' ? 'addPriceRemark' : 'edit_price_remark');
+    var label = document.getElementById(prefix === 'add' ? 'addPriceRemarkLabel' : 'editPriceRemarkLabel');
+    if (!priceInput || !remarkInput || !label) return;
+
+    if (parseFloat(priceInput.value) > 0) {
+        remarkInput.required = true;
+        if (!label.innerHTML.includes('text-danger')) {
+            label.innerHTML += ' <span class="text-danger">*</span>';
+        }
+    } else {
+        remarkInput.required = false;
+        label.innerHTML = label.innerHTML.replace(' <span class="text-danger">*</span>', '');
+    }
+}
+
+document.getElementById('addModal')?.addEventListener('shown.bs.modal', function() {
+    toggleRemarkRequirement('add');
+});
+
+document.getElementById('addPrice')?.addEventListener('input', function() {
+    toggleRemarkRequirement('add');
+});
+
 document.getElementById('editModal')?.addEventListener('show.bs.modal', function(e) {
     var btn = e.relatedTarget;
     document.getElementById('edit_id').value = btn.dataset.id;
@@ -220,5 +246,10 @@ document.getElementById('editModal')?.addEventListener('show.bs.modal', function
     document.getElementById('edit_price').value = btn.dataset.price;
     document.getElementById('edit_price_remark').value = btn.dataset.price_remark;
     document.getElementById('edit_remark').value = btn.dataset.remark;
+    toggleRemarkRequirement('edit');
+});
+
+document.getElementById('edit_price')?.addEventListener('input', function() {
+    toggleRemarkRequirement('edit');
 });
 </script>

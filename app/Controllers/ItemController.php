@@ -38,9 +38,18 @@ class ItemController extends Controller
                     'remark' => trim($_POST['remark'] ?? ''),
                 ];
 
-                if (empty($data['name'])) {
-                    $this->flash('danger', 'กรุณากรอกชื่อรายการครุภัณฑ์');
+                if (empty($data['set_id']) || empty($data['name'])) {
+                    $this->flash('danger', 'กรุณากรอกข้อมูลที่จำเป็น');
                     $this->redirect(SITE_URL . '/items');
+                }
+
+                if ($data['price'] > 0 && empty($data['price_remark'])) {
+                    $this->flash('danger', 'กรุณาระบุหมายเหตุราคา เนื่องจากมีการใส่ราคาทั้งรายการของครุภัณฑ์');
+                    $this->redirect(SITE_URL . '/items');
+                }
+
+                if (Item::parentSetHasPrice($data['set_id'])) {
+                    $data['price'] = 0;
                 }
 
                 if (!empty($id) && $id !== '0') {

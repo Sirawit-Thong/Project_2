@@ -46,9 +46,14 @@ class EquipmentController extends Controller
         $holders = User::getHolders();
         $allItems = Item::getAllForDropdown();
         $allSets = SetModel::getAllWithDept();
+        $managersByRoom = [];
+        foreach (RoomManager::getAllWithRoomAndUser() as $rm) {
+            $managersByRoom[$rm['room_id']][] = $rm;
+        }
         $pageTitle = 'เพิ่มครุภัณฑ์';
         $viewPath = 'equipment/form';
         $equipment = null;
+        $existingImages = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
@@ -67,8 +72,23 @@ class EquipmentController extends Controller
                 $errors[] = 'รหัสครุภัณฑ์นี้มีในระบบแล้ว';
             }
 
+            // Check quantity limit (only for new equipment)
+            if (!empty($data['item_id'])) {
+                $limit = Equipment::checkQtyLimit($data['item_id']);
+                if ($limit['qty'] > 0 && $limit['exceeded']) {
+                    $errors[] = 'ไม่สามารถเพิ่มได้ รายการ "' . $limit['name'] . '" มีจำนวน ' . $limit['qty'] . ' ชิ้น ลงทะเบียนครบแล้ว';
+                }
+            }
+
             if (empty($errors)) {
+                // Force price to 0 if parent item or set has price
+                $parentPrices = Equipment::getParentPrices($data['item_id']);
+                if ($parentPrices && ($parentPrices['item_price'] > 0 || $parentPrices['set_price'] > 0)) {
+                    $data['price'] = 0;
+                }
+
                 $id = Equipment::create($data);
+                $this->saveImages($id);
                 logActivity(getCurrentUserId(), 'Add Equipment', 'เพิ่มครุภัณฑ์: ' . $data['code']);
                 $this->flash('success', 'เพิ่มครุภัณฑ์สำเร็จ');
                 $this->redirect(SITE_URL . '/equipment');
@@ -93,8 +113,13 @@ class EquipmentController extends Controller
         $holders = User::getHolders();
         $allItems = Item::getAllForDropdown();
         $allSets = SetModel::getAllWithDept();
+        $managersByRoom = [];
+        foreach (RoomManager::getAllWithRoomAndUser() as $rm) {
+            $managersByRoom[$rm['room_id']][] = $rm;
+        }
         $pageTitle = 'แก้ไขครุภัณฑ์';
         $viewPath = 'equipment/form';
+        $existingImages = Equipment::getImages($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
@@ -114,7 +139,14 @@ class EquipmentController extends Controller
             }
 
             if (empty($errors)) {
+                // Force price to 0 if parent item or set has price
+                $parentPrices = Equipment::getParentPrices($data['item_id']);
+                if ($parentPrices && ($parentPrices['item_price'] > 0 || $parentPrices['set_price'] > 0)) {
+                    $data['price'] = 0;
+                }
+
                 Equipment::update($id, $data);
+                $this->saveImages($id);
                 logActivity(getCurrentUserId(), 'Edit Equipment', 'แก้ไขครุภัณฑ์: ' . $data['code']);
                 $this->flash('success', 'แก้ไขครุภัณฑ์สำเร็จ');
                 $this->redirect(SITE_URL . '/equipment/' . $id);
@@ -294,5 +326,55 @@ class EquipmentController extends Controller
         $disposed = Equipment::getByStatus('disposed', 1, 50);
 
         require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function deleteImage($id)
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+        $this->validateCsrf();
+
+        $imageId = (int)($_POST['image_id'] ?? 0);
+        if (!$imageId) {
+            $this->flash('danger', 'ไม่พบรูปภาพ');
+            $this->redirect(SITE_URL . '/equipment/edit/' . $id);
+        }
+
+        $path = Equipment::deleteImage($imageId, $id);
+        if ($path) {
+            $filepath = UPLOAD_PATH . $path;
+            if (file_exists($filepath)) {
+                unlink($filepath);
+            }
+            logActivity(getCurrentUserId(), 'Delete Equipment Image', 'ลบรูปครุภัณฑ์ ID: ' . $id . ', Image ID: ' . $imageId);
+            $this->flash('success', 'ลบรูปภาพสำเร็จ');
+        } else {
+            $this->flash('danger', 'ไม่พบรูปภาพ');
+        }
+
+        $this->redirect(SITE_URL . '/equipment/edit/' . $id);
+    }
+
+    private function saveImages($equipmentId)
+    {
+        foreach (['purchase' => 'purchase_images', 'current_condition' => 'current_images'] as $type => $field) {
+            if (empty($_FILES[$field]['name'][0])) continue;
+
+            foreach ($_FILES[$field]['tmp_name'] as $key => $tmpName) {
+                if ($_FILES[$field]['error'][$key] !== UPLOAD_ERR_OK) continue;
+
+                $file = [
+                    'name' => $_FILES[$field]['name'][$key],
+                    'type' => $_FILES[$field]['type'][$key],
+                    'tmp_name' => $tmpName,
+                    'size' => $_FILES[$field]['size'][$key],
+                ];
+
+                $result = uploadImage($file, 'equipment');
+                if ($result['success']) {
+                    Equipment::addImage($equipmentId, $result['path'], $type);
+                }
+            }
+        }
     }
 }

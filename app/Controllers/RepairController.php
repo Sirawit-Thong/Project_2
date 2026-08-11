@@ -13,7 +13,11 @@ class RepairController extends Controller
         $status = $_GET['status'] ?? '';
         $page = max(1, (int)($_GET['page'] ?? 1));
 
-        $result = Repair::getFiltered($status, $page);
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPageOptions)
+            ? (int) $_GET['per_page'] : 20;
+
+        $result = Repair::getFiltered($status, $page, $perPage);
         $statusCounts = Repair::getStatusCounts();
         $pageTitle = 'รายการซ่อม';
         $viewPath = 'repair/index';
@@ -30,17 +34,16 @@ class RepairController extends Controller
             ErrorHandler::page403();
         }
 
-        $pageTitle = 'แจ้งซ่อมใหม่';
+        $pageTitle = 'ส่งรายการแจ้งซ่อมบำรุงครุภัณฑ์';
         $viewPath = 'repair/submit';
         $equipment = Equipment::getAvailableWithRoom();
+        $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
 
             $equipmentId = $_POST['equipment_id'] ?? null;
             $issue = trim($_POST['issue'] ?? '');
-
-            $errors = [];
             if (empty($equipmentId)) $errors[] = 'กรุณาเลือกครุภัณฑ์';
             if (empty($issue)) $errors[] = 'กรุณากรอกรายละเอียดปัญหา';
 
@@ -69,8 +72,6 @@ class RepairController extends Controller
                 $this->flash('success', 'แจ้งซ่อมสำเร็จ');
                 $this->redirect(SITE_URL . '/repairs/mine');
             }
-
-            $this->flash('danger', implode('<br>', $errors));
         }
 
         require __DIR__ . '/../Views/layouts/main.php';

@@ -34,8 +34,13 @@ class SetController extends Controller
                     'remark' => trim($_POST['remark'] ?? ''),
                 ];
 
-                if (empty($data['name'])) {
-                    $this->flash('danger', 'กรุณากรอกชื่อชุดครุภัณฑ์');
+                if (empty($data['name']) || empty($data['year'])) {
+                    $this->flash('danger', 'กรุณากรอกข้อมูลที่จำเป็น');
+                    $this->redirect(SITE_URL . '/sets');
+                }
+
+                if ($data['price'] > 0 && empty($data['price_remark'])) {
+                    $this->flash('danger', 'กรุณาระบุหมายเหตุราคา เนื่องจากมีการใส่ราคารวมของชุดครุภัณฑ์');
                     $this->redirect(SITE_URL . '/sets');
                 }
 

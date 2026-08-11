@@ -26,7 +26,7 @@ class Repair extends Model
             LEFT JOIN items i ON e.item_id = i.id
             LEFT JOIN users u ON r.user_id = u.id
             {$whereSql}
-            ORDER BY r.created_at DESC
+            ORDER BY CASE r.status WHEN 'pending' THEN 1 WHEN 'in_progress' THEN 2 ELSE 3 END, r.created_at DESC
             LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
         $repairs = self::fetchAll($dataSql, $params);
 

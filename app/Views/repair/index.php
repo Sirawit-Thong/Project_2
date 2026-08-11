@@ -1,5 +1,8 @@
 <?php
 $pageTitle = 'รายการแจ้งซ่อม';
+$currentStatus = $_GET['status'] ?? '';
+$perPageOptions = $perPageOptions ?? [10, 20, 50, 100];
+$perPage = $perPage ?? 20;
 ?>
 
 <div class="page-header">
@@ -14,56 +17,84 @@ $pageTitle = 'รายการแจ้งซ่อม';
 
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-start border-primary border-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small">ทั้งหมด</div>
-                        <h4 class="mb-0"><?= number_format($result['total']) ?></h4>
+        <a href="<?= SITE_URL ?>/repairs" class="text-decoration-none text-body">
+            <div class="card border-start border-primary border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">ทั้งหมด</div>
+                            <h4 class="mb-0"><?= number_format($result['total']) ?></h4>
+                        </div>
+                        <i class="bi bi-tools fs-1 text-primary opacity-25"></i>
                     </div>
-                    <i class="bi bi-tools fs-1 text-primary opacity-25"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-start border-warning border-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small">รอดำเนินการ</div>
-                        <h4 class="mb-0"><?= number_format($statusCounts['pending'] ?? 0) ?></h4>
+        <a href="<?= SITE_URL ?>/repairs?status=pending" class="text-decoration-none text-body">
+            <div class="card border-start border-warning border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">รอดำเนินการ</div>
+                            <h4 class="mb-0"><?= number_format($statusCounts['pending'] ?? 0) ?></h4>
+                        </div>
+                        <i class="bi bi-hourglass-split fs-1 text-warning opacity-25"></i>
                     </div>
-                    <i class="bi bi-hourglass-split fs-1 text-warning opacity-25"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-start border-info border-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small">กำลังซ่อม</div>
-                        <h4 class="mb-0"><?= number_format($statusCounts['in_progress'] ?? 0) ?></h4>
+        <a href="<?= SITE_URL ?>/repairs?status=in_progress" class="text-decoration-none text-body">
+            <div class="card border-start border-info border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">กำลังซ่อม</div>
+                            <h4 class="mb-0"><?= number_format($statusCounts['in_progress'] ?? 0) ?></h4>
+                        </div>
+                        <i class="bi bi-gear fs-1 text-info opacity-25"></i>
                     </div>
-                    <i class="bi bi-gear fs-1 text-info opacity-25"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-lg-3">
-        <div class="card border-start border-success border-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small">ซ่อมเสร็จ</div>
-                        <h4 class="mb-0"><?= number_format($statusCounts['completed'] ?? 0) ?></h4>
+        <a href="<?= SITE_URL ?>/repairs?status=completed" class="text-decoration-none text-body">
+            <div class="card border-start border-success border-4 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small">ซ่อมเสร็จ</div>
+                            <h4 class="mb-0"><?= number_format($statusCounts['completed'] ?? 0) ?></h4>
+                        </div>
+                        <i class="bi bi-check-circle fs-1 text-success opacity-25"></i>
                     </div>
-                    <i class="bi bi-check-circle fs-1 text-success opacity-25"></i>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="row g-2 align-items-center">
+            <?php if ($currentStatus): ?>
+                <input type="hidden" name="status" value="<?= htmlspecialchars($currentStatus) ?>">
+            <?php endif; ?>
+            <div class="col-auto">
+                <label class="form-label mb-0 me-2">แสดง:</label>
+            </div>
+            <div class="col-auto">
+                <select name="per_page" class="form-select form-select-sm" style="min-width: 130px;" onchange="this.form.submit()">
+                    <?php foreach ($perPageOptions as $opt): ?>
+                        <option value="<?= $opt ?>" <?= $perPage === $opt ? 'selected' : '' ?>><?= $opt ?> รายการ</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -97,7 +128,7 @@ $pageTitle = 'รายการแจ้งซ่อม';
                     <tbody>
                         <?php foreach ($result['repairs'] as $i => $repair): ?>
                             <tr>
-                                <td class="text-muted"><?= ($result['pagination']['current_page'] - 1) * 10 + $i + 1 ?></td>
+                                <td class="text-muted"><?= $result['pagination']['offset'] + $i + 1 ?></td>
                                 <td>
                                     <strong><?= htmlspecialchars($repair['eq_code']) ?></strong>
                                 </td>
@@ -127,7 +158,7 @@ $pageTitle = 'รายการแจ้งซ่อม';
     </div>
     <?php if (!empty($result['pagination'])): ?>
         <div class="card-footer">
-            <?= paginationLinks($result['pagination'], SITE_URL . '/repairs?search=' . urlencode($_GET['search'] ?? '')) ?>
+            <?= paginationLinks($result['pagination'], SITE_URL . '/repairs?status=' . urlencode($currentStatus) . '&per_page=' . $perPage) ?>
         </div>
     <?php endif; ?>
 </div>

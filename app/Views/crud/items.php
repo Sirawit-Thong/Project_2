@@ -176,11 +176,11 @@ $pagination = $result['pagination'] ?? null;
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">ราคา</label>
-                            <input type="number" step="0.01" class="form-control" name="price" placeholder="0.00">
+                            <input type="number" step="0.01" class="form-control" name="price" id="addPrice" placeholder="0.00">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">หมายเหตุมูลค่า</label>
-                            <input type="text" class="form-control" name="price_remark">
+                            <label class="form-label" id="addPriceRemarkLabel">หมายเหตุมูลค่า</label>
+                            <input type="text" class="form-control" name="price_remark" id="addPriceRemark">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -254,7 +254,7 @@ $pagination = $result['pagination'] ?? null;
                             <input type="number" step="0.01" class="form-control" id="edit_price" name="price">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">หมายเหตุมูลค่า</label>
+                            <label class="form-label" id="editPriceRemarkLabel">หมายเหตุมูลค่า</label>
                             <input type="text" class="form-control" id="edit_price_remark" name="price_remark">
                         </div>
                     </div>
@@ -273,7 +273,37 @@ $pagination = $result['pagination'] ?? null;
 </div>
 
 <script>
+function toggleRemarkRequirement(prefix) {
+    var priceInput = document.getElementById(prefix === 'add' ? 'addPrice' : 'edit_price');
+    var remarkInput = document.getElementById(prefix === 'add' ? 'addPriceRemark' : 'edit_price_remark');
+    var label = document.getElementById(prefix === 'add' ? 'addPriceRemarkLabel' : 'editPriceRemarkLabel');
+    if (!priceInput || !remarkInput || !label) return;
+
+    if (parseFloat(priceInput.value) > 0) {
+        remarkInput.required = true;
+        if (!label.innerHTML.includes('text-danger')) {
+            label.innerHTML += ' <span class="text-danger">*</span>';
+        }
+    } else {
+        remarkInput.required = false;
+        label.innerHTML = label.innerHTML.replace(' <span class="text-danger">*</span>', '');
+    }
+}
+
+document.getElementById('addPrice')?.addEventListener('input', function() {
+    toggleRemarkRequirement('add');
+});
+
+document.getElementById('edit_price')?.addEventListener('input', function() {
+    toggleRemarkRequirement('edit');
+});
+
+document.getElementById('addModal')?.addEventListener('shown.bs.modal', function() {
+    toggleRemarkRequirement('add');
+});
+
 var departmentsData = <?= json_encode($departments) ?>;
+var setsByDept = {};
 var setsByDept = {};
 
 departmentsData.forEach(function(d) {
@@ -316,6 +346,7 @@ document.getElementById('editModal')?.addEventListener('show.bs.modal', function
     var deptId = btn.dataset.dept_id;
     document.getElementById('edit_dept_id').value = deptId;
     loadSets(deptId, 'edit_set_id', btn.dataset.set_id);
+    toggleRemarkRequirement('edit');
 });
 
 document.getElementById('filter_dept')?.addEventListener('change', function() {

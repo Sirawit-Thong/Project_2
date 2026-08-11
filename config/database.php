@@ -40,7 +40,7 @@ function getDB() {
 
 // Application settings
 define('SITE_NAME', 'ระบบแจ้งซ่อมครุภัณฑ์');
-define('SITE_URL', 'http://localhost/equipment');
+define('SITE_URL', 'http://localhost/P');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
 // Start session with secure settings

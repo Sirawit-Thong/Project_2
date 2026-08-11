@@ -1,135 +1,99 @@
 <?php
-$pageTitle = 'รายละเอียดการแจ้งซ่อม #' . $repair['id'];
+$pageTitle = 'รายละเอียดการแจ้งซ่อมบำรุง #' . $repair['id'];
 ?>
 
-<div class="page-header">
-    <h1><i class="bi bi-tools me-2"></i>รายละเอียดการแจ้งซ่อม</h1>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/repairs">รายการแจ้งซ่อม</a></li>
-            <li class="breadcrumb-item active">#<?= $repair['id'] ?></li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-wrench me-2"></i>รายละเอียดการแจ้งซ่อมบำรุง #<?= $repair['id'] ?></h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/repairs/mine">ประวัติการแจ้งซ่อม</a></li>
+                <li class="breadcrumb-item active">#<?= $repair['id'] ?></li>
+            </ol>
+        </nav>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+        <i class="bi bi-arrow-left me-1"></i>กลับ
+    </button>
 </div>
 
-<div class="row g-4">
+<div class="row">
     <div class="col-lg-8">
+        <!-- Repair Info -->
         <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-info-circle me-2"></i>ข้อมูลครุภัณฑ์</span>
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="bi bi-info-circle me-2"></i>ข้อมูลการแจ้งซ่อมบำรุง</span>
                 <span class="badge bg-<?= getStatusBadgeClass($repair['status']) ?> fs-6">
                     <?= translateRepairStatus($repair['status']) ?>
                 </span>
             </div>
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <div class="text-muted small mb-1">รหัสครุภัณฑ์</div>
-                        <div class="fw-semibold"><?= htmlspecialchars($repair['eq_code']) ?></div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="text-muted small mb-1">ชื่อรายการ</div>
-                        <div class="fw-semibold"><?= htmlspecialchars($repair['item_name']) ?></div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="text-muted small mb-1">ห้อง/สถานที่</div>
-                        <div class="fw-semibold"><?= htmlspecialchars($repair['room'] ?? '-') ?></div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="text-muted small mb-1">ยี่ห้อ / รุ่น</div>
-                        <div class="fw-semibold">
-                            <?= htmlspecialchars($repair['brand'] ?? '-') ?>
-                            <?= !empty($repair['model']) ? '/ ' . htmlspecialchars($repair['model']) : '' ?>
-                        </div>
-                    </div>
-                </div>
+                <table class="table table-borderless">
+                    <tr>
+                        <th style="width: 150px;">ครุภัณฑ์:</th>
+                        <td>
+                            <strong><?= htmlspecialchars($repair['item_name']) ?></strong><br>
+                            <small class="text-muted"><?= htmlspecialchars($repair['brand'] ?? '') ?>
+                                <?= htmlspecialchars($repair['model'] ?? '') ?></small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>รหัสครุภัณฑ์:</th>
+                        <td><code><?= htmlspecialchars($repair['eq_code'] ?? '-') ?></code></td>
+                    </tr>
+                    <tr>
+                        <th>ห้อง/สถานที่:</th>
+                        <td><span class="badge bg-secondary"><?= htmlspecialchars($repair['room'] ?? '-') ?></span></td>
+                    </tr>
+                    <tr>
+                        <th>วันที่แจ้ง:</th>
+                        <td><?= formatDateTimeThai($repair['created_at']) ?></td>
+                    </tr>
+                </table>
             </div>
         </div>
 
+        <!-- Issue Description -->
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-chat-left-text me-2"></i>ปัญหาที่แจ้ง
+                <i class="bi bi-exclamation-circle me-2"></i>รายละเอียดความขัดข้อง/ปัญหาที่พบ
             </div>
             <div class="card-body">
-                <p class="mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars($repair['issue']) ?></p>
+                <p class="mb-0"><?= nl2br(htmlspecialchars($repair['issue'])) ?></p>
             </div>
         </div>
 
-        <?php if (!empty($images)): ?>
+        <!-- Resolution (if any) -->
+        <?php if (!empty($repair['resolution'] ?? '')): ?>
             <div class="card mb-4">
-                <div class="card-header">
-                    <i class="bi bi-images me-2"></i>รูปภาพประกอบ (<?= count($images) ?> รูป)
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-check-circle me-2"></i>ผลการดำเนินการซ่อมบำรุง
                 </div>
                 <div class="card-body">
-                    <div class="row g-2">
-                        <?php foreach ($images as $img): ?>
-                            <div class="col-6 col-md-4">
-                                <a href="<?= SITE_URL ?>/uploads/repairs/<?= htmlspecialchars($img['filename']) ?>" target="_blank">
-                                    <img src="<?= SITE_URL ?>/uploads/repairs/<?= htmlspecialchars($img['filename']) ?>"
-                                        class="img-fluid rounded" alt="รูปประกอบ"
-                                        style="width:100%; height:150px; object-fit:cover;">
-                                </a>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($repair['admin_note'])): ?>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="bi bi-sticky me-2"></i>บันทึกจากเจ้าหน้าที่
-                </div>
-                <div class="card-body">
-                    <p class="mb-0" style="white-space: pre-wrap;"><?= htmlspecialchars($repair['admin_note']) ?></p>
+                    <p class="mb-0"><?= nl2br(htmlspecialchars($repair['resolution'])) ?></p>
+                    <?php if (!empty($repair['completed_at'] ?? '')): ?>
+                        <hr>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar-check me-1"></i>ดำเนินการเสร็จสิ้นเมื่อ:
+                            <?= formatDateTimeThai($repair['completed_at']) ?>
+                        </small>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>
     </div>
 
     <div class="col-lg-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="bi bi-person me-2"></i>ข้อมูลผู้แจ้ง
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center me-3" style="width:50px;height:50px;min-width:50px;">
-                        <i class="bi bi-person-fill text-white fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="fw-semibold"><?= htmlspecialchars($repair['firstname'] . ' ' . $repair['lastname']) ?></div>
-                        <small class="text-muted"><?= htmlspecialchars($repair['email']) ?></small><br>
-                        <span class="badge bg-<?= $repair['role'] === 'teacher' ? 'info' : 'secondary' ?>">
-                            <?= translateRole($repair['role']) ?>
-                        </span>
-                    </div>
-                </div>
-                <hr>
-                <div class="small">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">วันที่แจ้ง:</span>
-                        <span><?= formatDateTimeThai($repair['created_at']) ?></span>
-                    </div>
-                    <?php if (!empty($repair['updated_at']) && $repair['updated_at'] !== $repair['created_at']): ?>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">อัปเดตล่าสุด:</span>
-                            <span><?= formatDateTimeThai($repair['updated_at']) ?></span>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
         <?php if ($role === 'admin' || $role === 'staff'): ?>
+            <!-- Status Update (admin/staff) -->
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="bi bi-gear me-2"></i>อัปเดตสถานะ
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="<?= SITE_URL ?>/repairs/<?= $repair['id'] ?>/status">
+                    <form method="POST" action="<?= SITE_URL ?>/repairs/<?= $repair['id'] ?>">
                         <?= csrf_field() ?>
                         <div class="d-grid gap-2">
                             <?php if ($repair['status'] !== 'in_progress'): ?>
@@ -159,35 +123,67 @@ $pageTitle = 'รายละเอียดการแจ้งซ่อม #'
             </div>
         <?php endif; ?>
 
-        <div class="card">
+        <!-- Status Timeline -->
+        <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-clock-history me-2"></i>ประวัติสถานะ
+                <i class="bi bi-clock-history me-2"></i>สถานะการดำเนินการ
             </div>
             <div class="card-body">
-                <?php if (!empty($repair['timeline'])): ?>
-                    <div class="timeline">
-                        <?php foreach ($repair['timeline'] as $event): ?>
-                            <div class="d-flex mb-3">
-                                <div class="me-3">
-                                    <div class="rounded-circle bg-<?= getStatusBadgeClass($event['status']) ?> d-flex align-items-center justify-content-center"
-                                        style="width:32px;height:32px;min-width:32px;">
-                                        <i class="bi bi-<?= $event['status'] === 'pending' ? 'hourglass' : ($event['status'] === 'in_progress' ? 'gear' : ($event['status'] === 'completed' ? 'check-lg' : 'x-lg')) ?> text-white small"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold small"><?= translateRepairStatus($event['status']) ?></div>
-                                    <div class="text-muted small"><?= formatDateTimeThai($event['created_at']) ?></div>
-                                    <?php if (!empty($event['note'])): ?>
-                                        <div class="small mt-1"><?= htmlspecialchars($event['note']) ?></div>
-                                    <?php endif; ?>
-                                </div>
+                <div class="timeline">
+                    <div class="timeline-item active">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <p class="mb-0 fw-bold">แจ้งซ่อม</p>
+                            <small class="text-muted"><?= formatDateTimeThai($repair['created_at']) ?></small>
+                        </div>
+                    </div>
+                    <?php if ($repair['status'] !== 'pending'): ?>
+                        <div
+                            class="timeline-item <?= in_array($repair['status'], ['in_progress', 'completed']) ? 'active' : '' ?>">
+                            <div
+                                class="timeline-marker bg-<?= in_array($repair['status'], ['in_progress', 'completed']) ? 'warning' : 'secondary' ?>">
                             </div>
-                        <?php endforeach; ?>
+                            <div class="timeline-content">
+                                <p class="mb-0 fw-bold">กำลังดำเนินการ</p>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($repair['status'] === 'completed'): ?>
+                        <div class="timeline-item active">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <p class="mb-0 fw-bold">ซ่อมเสร็จ</p>
+                                <?php if (!empty($repair['completed_at'] ?? '')): ?>
+                                    <small class="text-muted"><?= formatDateTimeThai($repair['completed_at']) ?></small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Images -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-images me-2"></i>รูปภาพประกอบ
+            </div>
+            <div class="card-body">
+                <?php if (empty($images)): ?>
+                    <div class="empty-state py-3">
+                        <i class="bi bi-image"></i>
+                        <p>ไม่มีรูปภาพ</p>
                     </div>
                 <?php else: ?>
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-clock d-block mb-1"></i>
-                        <small>ยังไม่มีประวัติการเปลี่ยนสถานะ</small>
+                    <div class="row g-2">
+                        <?php foreach ($images as $img): ?>
+                            <div class="col-6">
+                                <a href="<?= SITE_URL ?>/uploads/<?= htmlspecialchars($img['path']) ?>" target="_blank">
+                                    <img src="<?= SITE_URL ?>/uploads/<?= htmlspecialchars($img['path']) ?>" class="img-fluid rounded"
+                                        alt="Repair Image">
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -195,4 +191,36 @@ $pageTitle = 'รายละเอียดการแจ้งซ่อม #'
     </div>
 </div>
 
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
 
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+        border-left: 2px solid #dee2e6;
+        padding-left: 20px;
+        margin-left: 6px;
+    }
+
+    .timeline-item:last-child {
+        border-left: none;
+        padding-bottom: 0;
+    }
+
+    .timeline-item.active .timeline-marker {
+        transform: scale(1.2);
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -8px;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #6c757d;
+    }
+</style>
