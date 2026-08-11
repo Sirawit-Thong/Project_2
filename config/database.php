@@ -8,11 +8,13 @@
  */
 
 // Auto-detect: local (XAMPP) or production (InfinityFree)
-// On InfinityFree, env vars are set via .htaccess SetEnv
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'equipment_db');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+$isProduction = isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'infinityfree') !== false
+    || isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'khuruphan') !== false;
+
+define('DB_HOST', $isProduction ? 'sql103.infinityfree.com' : 'localhost');
+define('DB_NAME', $isProduction ? 'if0_40083938_equipment_db' : 'equipment_db');
+define('DB_USER', $isProduction ? 'if0_40083938' : 'root');
+define('DB_PASS', $isProduction ? 'tRWdRx6inu7F' : '');
 define('DB_CHARSET', 'utf8mb4');
 
 /**
@@ -41,7 +43,7 @@ function getDB() {
 
 // Application settings
 define('SITE_NAME', 'ระบบแจ้งซ่อมครุภัณฑ์');
-define('SITE_URL', getenv('SITE_URL') ?: 'http://localhost/P');
+define('SITE_URL', $isProduction ? 'https://khuruphan-rus.free.je' : 'http://localhost/P');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
 // Start session with secure settings
