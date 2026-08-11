@@ -8,8 +8,10 @@
  */
 
 // Auto-detect: local (XAMPP) or production (InfinityFree)
-$isProduction = isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'infinityfree') !== false
-    || isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'khuruphan') !== false;
+$isLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])
+    || strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false;
+
+$isProduction = !$isLocal;
 
 define('DB_HOST', $isProduction ? 'sql103.infinityfree.com' : 'localhost');
 define('DB_NAME', $isProduction ? 'if0_40083938_equipment_db' : 'equipment_db');
