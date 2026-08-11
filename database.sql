@@ -165,9 +165,9 @@ CREATE TABLE IF NOT EXISTS system_logs (
 
 -- ข้อมูลผู้ใช้เริ่มต้น (รหัสผ่านคือ 123456)
 INSERT INTO users (sid, email, password, firstname, lastname, role, status, class) VALUES
-(NULL, 'admin@rmutsb.ac.th', '$2y$10$ufM.kQSOGUSpXimh5c2o.OVZipdx2T1H8phvwRpEi0SWpWeUyk45u', 'ผู้ดูแลระบบ', 'ทดสอบ', 'admin', 'approved', NULL),
-(NULL, 'staff@rmutsb.ac.th', '$2y$10$ufM.kQSOGUSpXimh5c2o.OVZipdx2T1H8phvwRpEi0SWpWeUyk45u', 'พนักงาน', 'ทดสอบ', 'staff', 'approved', NULL),
-(NULL, 'teacher@rmutsb.ac.th', '$2y$10$ufM.kQSOGUSpXimh5c2o.OVZipdx2T1H8phvwRpEi0SWpWeUyk45u', 'อาจารย์', 'ทดสอบ', 'teacher', 'approved', NULL),
+(NULL, 'admin@rmutsb.ac.th', '$2y$10$O6hMD4KspNa0nAofyrSiuOo31Jd2L2UuUoDuI/CPxHLkDDsJ.Zaze', 'ผู้ดูแลระบบ', 'ทดสอบ', 'admin', 'approved', NULL),
+(NULL, 'staff@rmutsb.ac.th', '$2y$10$O6hMD4KspNa0nAofyrSiuOo31Jd2L2UuUoDuI/CPxHLkDDsJ.Zaze', 'พนักงาน', 'ทดสอบ', 'staff', 'approved', NULL),
+(NULL, 'teacher@rmutsb.ac.th', '$2y$10$O6hMD4KspNa0nAofyrSiuOo31Jd2L2UuUoDuI/CPxHLkDDsJ.Zaze', 'อาจารย์', 'ทดสอบ', 'teacher', 'approved', NULL),
 
 -- ข้อมูลห้องเริ่มต้น
 INSERT INTO rooms (name) VALUES
