@@ -280,7 +280,7 @@ $formAction = $isEdit ? SITE_URL . '/equipment/edit/' . $equipment['id'] : SITE_
 document.addEventListener('DOMContentLoaded', function() {
     const allItems = <?= json_encode($allItems, JSON_UNESCAPED_UNICODE) ?>;
     const allSets = <?= json_encode($allSets, JSON_UNESCAPED_UNICODE) ?>;
-    const existingItemId = '<?= $equipment['item_id'] ?? $_POST['item_id'] ?? '' ?>';
+    const existingItemId = '<?= $preselectedItemId ?? $equipment['item_id'] ?? $_POST['item_id'] ?? '' ?>';
 
     const deptSelect = document.getElementById('deptSelect');
     const setSelect = document.getElementById('setSelect');

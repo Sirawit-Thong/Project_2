@@ -15,9 +15,14 @@ class ItemController extends Controller
         $setFilter = $_GET['set_id'] ?? null;
         $deptFilter = $_GET['dept_id'] ?? null;
         $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPageOptions)
+            ? (int) $_GET['per_page']
+            : 20;
 
-        $result = Item::getFiltered($setFilter, $deptFilter, $page);
+        $result = Item::getFiltered($setFilter, $deptFilter, $page, $perPage);
         $departments = Department::getAll();
+        $allSets = SetModel::getAllWithDept();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();

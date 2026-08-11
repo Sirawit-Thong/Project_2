@@ -54,6 +54,7 @@ class EquipmentController extends Controller
         $viewPath = 'equipment/form';
         $equipment = null;
         $existingImages = [];
+        $preselectedItemId = $_GET['item_id'] ?? null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();

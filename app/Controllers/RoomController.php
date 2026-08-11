@@ -13,8 +13,12 @@ class RoomController extends Controller
         $pageTitle = 'จัดการห้อง/สถานที่';
         $viewPath = 'crud/rooms';
         $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPageOptions)
+            ? (int) $_GET['per_page']
+            : 20;
 
-        $result = Room::getFiltered($page);
+        $result = Room::getFiltered($page, $perPage);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
