@@ -253,17 +253,6 @@ class AuthController extends Controller
 
     private function doLogin($email, $password)
     {
-        // Rate limiting: max 5 ครั้งล้มเหลวต่อ IP ภายใน 15 นาที (กัน brute force ข้าม session)
-        $maxAttempts = 5;
-        $lockoutMinutes = 15;
-        $ip = $this->clientIp();
-
-        $failedCount = LoginAttempt::recentFailures($ip, $lockoutMinutes);
-
-        if ($failedCount >= $maxAttempts) {
-            return ['success' => false, 'error' => "ลองเข้าสู่ระบบมากเกินไป กรุณารอ {$lockoutMinutes} นาที"];
-        }
-
         $input = strtolower(trim($email));
 
         if (strpos($input, '@') === false) {
@@ -283,12 +272,10 @@ class AuthController extends Controller
         }
 
         if (!$user) {
-            LoginAttempt::record($ip, false, $input);
             return ['success' => false, 'error' => 'ไม่พบอีเมลหรือรหัสนักศึกษานี้ในระบบ'];
         }
 
         if (!password_verify($password, $user['password'])) {
-            LoginAttempt::record($ip, false, $user['email']);
             return ['success' => false, 'error' => 'รหัสผ่านไม่ถูกต้อง'];
         }
 
@@ -306,10 +293,6 @@ class AuthController extends Controller
         // Rotate CSRF token — token เก่าของ pre-login session ใช้ไม่ได้อีกต่อไป
         unset($_SESSION['csrf_token']);
 
-        // Reset rate limiting on successful login
-        LoginAttempt::record($ip, true, $user['email']);
-        LoginAttempt::clearForIp($ip);
-
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_role'] = $user['role'];
         $_SESSION['user_name'] = $user['firstname'] . ' ' . $user['lastname'];
@@ -318,11 +301,6 @@ class AuthController extends Controller
         logActivity($user['id'], 'Login', 'เข้าสู่ระบบสำเร็จ');
 
         return ['success' => true, 'user' => $user];
-    }
-
-    private function clientIp()
-    {
-        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 
     private function doRegister($data)

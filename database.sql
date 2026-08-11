@@ -150,17 +150,6 @@ CREATE TABLE IF NOT EXISTS repair_img (
     FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table: login_attempts (Rate Limiting)
--- ตาราง: บันทึกความพยายามเข้าสู่ระบบ ใช้กัน brute force แบบต่อ IP
-CREATE TABLE IF NOT EXISTS login_attempts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ip_address VARCHAR(45) NOT NULL, -- IP ผู้พยายามเข้าสู่ระบบ
-    email VARCHAR(100) DEFAULT NULL, -- อีเมลที่ใช้พยายาม
-    success TINYINT(1) NOT NULL DEFAULT 0, -- สำเร็จ=1, ล้มเหลว=0
-    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_ip_time (ip_address, attempted_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- Table: system_logs (Audit Trail / Activity Logs)
 -- ตาราง: บันทึกการใช้งานระบบ (Audit Log)
 CREATE TABLE IF NOT EXISTS system_logs (
