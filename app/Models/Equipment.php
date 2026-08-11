@@ -385,6 +385,44 @@ class Equipment extends Model {
         return EquipmentStats::getReportStatsForTeacher($userId);
     }
 
+    public static function getForTeacherExport($userId, $room = '') {
+        if ($room === 'other') {
+            $sql = "SELECT e.code, i.name AS item_name, i.brand, i.model,
+                    'อื่นๆ (ไม่ได้อยู่ในห้องที่รับผิดชอบ)' AS room_name, e.status, e.price, e.purchase_date, e.check_date,
+                    u.firstname AS holder_firstname, u.lastname AS holder_lastname,
+                    e.remark, e.price_remark AS eq_price_remark, i.price_remark AS item_price_remark, s.price_remark AS set_price_remark
+                FROM equipment e
+                JOIN items i ON e.item_id = i.id
+                JOIN sets s ON i.set_id = s.id
+                LEFT JOIN users u ON e.holder_id = u.id
+                WHERE e.holder_id = ?
+                AND (e.room_id IS NULL OR e.room_id NOT IN (SELECT room_id FROM room_managers WHERE user_id = ?))
+                ORDER BY e.code";
+            return self::fetchAll($sql, [$userId, $userId]);
+        }
+
+        $sql = "SELECT e.code, i.name AS item_name, i.brand, i.model,
+                r.name AS room_name, e.status, e.price, e.purchase_date, e.check_date,
+                u.firstname AS holder_firstname, u.lastname AS holder_lastname,
+                e.remark, e.price_remark AS eq_price_remark, i.price_remark AS item_price_remark, s.price_remark AS set_price_remark
+            FROM equipment e
+            JOIN items i ON e.item_id = i.id
+            JOIN sets s ON i.set_id = s.id
+            JOIN rooms r ON e.room_id = r.id
+            JOIN room_managers rm ON rm.room_id = r.id
+            LEFT JOIN users u ON e.holder_id = u.id
+            WHERE rm.user_id = ?";
+        $params = [$userId];
+
+        if ($room !== '') {
+            $sql .= " AND e.room_id = ?";
+            $params[] = (int) $room;
+        }
+
+        $sql .= " ORDER BY r.name, e.code";
+        return self::fetchAll($sql, $params);
+    }
+
     public static function inspectionUpdate($id, $status, $remark, $updateCheckDate = false) {
         if ($updateCheckDate) {
             return self::update($id, [

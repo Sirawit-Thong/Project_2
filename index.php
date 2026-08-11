@@ -54,6 +54,12 @@ $router->get('/repairs/{id}', 'RepairController@detail');
 $router->post('/repairs/{id}', 'RepairController@detail');
 
 // ============================================
+// Teacher Report Routes
+// ============================================
+$router->get('/teacher/report', 'DashboardController@teacherReport');
+$router->get('/teacher/export', 'DashboardController@teacherExport');
+
+// ============================================
 // User Management Routes
 // ============================================
 $router->get('/users', 'UserController@index');

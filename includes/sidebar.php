@@ -151,6 +151,10 @@ function isSidebarActive($path)
                     <i class="bi bi-clipboard-check"></i>
                     <span>ตรวจสอบครุภัณฑ์ที่รับผิดชอบ</span>
                 </a>
+                <a href="<?= SITE_URL ?>/teacher/report" class="nav-link <?= isSidebarActive('/teacher/report') ?>">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>รายงานสรุป</span>
+                </a>
             </div>
 
         <?php elseif ($role === 'student'): ?>
