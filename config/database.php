@@ -16,7 +16,7 @@ $isProduction = !$isLocal;
 define('DB_HOST', $isProduction ? 'sql103.infinityfree.com' : 'localhost');
 define('DB_NAME', $isProduction ? 'if0_40083938_equipment_db' : 'equipment_db');
 define('DB_USER', $isProduction ? 'if0_40083938' : 'root');
-define('DB_PASS', $isProduction ? 'tRWdRx6inu7F' : '');
+define('DB_PASS', $isProduction ? 'tnRWdRx6inu7F' : '');
 define('DB_CHARSET', 'utf8mb4');
 
 /**
