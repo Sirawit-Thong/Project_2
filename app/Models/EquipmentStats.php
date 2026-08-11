@@ -13,18 +13,21 @@ class EquipmentStats extends Model {
     }
 
     public static function getTotalValue() {
-        $sql = "SELECT COALESCE(SUM(
-            CASE
-                WHEN e.price IS NOT NULL AND e.price > 0 THEN e.price
-                WHEN i.price IS NOT NULL AND i.price > 0 THEN i.price
-                WHEN s.price IS NOT NULL AND s.price > 0 THEN s.price
-                ELSE 0
-            END
-        ), 0) AS total_value
-        FROM equipment e
-        JOIN items i ON e.item_id = i.id
-        JOIN sets s ON i.set_id = s.id
-        WHERE e.status != 'disposed'";
+        // มูลค่าทรัพย์สินรวม = ราคารวมของชุดครุภัณฑ์/รายการครุภัณฑ์
+        // เฉพาะกลุ่มที่มีครุภัณฑ์หลายชิ้น (>= 2) นับราคารวมแค่ชุด/รายการละ 1 ครั้ง
+        $sql = "SELECT COALESCE((
+            (SELECT COALESCE(SUM(s.price), 0) FROM sets s
+             WHERE s.price > 0
+               AND (SELECT COUNT(*) FROM items i
+                    JOIN equipment e ON e.item_id = i.id
+                    WHERE i.set_id = s.id AND e.status != 'disposed') >= 2)
+            +
+            (SELECT COALESCE(SUM(i.price), 0) FROM items i
+             WHERE i.price > 0
+               AND (SELECT COUNT(*) FROM equipment e
+                    WHERE e.item_id = i.id AND e.status != 'disposed') >= 2
+               AND NOT EXISTS (SELECT 1 FROM sets s WHERE s.id = i.set_id AND s.price > 0))
+        ), 0) AS total_value";
         return (float) self::fetchColumn($sql);
     }
 
