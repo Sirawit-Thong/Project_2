@@ -1,18 +1,19 @@
 <?php
 /**
  * Admin Dashboard View
- * แดชบอร์ดผู้ดูแลระบบ
+ * แดชบอร์ดผู้ดูแลระบบ — ภาพรวมระบบ
  *
  * Variables from controller:
  *   $totalEquipment, $availableCount, $repairCount, $totalValue,
- *   $statusCounts, $monthlyStats, $deptStats, $recentRepairs, $pendingUsers
+ *   $totalRepairs, $inProgressRepairs, $totalUsers, $statusCounts,
+ *   $monthlyStats, $deptStats, $recentRepairs, $pendingUsers
  */
 ?>
 
 <!-- Page Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-1 text-gray-800"><i class="bi bi-speedometer2 me-2 text-primary"></i>แดชบอร์ดผู้ดูแลระบบ</h1>
+        <h1 class="h3 mb-1 text-gray-800"><i class="bi bi-speedometer2 me-2 text-primary"></i>ภาพรวมระบบ</h1>
         <p class="text-muted mb-0">ยินดีต้อนรับสู่ระบบจัดการครุภัณฑ์และแจ้งซ่อม</p>
     </div>
     <div>
@@ -66,7 +67,8 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">แจ้งซ่อม (รอดำเนินการ)</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">แจ้งซ่อม
+                            (รอดำเนินการ)</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?= number_format($repairCount) ?> รายการ
                         </div>
@@ -84,28 +86,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">สมาชิกรอการอนุมัติ</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?= number_format($pendingUsers) ?> คน
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-person-plus fa-2x text-gray-300 fs-1 opacity-25"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Total Asset Value -->
-<div class="row g-4 mb-4">
-    <div class="col-lg-4">
-        <div class="card bg-white border-0 shadow-sm h-100 border-start border-4 border-danger">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">มูลค่าทรัพย์สินรวม</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">มูลค่าทรัพย์สินรวม</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?= formatCurrency($totalValue) ?>
                         </div>
@@ -117,51 +98,122 @@
             </div>
         </div>
     </div>
+</div>
 
-    <?php if (!empty($statusCounts)): ?>
-    <div class="col-lg-4">
+<!-- Secondary Stats & Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Repair Status Breakdown -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-dark"><i class="bi bi-tools me-2 text-primary"></i>สรุปสถานะการแจ้งซ่อม</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small font-weight-bold text-warning">รอดำเนินการ</span>
+                        <span class="small font-weight-bold"><?= $repairCount ?></span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-warning" role="progressbar"
+                            style="width: <?= ($totalRepairs > 0 ? ($repairCount / $totalRepairs * 100) : 0) ?>%">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small font-weight-bold text-primary">กำลังซ่อม</span>
+                        <span class="small font-weight-bold"><?= $inProgressRepairs ?></span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-primary" role="progressbar"
+                            style="width: <?= ($totalRepairs > 0 ? ($inProgressRepairs / $totalRepairs * 100) : 0) ?>%">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small font-weight-bold text-secondary">รวมทั้งหมด</span>
+                        <span class="small font-weight-bold"><?= $totalRepairs ?> ครั้ง</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Status Breakdown -->
+    <div class="col-lg-4 col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white py-3">
                 <h6 class="m-0 font-weight-bold text-dark"><i class="bi bi-box-seam me-2 text-success"></i>สถานะครุภัณฑ์</h6>
             </div>
             <div class="card-body">
                 <ul class="list-group list-group-flush">
-                    <?php foreach ($statusCounts as $sc): ?>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
-                        <span>
-                            <span class="badge rounded-circle bg-<?= getStatusBadgeClass($sc['status']) ?> me-2 p-1">
-                                <span class="visually-hidden">s</span>
-                            </span>
-                            <?= translateRepairStatus($sc['status']) ?: $sc['status'] ?>
-                        </span>
-                        <span class="badge bg-light text-dark rounded-pill"><?= $sc['count'] ?></span>
+                    <?php
+                    $eqStatusLabels = [
+                        'available' => 'พร้อมใช้งาน',
+                        'repair' => 'ส่งซ่อม',
+                        'broken' => 'ซ่อมไม่ได้',
+                        'pending_disposal' => 'รอจำหน่ายออก',
+                    ];
+                    $eqStatusCounts = array_column($statusCounts, 'count', 'status');
+                    ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 pb-2">
+                        <span><span class="badge rounded-circle bg-success me-2 p-1"><span class="visually-hidden">s</span></span>พร้อมใช้งาน</span>
+                        <span class="badge bg-light text-dark rounded-pill"><?= $eqStatusCounts['available'] ?? 0 ?></span>
                     </li>
-                    <?php endforeach; ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
+                        <span><span class="badge rounded-circle bg-warning me-2 p-1"><span class="visually-hidden">s</span></span>ส่งซ่อม</span>
+                        <span class="badge bg-light text-dark rounded-pill"><?= $eqStatusCounts['repair'] ?? 0 ?></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
+                        <span><span class="badge rounded-circle bg-danger me-2 p-1"><span class="visually-hidden">s</span></span>ซ่อมไม่ได้</span>
+                        <span class="badge bg-light text-dark rounded-pill"><?= $eqStatusCounts['broken'] ?? 0 ?></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 pt-2">
+                        <span><span class="badge rounded-circle bg-info me-2 p-1"><span class="visually-hidden">s</span></span>รอจำหน่ายออก</span>
+                        <span class="badge bg-light text-dark rounded-pill"><?= $eqStatusCounts['pending_disposal'] ?? 0 ?></span>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
-    <?php endif; ?>
 
-    <?php if (!empty($deptStats)): ?>
-    <div class="col-lg-4">
+    <!-- User Stats -->
+    <div class="col-lg-4 col-md-12">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white py-3">
-                <h6 class="m-0 font-weight-bold text-info"><i class="bi bi-pie-chart me-2"></i>ครุภัณฑ์ตามสาขา</h6>
+                <h6 class="m-0 font-weight-bold text-dark"><i class="bi bi-people me-2 text-info"></i>สมาชิกในระบบ</h6>
             </div>
-            <div class="card-body">
-                <div class="chart-container" style="height: 200px;">
-                    <canvas id="deptChart"></canvas>
+            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                <div class="position-relative mb-3">
+                    <i class="bi bi-person-circle text-gray-300" style="font-size: 4rem;"></i>
+                    <?php if ($pendingUsers > 0): ?>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <?= $pendingUsers ?>
+                            <span class="visually-hidden">pending users</span>
+                        </span>
+                    <?php endif; ?>
                 </div>
+                <h3 class="font-weight-bold text-dark"><?= number_format($totalUsers) ?></h3>
+                <p class="text-muted mb-4">ผู้ใช้งานทั้งหมด</p>
+
+                <?php if ($pendingUsers > 0): ?>
+                    <a href="<?= SITE_URL ?>/users/pending" class="btn btn-warning w-100 rounded-pill">
+                        <i class="bi bi-person-check me-2"></i>อนุมัติสมาชิก (<?= $pendingUsers ?>)
+                    </a>
+                <?php else: ?>
+                    <a href="<?= SITE_URL ?>/users" class="btn btn-outline-primary w-100 rounded-pill">
+                        <i class="bi bi-people me-2"></i>จัดการสมาชิก
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-    <?php endif; ?>
 </div>
 
-<!-- Monthly Chart & Recent Repairs -->
+<!-- Charts Row -->
 <div class="row g-4 mb-4">
-    <?php if (!empty($monthlyStats)): ?>
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white py-3">
@@ -174,31 +226,18 @@
             </div>
         </div>
     </div>
-    <?php endif; ?>
-
-    <?php if (!empty($pendingUsers)): ?>
-    <div class="<?= !empty($monthlyStats) ? 'col-lg-4' : 'col-lg-12' ?>">
+    <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white py-3">
-                <h6 class="m-0 font-weight-bold text-dark"><i class="bi bi-people me-2 text-info"></i>สมาชิกรอการอนุมัติ</h6>
+                <h6 class="m-0 font-weight-bold text-info"><i class="bi bi-pie-chart me-2"></i>ครุภัณฑ์ตามสาขา</h6>
             </div>
-            <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <div class="position-relative mb-3">
-                    <i class="bi bi-person-circle text-gray-300" style="font-size: 4rem;"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        <?= $pendingUsers ?>
-                        <span class="visually-hidden">pending users</span>
-                    </span>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="deptChart"></canvas>
                 </div>
-                <h3 class="font-weight-bold text-dark"><?= $pendingUsers ?></h3>
-                <p class="text-muted mb-4">รอการอนุมัติ</p>
-                <a href="<?= SITE_URL ?>/users/pending" class="btn btn-warning w-100 rounded-pill">
-                    <i class="bi bi-person-check me-2"></i>อนุมัติสมาชิก
-                </a>
             </div>
         </div>
     </div>
-    <?php endif; ?>
 </div>
 
 <!-- Recent Repairs -->

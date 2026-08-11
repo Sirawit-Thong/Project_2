@@ -38,6 +38,9 @@ class DashboardController extends Controller
         $availableCount = Equipment::countByStatus('available');
         $repairCount = Repair::pendingCount();
         $totalValue = Equipment::getTotalValue();
+        $totalRepairs = Repair::totalCount();
+        $inProgressRepairs = Repair::countByStatus('in_progress');
+        $totalUsers = User::totalCount();
         $statusCounts = Equipment::getStatusCounts();
         $monthlyStats = Repair::getMonthlyStats(6);
         $deptStats = Equipment::countByDepartment();
