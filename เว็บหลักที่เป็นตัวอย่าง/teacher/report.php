@@ -1,0 +1,345 @@
+<?php
+/**
+ * Teacher Room Report
+ * รายงานสรุปครุภัณฑ์ในห้องที่ดูแล
+ */
+$pageTitle = 'รายงานสรุปสถานะครุภัณฑ์ในสังกัด';
+require_once '../includes/header.php';
+requireRole('teacher');
+
+$pdo = getDB();
+$userId = getCurrentUserId();
+
+// Get managed rooms with statistics
+$stmt = $pdo->prepare("
+    SELECT 
+        r.id as room_id, 
+        r.name as room_name,
+        COUNT(e.id) as total_equipment,
+        SUM(CASE WHEN e.status = 'available' THEN 1 ELSE 0 END) as available_count,
+        SUM(CASE WHEN e.status = 'repair' THEN 1 ELSE 0 END) as repair_count,
+        SUM(CASE WHEN e.status = 'broken' THEN 1 ELSE 0 END) as broken_count,
+        SUM(CASE WHEN e.status IN ('pending_disposal', 'disposed') THEN 1 ELSE 0 END) as disposed_count,
+        SUM(COALESCE(e.price, 0)) as total_value,
+        SUM(CASE WHEN e.check_date IS NULL OR e.check_date < DATE_SUB(CURDATE(), INTERVAL 1 YEAR) THEN 1 ELSE 0 END) as need_check_count,
+        1 as sort_order
+    FROM room_managers rm
+    JOIN rooms r ON rm.room_id = r.id
+    LEFT JOIN equipment e ON r.id = e.room_id
+    WHERE rm.user_id = ?
+    GROUP BY r.id, r.name
+    
+    UNION ALL
+    
+    SELECT 
+        'other' as room_id, 
+        'อื่นๆ (ไม่ได้อยู่ในห้องที่รับผิดชอบ)' as room_name,
+        COUNT(e.id) as total_equipment,
+        SUM(CASE WHEN e.status = 'available' THEN 1 ELSE 0 END) as available_count,
+        SUM(CASE WHEN e.status = 'repair' THEN 1 ELSE 0 END) as repair_count,
+        SUM(CASE WHEN e.status = 'broken' THEN 1 ELSE 0 END) as broken_count,
+        SUM(CASE WHEN e.status IN ('pending_disposal', 'disposed') THEN 1 ELSE 0 END) as disposed_count,
+        SUM(COALESCE(e.price, 0)) as total_value,
+        SUM(CASE WHEN e.check_date IS NULL OR e.check_date < DATE_SUB(CURDATE(), INTERVAL 1 YEAR) THEN 1 ELSE 0 END) as need_check_count,
+        2 as sort_order
+    FROM equipment e
+    WHERE e.holder_id = ? 
+      AND (e.room_id IS NULL OR e.room_id NOT IN (SELECT room_id FROM room_managers WHERE user_id = ?))
+    HAVING COUNT(e.id) > 0
+    
+    ORDER BY sort_order, room_name
+");
+$stmt->execute([$userId, $userId, $userId]);
+$rooms = $stmt->fetchAll();
+
+// Calculate totals
+$totals = [
+    'total_equipment' => 0,
+    'available_count' => 0,
+    'repair_count' => 0,
+    'broken_count' => 0,
+    'disposed_count' => 0,
+    'total_value' => 0,
+    'need_check_count' => 0
+];
+
+foreach ($rooms as $room) {
+    $totals['total_equipment'] += $room['total_equipment'];
+    $totals['available_count'] += $room['available_count'];
+    $totals['repair_count'] += $room['repair_count'];
+    $totals['broken_count'] += $room['broken_count'];
+    $totals['disposed_count'] += $room['disposed_count'];
+    $totals['total_value'] += $room['total_value'];
+    $totals['need_check_count'] += $room['need_check_count'];
+}
+?>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1><i class="bi bi-bar-chart me-2"></i>รายงานสรุปสถานะครุภัณฑ์ในสังกัด</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php">แดชบอร์ด</a></li>
+            <li class="breadcrumb-item active">รายงานสรุป</li>
+        </ol>
+    </nav>
+</div>
+
+<?php if (empty($rooms)): ?>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        คุณยังไม่ได้รับมอบหมายให้ดูแลห้องปฏิบัติการใด กรุณาติดต่อเจ้าหน้าที่ดูแลระบบ
+    </div>
+<?php else: ?>
+
+    <style>
+        .stats-card {
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2.5rem;
+            opacity: 0.2;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+            color: white;
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #198754, #157347);
+            color: white;
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(135deg, #ffc107, #ffca2c);
+            color: #000;
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #0dcaf0, #31d2f2);
+            color: #000;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 1rem;
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+    </style>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card bg-gradient-primary">
+                <div class="stats-icon"><i class="bi bi-pc-display"></i></div>
+                <div class="stats-number"><?= number_format($totals['total_equipment']) ?></div>
+                <div class="stats-label">ครุภัณฑ์ทั้งหมด</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card bg-gradient-success">
+                <div class="stats-icon"><i class="bi bi-check-circle"></i></div>
+                <div class="stats-number"><?= number_format($totals['available_count']) ?></div>
+                <div class="stats-label">พร้อมใช้งาน</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card bg-gradient-warning">
+                <div class="stats-icon"><i class="bi bi-tools"></i></div>
+                <div class="stats-number"><?= number_format($totals['repair_count'] + $totals['broken_count']) ?></div>
+                <div class="stats-label">ชำรุด / ส่งซ่อม</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card bg-gradient-info">
+                <div class="stats-icon"><i class="bi bi-currency-dollar"></i></div>
+                <div class="stats-number"><?= number_format($totals['total_value'], 0) ?></div>
+                <div class="stats-label">มูลค่ารวม (บาท)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rooms Table -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check me-2 text-primary"></i>สรุปข้อมูลแยกตามห้องปฏิบัติการ</span>
+            <a href="export_excel.php" class="btn btn-success btn-sm rounded-pill px-3">
+                <i class="bi bi-file-earmark-excel me-1"></i>ส่งออก Excel
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ห้อง/สถานที่</th>
+                            <th class="text-center">ทั้งหมด</th>
+                            <th class="text-center">สภาพดี</th>
+                            <th class="text-center">ส่งซ่อม</th>
+                            <th class="text-center">ชำรุด</th>
+                            <th class="text-center text-danger">รอตรวจ</th>
+                            <th class="text-end">มูลค่า</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rooms as $room): ?>
+                            <tr>
+                                <td>
+                                    <?php if ($room['room_id'] === 'other'): ?>
+                                        <span class="text-primary fw-bold"><i
+                                                class="bi bi-asterisk me-2"></i><?= htmlspecialchars($room['room_name']) ?></span>
+                                    <?php else: ?>
+                                        <strong><?= htmlspecialchars($room['room_name']) ?></strong>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center"><span
+                                        class="badge bg-secondary rounded-pill"><?= $room['total_equipment'] ?></span>
+                                </td>
+                                <td class="text-center"><span
+                                        class="badge bg-success rounded-pill"><?= $room['available_count'] ?></span>
+                                </td>
+                                <td class="text-center"><span
+                                        class="badge bg-warning text-dark rounded-pill"><?= $room['repair_count'] ?></span></td>
+                                <td class="text-center"><span
+                                        class="badge bg-danger rounded-pill"><?= $room['broken_count'] ?></span></td>
+                                <td class="text-center">
+                                    <?php if ($room['need_check_count'] > 0): ?>
+                                        <span class="badge bg-danger rounded-pill"><?= $room['need_check_count'] ?></span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-muted rounded-pill">0</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end"><?= number_format($room['total_value'], 0) ?></td>
+                                <td>
+                                    <a href="my_equipment.php?room=<?= $room['room_id'] ?>"
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i>ดู
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th>รวม <?= count($rooms) ?> รายการ</th>
+                            <th class="text-center"><?= $totals['total_equipment'] ?></th>
+                            <th class="text-center"><?= $totals['available_count'] ?></th>
+                            <th class="text-center"><?= $totals['repair_count'] ?></th>
+                            <th class="text-center"><?= $totals['broken_count'] ?></th>
+                            <th class="text-center"><?= $totals['need_check_count'] ?></th>
+                            <th class="text-end"><?= number_format($totals['total_value'], 0) ?></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-pie-chart me-2"></i>สถานะครุภัณฑ์
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-bar-chart me-2"></i>จำนวนครุภัณฑ์ตามห้องปฏิบัติการ
+                </div>
+                <div class="card-body">
+                    <canvas id="roomChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Status Pie Chart
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['พร้อมใช้งาน', 'ส่งซ่อม', 'ซ่อมไม่ได้', 'จำหน่ายออก'],
+                datasets: [{
+                    data: [<?= $totals['available_count'] ?>, <?= $totals['repair_count'] ?>, <?= $totals['broken_count'] ?>, <?= $totals['disposed_count'] ?>],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6c757d']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Room Bar Chart
+        new Chart(document.getElementById('roomChart'), {
+            type: 'bar',
+            data: {
+                labels: [<?php foreach ($rooms as $r)
+                    echo "'" . addslashes($r['room_name']) . "',"; ?>],
+                datasets: [{
+                    label: 'จำนวนครุภัณฑ์',
+                    data: [<?php foreach ($rooms as $r)
+                        echo $r['total_equipment'] . ','; ?>],
+                    backgroundColor: '#0d6efd'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+
+<?php endif; ?>
+
+<?php require_once '../includes/footer.php'; ?>

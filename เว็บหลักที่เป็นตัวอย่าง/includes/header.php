@@ -7,7 +7,8 @@
 // Start output buffering to allow redirects after HTML output
 ob_start();
 
-require_once __DIR__ . '/../app/init.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/auth.php';
 
 // Get current user info
@@ -31,6 +32,7 @@ if (isset($pageTitle) && !empty($pageTitle)) {
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= SITE_URL ?>/assets/Logo.svg">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -65,29 +67,23 @@ if (isset($pageTitle) && !empty($pageTitle)) {
                     <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#"
                         data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle me-1"></i>
-                        <span class="d-none d-sm-inline"><?= e($_SESSION['user_name'] ?? 'ผู้ใช้') ?></span>
+                        <span class="d-none d-sm-inline"><?= $_SESSION['user_name'] ?? 'ผู้ใช้' ?></span>
                         <span
                             class="badge bg-light text-primary ms-1 d-none d-sm-inline"><?= translateRole($currentRole) ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li class="d-sm-none px-3 py-2 text-muted small"><?= e($_SESSION['user_name'] ?? 'ผู้ใช้') ?>
+                        <li class="d-sm-none px-3 py-2 text-muted small"><?= $_SESSION['user_name'] ?? 'ผู้ใช้' ?>
                             (<?= translateRole($currentRole) ?>)</li>
                         <li class="d-sm-none">
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="<?= SITE_URL ?>/profile"><i
+                        <li><a class="dropdown-item" href="<?= SITE_URL ?>/profile.php"><i
                                     class="bi bi-person me-2"></i>ข้อมูลส่วนตัว</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li>
-                            <form method="POST" action="<?= SITE_URL ?>/logout" class="d-inline">
-                                <?= csrf_field() ?>
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>ออกจากระบบ
-                                </button>
-                            </form>
-                        </li>
+                        <li><a class="dropdown-item text-danger" href="<?= SITE_URL ?>/logout.php"><i
+                                    class="bi bi-box-arrow-right me-2"></i>ออกจากระบบ</a></li>
                     </ul>
                 </div>
             </div>
@@ -98,8 +94,25 @@ if (isset($pageTitle) && !empty($pageTitle)) {
 
             <main class="main-content">
                 <div class="container-fluid py-4">
-                    <?php flashMessage(); ?>
+                    <?php
+                    // Show flash messages
+                    $flash = getFlash();
+                    if ($flash):
+                        ?>
+                        <div class="alert alert-<?= $flash['type'] ?> alert-dismissible fade show" role="alert">
+                            <?= $flash['message'] ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
                 <?php else: ?>
                     <div class="container-fluid">
-                        <?php flashMessage(); ?>
+                        <?php
+                        $flash = getFlash();
+                        if ($flash):
+                            ?>
+                            <div class="alert alert-<?= $flash['type'] ?> alert-dismissible fade show mt-3" role="alert">
+                                <?= $flash['message'] ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
