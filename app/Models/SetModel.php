@@ -33,7 +33,7 @@ class SetModel extends Model
             LEFT JOIN equipment e ON e.item_id = i.id
             {$where}
             GROUP BY s.id, s.dept_id, s.name, s.year, s.price, s.price_remark, s.remark, s.created_at, s.updated_at, d.name
-            ORDER BY d.name ASC, s.name ASC
+            ORDER BY s.year DESC, s.name ASC
             LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}
         ";
         $rows = self::fetchAll($sql, $params);

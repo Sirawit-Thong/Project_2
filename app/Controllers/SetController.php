@@ -14,8 +14,12 @@ class SetController extends Controller
         $viewPath = 'crud/sets';
         $deptFilter = $_GET['dept_id'] ?? null;
         $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPageOptions)
+            ? (int) $_GET['per_page']
+            : 20;
 
-        $result = SetModel::getFiltered($deptFilter, $page);
+        $result = SetModel::getFiltered($deptFilter, $page, $perPage);
         $departments = Department::getAll();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
