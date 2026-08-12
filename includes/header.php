@@ -48,7 +48,8 @@ if (isset($pageTitle) && !empty($pageTitle)) {
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
             <div class="container-fluid">
-                <button class="btn btn-link text-white me-2 d-none d-lg-block" id="sidebarToggle">
+                <button class="btn btn-link text-white me-2 d-none d-lg-block" id="sidebarToggle"
+                    aria-label="ย่อ/ขยายเมนูด้านข้าง" aria-controls="sidebar" aria-expanded="true">
                     <i class="bi bi-list fs-4"></i>
                 </button>
                 <a class="navbar-brand" href="<?= SITE_URL ?>">
@@ -56,7 +57,8 @@ if (isset($pageTitle) && !empty($pageTitle)) {
                 </a>
 
                 <!-- Mobile toggle for sidebar -->
-                <button class="btn btn-link text-white d-lg-none" id="sidebarToggleMobile">
+                <button class="btn btn-link text-white d-lg-none" id="sidebarToggleMobile"
+                    aria-label="เปิดเมนูด้านข้าง" aria-controls="sidebar" aria-expanded="false">
                     <i class="bi bi-list fs-4"></i>
                 </button>
 

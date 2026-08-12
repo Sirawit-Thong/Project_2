@@ -16,6 +16,29 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.appendChild(sidebarOverlay);
     }
 
+    const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+
+    // Sync aria-expanded on both toggle buttons with the sidebar state
+    function updateSidebarAria() {
+        if (!sidebar) return;
+        const expanded = window.innerWidth < 992
+            ? sidebar.classList.contains('show')
+            : !sidebar.classList.contains('collapsed');
+        const value = expanded ? 'true' : 'false';
+        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', value);
+        if (sidebarToggleMobile) sidebarToggleMobile.setAttribute('aria-expanded', value);
+    }
+
+    // Restore desktop collapsed state
+    if (sidebar && window.innerWidth >= 992 && localStorage.getItem('sidebarCollapsed') === '1') {
+        sidebar.classList.add('collapsed');
+        if (mainContent) {
+            mainContent.classList.add('expanded');
+        }
+    }
+
+    updateSidebarAria();
+
     // Toggle sidebar function
     function toggleSidebar() {
         if (window.innerWidth < 992) {
@@ -29,7 +52,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (mainContent) {
                 mainContent.classList.toggle('expanded');
             }
+            try {
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+            } catch (e) { /* localStorage may be unavailable */ }
         }
+        updateSidebarAria();
     }
 
     // Close sidebar function
@@ -41,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
             sidebarOverlay.classList.remove('show');
         }
         document.body.style.overflow = '';
+        updateSidebarAria();
     }
 
     if (sidebarToggle && sidebar) {
@@ -48,10 +76,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Mobile sidebar toggle
-    const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
     if (sidebarToggleMobile && sidebar) {
         sidebarToggleMobile.addEventListener('click', toggleSidebar);
     }
+
+    // Close sidebar on Escape (mobile)
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && window.innerWidth < 992) {
+            closeSidebar();
+        }
+    });
 
     // Close sidebar when clicking overlay
     if (sidebarOverlay) {
@@ -73,6 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', function () {
         if (window.innerWidth >= 992) {
             closeSidebar();
+        } else {
+            updateSidebarAria();
         }
     });
 

@@ -5,15 +5,42 @@
  */
 $role = getCurrentRole();
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// ตัด base path (เช่น /P) ออกเพื่อให้ path ตรงกับ route ที่ router ใช้
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+if ($basePath && strpos($requestUri, $basePath) === 0) {
+    $requestUri = substr($requestUri, strlen($basePath));
+}
 $requestUri = rtrim($requestUri, '/') ?: '/';
+
+// path ทั้งหมดที่เมนูของแต่ละ role ใช้ตรวจ active
+$roleLinks = [
+    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
+    'staff'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/users/pending'],
+    'teacher' => ['/', '/repairs/submit', '/repairs/mine', '/equipment', '/teacher/report'],
+    'student' => ['/', '/repairs/submit', '/repairs/mine'],
+];
+$roleLinks = $roleLinks[$role] ?? [];
+
+// เลือก path ที่แมท URL ปัจจุบันแล้วยาวที่สุด (เจาะจงสุด) เป็น active
+// แมทแบบ segment เท่านั้น เช่น /equipment แมท /equipment/5 แต่ไม่แมท /equipmentx
+// เก็บใน $GLOBALS เพราะ sidebar ถูก include ใน function scope (controller method)
+$activePath = null;
+$activeLen = -1;
+foreach ($roleLinks as $link) {
+    $isMatch = $link === '/'
+        ? $requestUri === '/'
+        : ($requestUri === $link || strpos($requestUri, $link . '/') === 0);
+    if ($isMatch && strlen($link) > $activeLen) {
+        $activePath = $link;
+        $activeLen = strlen($link);
+    }
+}
+$GLOBALS['sidebar_active_path'] = $activePath;
 
 function isSidebarActive($path)
 {
-    global $requestUri;
-    if ($path === '/') {
-        return $requestUri === '/' ? 'active' : '';
-    }
-    return strpos($requestUri, $path) === 0 ? 'active' : '';
+    return $path === ($GLOBALS['sidebar_active_path'] ?? null) ? 'active' : '';
 }
 ?>
 
