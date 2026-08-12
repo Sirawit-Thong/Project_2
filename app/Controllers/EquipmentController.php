@@ -210,7 +210,7 @@ class EquipmentController extends Controller
 
         $images = Equipment::getImages($id);
         $repairHistory = Equipment::getRepairHistory($id, 10);
-        $pageTitle = 'รายละเอียดครุภัณฑ์';
+        $pageTitle = 'รายละเอียดข้อมูลครุภัณฑ์';
         $viewPath = 'equipment/detail';
 
         require __DIR__ . '/../Views/layouts/main.php';
@@ -226,24 +226,48 @@ class EquipmentController extends Controller
         $holders = User::getHolders();
         $allItems = Item::getAllForDropdown();
         $allSets = SetModel::getAllWithDept();
-        $pageTitle = 'เพิ่มครุภัณฑ์จำนวนมาก';
+        $managersByRoom = [];
+        foreach (RoomManager::getAllWithRoomAndUser() as $rm) {
+            $managersByRoom[$rm['room_id']][] = $rm;
+        }
+        $pageTitle = 'เพิ่มครุภัณฑ์หลายรายการ';
         $viewPath = 'equipment/bulk_add';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
 
             $codes = $_POST['codes'] ?? [];
+            if (!is_array($codes)) {
+                $codes = [$codes];
+            }
             $itemId = $_POST['item_id'] ?? null;
             $roomId = $_POST['room_id'] ?? null;
             $holderId = $_POST['holder_id'] ?? null;
             $status = $_POST['status'] ?? 'available';
             $remark = $_POST['remark'] ?? null;
+            $purchaseDate = !empty($_POST['purchase_date']) ? $_POST['purchase_date'] : null;
+            $price = ($_POST['price'] ?? '') !== '' ? $_POST['price'] : null;
 
             $errors = [];
             $validCodes = array_values(array_unique(array_map('trim', $codes)));
 
             if (empty($itemId)) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
             if (empty($validCodes)) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์อย่างน้อย 1 รายการ';
+
+            // เช็คจำนวนคงเหลือเทียบกับจำนวนที่กำหนด (qty) ของรายการ
+            if ($itemId && !empty($validCodes)) {
+                $itemInfo = null;
+                foreach ($allItems as $it) {
+                    if ((int) $it['id'] === (int) $itemId) { $itemInfo = $it; break; }
+                }
+                if ($itemInfo && (int) $itemInfo['qty'] > 0) {
+                    $existingCount = (int) ($itemInfo['existing_count'] ?? 0);
+                    $remaining = (int) $itemInfo['qty'] - $existingCount;
+                    if (count($validCodes) > $remaining) {
+                        $errors[] = 'ไม่สามารถเพิ่มได้ รายการ "' . $itemInfo['name'] . '" มีจำนวน ' . $itemInfo['qty'] . ' ชิ้น ลงทะเบียนแล้ว ' . $existingCount . ' ชิ้น เพิ่มได้อีก ' . $remaining . ' ชิ้น (คุณกำลังเพิ่ม ' . count($validCodes) . ' ชิ้น)';
+                    }
+                }
+            }
 
             $added = 0;
             $skipped = 0;
@@ -263,6 +287,8 @@ class EquipmentController extends Controller
                         'holder_id' => $holderId ?: null,
                         'status' => $status,
                         'remark' => $remark,
+                        'purchase_date' => $purchaseDate,
+                        'price' => $price !== null ? (float) $price : null,
                     ];
                 }
 

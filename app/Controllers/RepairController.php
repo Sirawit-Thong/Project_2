@@ -109,8 +109,9 @@ class RepairController extends Controller
         if (!$repair) ErrorHandler::page404();
 
         $images = Repair::getImages($id);
-        $pageTitle = 'รายละเอียดการซ่อม';
-        $viewPath = 'repair/detail';
+        $isAdmin = in_array($role, ['admin', 'staff'], true);
+        $pageTitle = $isAdmin ? 'รายละเอียดการแจ้งซ่อม' : 'รายละเอียดการแจ้งซ่อมบำรุง';
+        $viewPath = $isAdmin ? 'repair/detail_admin' : 'repair/detail';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['admin', 'staff'])) {
             $this->validateCsrf();

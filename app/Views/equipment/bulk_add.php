@@ -1,230 +1,437 @@
 <?php
-$pageTitle = $pageTitle ?? 'เพิ่มครุภัณฑ์จำนวนมาก';
+$pageTitle = $pageTitle ?? 'เพิ่มครุภัณฑ์หลายรายการ';
+$errors = $errors ?? [];
 ?>
 
-<div class="page-header mb-4">
-    <h4 class="mb-1"><i class="bi bi-plus-square me-2"></i><?= $pageTitle ?></h4>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0 small">
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/equipment">รายการครุภัณฑ์</a></li>
-            <li class="breadcrumb-item active"><?= $pageTitle ?></li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-plus-square me-2"></i>เพิ่มครุภัณฑ์หลายรายการ</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/equipment">ครุภัณฑ์</a></li>
+                <li class="breadcrumb-item active">เพิ่มหลายรายการ</li>
+            </ol>
+        </nav>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+        <i class="bi bi-arrow-left me-1"></i>กลับ
+    </button>
 </div>
 
-<form method="POST" action="<?= SITE_URL ?>/equipment/bulk-add" id="bulkAddForm">
-    <?= csrf_field() ?>
+<?php if (!empty($errors)): ?>
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            <?php foreach ($errors as $error): ?>
+                <li><?= sanitize($error) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card mb-4">
-                <div class="card-header"><i class="bi bi-tags me-1"></i>เลือกประเภทครุภัณฑ์</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">สาขาวิชา <span class="text-danger">*</span></label>
-                            <select class="form-select" id="deptSelect" required>
-                                <option value="">-- เลือกสาขาวิชา --</option>
-                                <?php foreach ($departments as $d): ?>
-                                    <option value="<?= $d['id'] ?>"><?= sanitize($d['name']) ?></option>
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list-check me-2"></i>ข้อมูลครุภัณฑ์
+            </div>
+            <div class="card-body">
+                <form method="POST" action="<?= SITE_URL ?>/equipment/bulk-add" id="bulkAddForm">
+                    <?= csrf_field() ?>
+
+                    <!-- Item Selection with Filters -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small">สาขา</label>
+                            <select class="form-select form-select-sm" id="filterDept">
+                                <option value="">-- ทุกสาขา --</option>
+                                <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= (int) $dept['id'] ?>"><?= sanitize($dept['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">ชุดครุภัณฑ์ <span class="text-danger">*</span></label>
-                            <select class="form-select" id="setSelect" required disabled>
-                                <option value="">-- เลือกชุดครุภัณฑ์ --</option>
+                            <label class="form-label small">ชุดครุภัณฑ์</label>
+                            <select class="form-select form-select-sm" id="filterSet">
+                                <option value="">-- ทุกชุด --</option>
+                                <?php foreach ($allSets as $set): ?>
+                                    <option value="<?= (int) $set['id'] ?>" data-dept="<?= $set['dept_id'] ?>">
+                                        <?= sanitize($set['name']) ?> (<?= sanitize($set['year']) ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small">รายการ <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" name="item_id" id="itemSelect" required>
+                                <option value="">-- เลือกรายการ --</option>
+                                <?php foreach ($allItems as $item):
+                                    $remaining = $item['qty'] > 0 ? (int) $item['qty'] - (int) ($item['existing_count'] ?? 0) : 999;
+                                    $qtyText = $item['qty'] > 0 ? " [{$item['existing_count']}/{$item['qty']}]" : "";
+                                    ?>
+                                    <option value="<?= (int) $item['id'] ?>" data-dept="<?= $item['dept_id'] ?>"
+                                        data-set="<?= (int) $item['set_id'] ?>" data-qty="<?= (int) $item['qty'] ?>"
+                                        data-remaining="<?= $remaining ?>" data-item-price="<?= (float) ($item['price'] ?? 0) ?>"
+                                        data-set-price="<?= (float) ($item['set_price'] ?? 0) ?>"
+                                        <?= $remaining <= 0 ? 'disabled' : '' ?>>
+                                        <?= sanitize($item['name']) ?>
+                                        (<?= sanitize($item['brand'] ?? '-') ?>)<?= $qtyText ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div id="itemQtyInfo" class="form-text"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">ห้อง/สถานที่</label>
+                            <select class="form-select" name="room_id" id="roomSelect">
+                                <option value="">-- เลือกห้อง --</option>
+                                <?php foreach ($rooms as $room): ?>
+                                    <option value="<?= (int) $room['id'] ?>"><?= sanitize($room['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">รายการครุภัณฑ์ <span class="text-danger">*</span></label>
-                            <select class="form-select" name="item_id" id="itemSelect" required disabled>
-                                <option value="">-- เลือกรายการ --</option>
+                            <label class="form-label">ผู้รับผิดชอบ</label>
+                            <select class="form-select" name="holder_id" id="holderSelect">
+                                <option value="">-- เลือกผู้รับผิดชอบ --</option>
+                                <?php foreach ($holders as $t): ?>
+                                    <option value="<?= (int) $t['id'] ?>">
+                                        <?= sanitize($t['firstname'] . ' ' . $t['lastname']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div id="holderInfo" class="form-text"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">สถานะ</label>
+                            <select class="form-select" name="status">
+                                <option value="available">พร้อมใช้งาน</option>
+                                <option value="repair">ส่งซ่อม</option>
+                                <option value="broken">ซ่อมไม่ได้</option>
+                                <option value="pending_disposal">รอจำหน่ายออก</option>
+                                <option value="disposed">จำหน่ายออก</option>
                             </select>
                         </div>
                     </div>
-                    <div id="qtyInfo" class="text-muted small mt-2 d-none">
-                        <i class="bi bi-info-circle me-1"></i>
-                        <span id="qtyInfoText"></span>
-                    </div>
-                </div>
-            </div>
 
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list-ol me-1"></i>รหัสครุภัณฑ์ที่ต้องการเพิ่ม</span>
-                    <button type="button" class="btn btn-sm btn-success" id="addRowBtn">
-                        <i class="bi bi-plus-lg me-1"></i>เพิ่มแถว
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div id="codeRows">
-                        <div class="input-group mb-2 code-row">
-                            <span class="input-group-text bg-light code-num">1</span>
-                            <input type="text" class="form-control" name="codes[]" placeholder="เช่น CP-001" required>
-                            <button type="button" class="btn btn-outline-danger remove-row-btn" title="ลบ"><i class="bi bi-x-lg"></i></button>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">วันที่จัดซื้อ</label>
+                            <input type="date" class="form-control" name="purchase_date">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">ราคาต่อชิ้น (บาท) <span id="priceSourceLabel"
+                                    class="badge bg-secondary ms-1 d-none"></span></label>
+                            <input type="number" class="form-control" name="price" id="eqPrice" step="0.01">
                         </div>
                     </div>
-                    <div class="text-muted small mt-2" id="rowCount">จำนวน 1 รายการ</div>
-                </div>
+
+                    <div class="alert alert-info d-none py-2 mb-3" id="priceAlert">
+                        <i class="bi bi-info-circle me-1"></i> <span id="priceAlertText">ชุดครุภัณฑ์ หรือ
+                            รายการครุภัณฑ์มีการระบุราคารวมไว้แล้ว ราคาของครุภัณฑ์ชิ้นนี้จะถูกตั้งเป็น 0</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0"><i class="bi bi-123 me-1"></i>รหัสครุภัณฑ์ <span
+                                    class="text-danger">*</span></label>
+                            <button type="button" class="btn btn-success btn-sm" id="addCodeBtn">
+                                <i class="bi bi-plus me-1"></i>เพิ่มช่อง
+                            </button>
+                        </div>
+                        <div id="codesContainer">
+                            <div class="input-group mb-2 code-row">
+                                <span class="input-group-text">1</span>
+                                <input type="text" class="form-control" name="codes[]"
+                                    placeholder="เช่น 7440-001-0001.1/567 วท." required>
+                                <button type="button" class="btn btn-outline-danger remove-code" disabled><i
+                                        class="bi bi-x"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-text">ระบุรหัสครุภัณฑ์แต่ละชิ้น หรือใช้ปุ่ม "เพิ่มช่อง" เพื่อเพิ่มหลายชิ้น
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>บันทึกทั้งหมด
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                            <i class="bi bi-x-lg me-1"></i>ยกเลิก
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>คำแนะนำ
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 small">
+                    <li>เลือกรายการครุภัณฑ์ที่ต้องการเพิ่ม</li>
+                    <li>กรอกข้อมูลทั่วไป (ห้อง, สถานะ, วันที่จัดซื้อ, ราคา) ซึ่งจะใช้กับทุกชิ้น</li>
+                    <li>กดปุ่ม "เพิ่มช่อง" เพื่อเพิ่มรหัสครุภัณฑ์หลายชิ้น</li>
+                    <li>รหัสครุภัณฑ์แต่ละช่องจะสร้างเป็น 1 รายการ</li>
+                    <li>สามารถเพิ่มรูปภาพได้ภายหลังโดยแก้ไขทีละชิ้น</li>
+                </ul>
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-header"><i class="bi bi-gear me-1"></i>ตั้งค่าทั่วไป</div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">ห้อง / สถานที่</label>
-                        <select class="form-select" name="room_id">
-                            <option value="">-- ไม่ระบุ --</option>
-                            <?php foreach ($rooms as $r): ?>
-                                <option value="<?= $r['id'] ?>"><?= sanitize($r['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">ผู้ถือครอง</label>
-                        <select class="form-select" name="holder_id">
-                            <option value="">-- ไม่ระบุ --</option>
-                            <?php foreach ($holders as $h): ?>
-                                <option value="<?= $h['id'] ?>"><?= sanitize($h['firstname'] . ' ' . $h['lastname']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">สถานะ</label>
-                        <select class="form-select" name="status">
-                            <option value="available">พร้อมใช้งาน</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">หมายเหตุ</label>
-                        <input type="text" class="form-control" name="remark" placeholder="หมายเหตุทั่วไป">
-                    </div>
-                </div>
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <i class="bi bi-lightbulb me-2"></i>Quick Fill
             </div>
-
-            <div class="card mb-4">
-                <div class="card-header"><i class="bi bi-clipboard me-1"></i>เติมรหัสด่วน</div>
-                <div class="card-body">
-                    <p class="text-muted small mb-2">วางรหัสครุภัณฑ์แยกบรรทัด (จะเพิ่มทีละบรรทัดโดยอัตโนมัติ)</p>
-                    <textarea class="form-control mb-2" id="quickFill" rows="5" placeholder="CP-001&#10;CP-002&#10;CP-003"></textarea>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="quickFillBtn">
-                        <i class="bi bi-clipboard-plus me-1"></i>เติมหากรหัส
-                    </button>
-                </div>
-            </div>
-
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                    <i class="bi bi-plus-circle me-1"></i>เพิ่มครุภัณฑ์ทั้งหมด
+            <div class="card-body">
+                <label class="form-label small">เพิ่มหลายรหัสพร้อมกัน (1 บรรทัด = 1 รหัส)</label>
+                <textarea class="form-control mb-2" id="quickFillArea" rows="4"
+                    placeholder="วางรหัสครุภัณฑ์ที่นี่&#10;แต่ละบรรทัดจะเพิ่มเป็น 1 ช่อง"></textarea>
+                <button type="button" class="btn btn-warning btn-sm w-100" id="quickFillBtn">
+                    <i class="bi bi-magic me-1"></i>เติมลงช่อง
                 </button>
             </div>
         </div>
     </div>
-</form>
+</div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const allItems = <?= json_encode($allItems, JSON_UNESCAPED_UNICODE) ?>;
-    const allSets = <?= json_encode($allSets, JSON_UNESCAPED_UNICODE) ?>;
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterDept = document.getElementById('filterDept');
+        const filterSet = document.getElementById('filterSet');
+        const itemSelect = document.getElementById('itemSelect');
+        const codesContainer = document.getElementById('codesContainer');
+        const addCodeBtn = document.getElementById('addCodeBtn');
 
-    const deptSelect = document.getElementById('deptSelect');
-    const setSelect = document.getElementById('setSelect');
-    const itemSelect = document.getElementById('itemSelect');
-    const codeRows = document.getElementById('codeRows');
-    const addRowBtn = document.getElementById('addRowBtn');
-    const quickFillBtn = document.getElementById('quickFillBtn');
-    const quickFill = document.getElementById('quickFill');
-    const qtyInfo = document.getElementById('qtyInfo');
-    const qtyInfoText = document.getElementById('qtyInfoText');
-    const rowCountEl = document.getElementById('rowCount');
+        // Store all options
+        const allSetOptions = Array.from(filterSet.options).slice(1);
+        const allItemOptions = Array.from(itemSelect.options).slice(1);
 
-    function getSetsForDept(deptId) {
-        return allSets.filter(s => String(s.dept_id) === String(deptId));
-    }
+        // Filter Set by Dept
+        filterDept.addEventListener('change', function () {
+            const deptId = this.value;
+            filterSet.innerHTML = '<option value="">-- ทุกชุด --</option>';
 
-    function getItemsForSet(setId) {
-        return allItems.filter(i => String(i.set_id) === String(setId));
-    }
+            allSetOptions.forEach(opt => {
+                if (!deptId || opt.dataset.dept == deptId) {
+                    filterSet.appendChild(opt.cloneNode(true));
+                }
+            });
 
-    deptSelect.addEventListener('change', function() {
-        const deptId = this.value;
-        setSelect.innerHTML = '<option value="">-- เลือกชุดครุภัณฑ์ --</option>';
-        itemSelect.innerHTML = '<option value="">-- เลือกรายการ --</option>';
-        itemSelect.disabled = true;
-        qtyInfo.classList.add('d-none');
-
-        if (!deptId) { setSelect.disabled = true; return; }
-        getSetsForDept(deptId).forEach(s => {
-            setSelect.appendChild(new Option(s.name + (s.year ? ' (' + s.year + ')' : ''), s.id));
+            filterSet.dispatchEvent(new Event('change'));
         });
-        setSelect.disabled = false;
-    });
 
-    setSelect.addEventListener('change', function() {
-        const setId = this.value;
-        itemSelect.innerHTML = '<option value="">-- เลือกรายการ --</option>';
-        qtyInfo.classList.add('d-none');
+        // Filter Item by Set
+        filterSet.addEventListener('change', function () {
+            const setId = this.value;
+            const deptId = filterDept.value;
+            itemSelect.innerHTML = '<option value="">-- เลือกรายการ --</option>';
 
-        if (!setId) { itemSelect.disabled = true; return; }
-        getItemsForSet(setId).forEach(i => {
-            itemSelect.appendChild(new Option(i.name + (i.brand ? ' - ' + i.brand : ''), i.id));
+            allItemOptions.forEach(opt => {
+                const matchDept = !deptId || opt.dataset.dept == deptId;
+                const matchSet = !setId || opt.dataset.set == setId;
+                if (matchDept && matchSet) {
+                    itemSelect.appendChild(opt.cloneNode(true));
+                }
+            });
+            updateQtyInfo();
         });
-        itemSelect.disabled = false;
-    });
 
-    itemSelect.addEventListener('change', function() {
-        const item = allItems.find(i => String(i.id) === String(this.value));
-        if (item) {
-            qtyInfo.classList.remove('d-none');
-            qtyInfoText.textContent = item.name + ' — กำหนด ' + item.qty + ' ชิ้น, มีแล้ว ' + item.existing_count + ' ชิ้น';
-        } else {
-            qtyInfo.classList.add('d-none');
+        // Whenever Item is selected, automatically select Dept and Set if not already selected
+        itemSelect.addEventListener('change', function () {
+            const selectedItem = this.options[this.selectedIndex];
+            if (selectedItem && selectedItem.value) {
+                const itemDept = selectedItem.dataset.dept;
+                const itemSet = selectedItem.dataset.set;
+
+                let needsUpdate = false;
+
+                if (itemDept && filterDept.value !== itemDept) {
+                    filterDept.value = itemDept;
+                    needsUpdate = true;
+                }
+
+                if (needsUpdate) {
+                    // Temporarily update Set options based on Dept
+                    filterSet.innerHTML = '<option value="">-- ทุกชุด --</option>';
+                    allSetOptions.forEach(opt => {
+                        if (opt.dataset.dept == itemDept) {
+                            filterSet.appendChild(opt.cloneNode(true));
+                        }
+                    });
+                }
+
+                if (itemSet && filterSet.value !== itemSet) {
+                    filterSet.value = itemSet;
+                }
+            }
+            // Trigger qty update and price cascade logic
+            updateQtyInfo();
+            checkPriceCascade();
+        });
+
+        // Extracted qty info logic
+        const qtyInfo = document.getElementById('itemQtyInfo');
+        function updateQtyInfo() {
+            const selected = itemSelect.options[itemSelect.selectedIndex];
+            if (selected && selected.value) {
+                const qty = parseInt(selected.dataset.qty) || 0;
+                const remaining = parseInt(selected.dataset.remaining) || 999;
+                if (qty > 0) {
+                    if (remaining > 0) {
+                        qtyInfo.innerHTML = `<span class="text-info"><i class="bi bi-info-circle me-1"></i>เพิ่มได้อีก ${remaining} ชิ้น (จาก ${qty})</span>`;
+                    } else {
+                        qtyInfo.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>รายการเต็มแล้ว!</span>`;
+                    }
+                } else {
+                    qtyInfo.innerHTML = '';
+                }
+            } else {
+                qtyInfo.innerHTML = '';
+            }
         }
-    });
 
-    let rowIdx = 1;
+        // Price cascade logic
+        const eqPrice = document.getElementById('eqPrice');
+        const priceAlert = document.getElementById('priceAlert');
+        const priceAlertText = document.getElementById('priceAlertText');
+        const priceSourceLabel = document.getElementById('priceSourceLabel');
 
-    function addRow(value) {
-        rowIdx++;
-        const div = document.createElement('div');
-        div.className = 'input-group mb-2 code-row';
-        div.innerHTML = '<span class="input-group-text bg-light code-num">' + rowIdx + '</span>' +
-            '<input type="text" class="form-control" name="codes[]" placeholder="เช่น CP-' + String(rowIdx).padStart(3, '0') + '"' + (value ? ' value="' + value.replace(/"/g, '&quot;') + '"' : '') + ' required>' +
-            '<button type="button" class="btn btn-outline-danger remove-row-btn" title="ลบ"><i class="bi bi-x-lg"></i></button>';
-        codeRows.appendChild(div);
-        renumber();
-    }
+        function checkPriceCascade() {
+            const selectedOpt = itemSelect.options[itemSelect.selectedIndex];
+            if (!selectedOpt || !selectedOpt.value) {
+                if (eqPrice) eqPrice.readOnly = false;
+                if (priceAlert) priceAlert.classList.add('d-none');
+                if (priceSourceLabel) priceSourceLabel.classList.add('d-none');
+                return;
+            }
 
-    function renumber() {
-        const rows = codeRows.querySelectorAll('.code-row');
-        rows.forEach((r, i) => {
-            r.querySelector('.code-num').textContent = i + 1;
+            const itemPrice = parseFloat(selectedOpt.dataset.itemPrice || 0);
+            const setPrice = parseFloat(selectedOpt.dataset.setPrice || 0);
+
+            if (setPrice > 0) {
+                if (eqPrice) { eqPrice.value = 0; eqPrice.readOnly = true; }
+                if (priceAlertText) priceAlertText.textContent = "หมวดหมู่ 'ชุดครุภัณฑ์' มีการระบุราคารวมไว้แล้ว ราคาของครุภัณฑ์ชิ้นนี้จะถูกบังคับเป็น 0";
+                if (priceAlert) priceAlert.classList.remove('d-none');
+                if (priceSourceLabel) { priceSourceLabel.textContent = "(ราคารวมอยู่ที่ชุดครุภัณฑ์)"; priceSourceLabel.classList.remove('d-none'); }
+            } else if (itemPrice > 0) {
+                if (eqPrice) { eqPrice.value = 0; eqPrice.readOnly = true; }
+                if (priceAlertText) priceAlertText.textContent = "หมวดหมู่ 'รายการครุภัณฑ์' มีการระบุราคารวมไว้แล้ว ราคาของครุภัณฑ์ชิ้นนี้จะถูกบังคับเป็น 0";
+                if (priceAlert) priceAlert.classList.remove('d-none');
+                if (priceSourceLabel) { priceSourceLabel.textContent = "(ราคารวมอยู่ที่รายการครุภัณฑ์)"; priceSourceLabel.classList.remove('d-none'); }
+            } else {
+                if (eqPrice) eqPrice.readOnly = false;
+                if (priceAlert) priceAlert.classList.add('d-none');
+                if (priceSourceLabel) priceSourceLabel.classList.add('d-none');
+            }
+        }
+
+        // Add code row
+        function addCodeRow(value = '') {
+            const rowNum = codesContainer.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2 code-row';
+            div.innerHTML = `
+            <span class="input-group-text">${rowNum}</span>
+            <input type="text" class="form-control" name="codes[]" placeholder="เช่น 7440-001-0001.1/567 วท." value="${value.replace(/"/g, '&quot;')}" required>
+            <button type="button" class="btn btn-outline-danger remove-code"><i class="bi bi-x"></i></button>
+        `;
+            codesContainer.appendChild(div);
+            updateRemoveButtons();
+        }
+
+        // Update remove buttons state
+        function updateRemoveButtons() {
+            const rows = codesContainer.querySelectorAll('.code-row');
+            rows.forEach((row, idx) => {
+                row.querySelector('.input-group-text').textContent = idx + 1;
+                row.querySelector('.remove-code').disabled = rows.length <= 1;
+            });
+        }
+
+        addCodeBtn.addEventListener('click', () => addCodeRow());
+
+        // Remove code row
+        codesContainer.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-code')) {
+                e.target.closest('.code-row').remove();
+                updateRemoveButtons();
+            }
         });
-        rowCountEl.textContent = 'จำนวน ' + rows.length + ' รายการ';
-    }
 
-    addRowBtn.addEventListener('click', function() { addRow(); });
+        // Quick fill
+        document.getElementById('quickFillBtn').addEventListener('click', function () {
+            const text = document.getElementById('quickFillArea').value.trim();
+            if (!text) return;
 
-    codeRows.addEventListener('click', function(e) {
-        const btn = e.target.closest('.remove-row-btn');
-        if (!btn) return;
-        const rows = codeRows.querySelectorAll('.code-row');
-        if (rows.length <= 1) return;
-        btn.closest('.code-row').remove();
-        renumber();
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+
+            // Clear existing rows
+            codesContainer.innerHTML = '';
+
+            // Add rows for each line
+            lines.forEach(line => addCodeRow(line));
+
+            document.getElementById('quickFillArea').value = '';
+        });
+
+        // Room manager mapping (from PHP)
+        const roomManagersData = <?= json_encode($managersByRoom, JSON_UNESCAPED_UNICODE) ?>;
+
+        // Room-based holder suggestion
+        const roomSelect = document.getElementById('roomSelect');
+        const holderSelect = document.getElementById('holderSelect');
+        const holderInfo = document.getElementById('holderInfo');
+        const allHolderOptions = Array.from(holderSelect.options);
+
+        roomSelect.addEventListener('change', function () {
+            const roomId = this.value;
+            const managers = roomManagersData[roomId] || [];
+
+            // Reset holder select
+            holderSelect.innerHTML = '<option value="">-- เลือกผู้รับผิดชอบ --</option>';
+
+            if (managers.length > 0) {
+                // Add room managers as suggested options
+                const optGroup = document.createElement('optgroup');
+                optGroup.label = '★ ผู้รับผิดชอบห้องนี้';
+                managers.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.user_id;
+                    opt.textContent = m.firstname + ' ' + m.lastname;
+                    opt.className = 'text-primary fw-bold';
+                    optGroup.appendChild(opt);
+                });
+                holderSelect.appendChild(optGroup);
+
+                // Add separator
+                const optGroup2 = document.createElement('optgroup');
+                optGroup2.label = '─── อื่นๆ ───';
+                allHolderOptions.slice(1).forEach(opt => {
+                    if (!managers.find(m => m.user_id == opt.value)) {
+                        optGroup2.appendChild(opt.cloneNode(true));
+                    }
+                });
+                holderSelect.appendChild(optGroup2);
+
+                // Auto-select first manager
+                holderSelect.value = managers[0].user_id;
+                holderInfo.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>เลือกผู้รับผิดชอบห้องอัตโนมัติ</span>';
+            } else {
+                // No managers, show all options
+                allHolderOptions.slice(1).forEach(opt => {
+                    holderSelect.appendChild(opt.cloneNode(true));
+                });
+                holderInfo.innerHTML = '';
+            }
+        });
     });
-
-    quickFillBtn.addEventListener('click', function() {
-        const lines = quickFill.value.split('\n')
-            .map(l => l.trim())
-            .filter(l => l.length > 0);
-        if (lines.length === 0) return;
-        lines.forEach(code => addRow(code));
-        quickFill.value = '';
-    });
-});
 </script>

@@ -156,14 +156,15 @@ class Equipment extends Model {
                 $values = [];
                 $params = [];
                 foreach ($chunk as $row) {
-                    $values[] = '(?, ?, ?, ?, ?, ?)';
+                    $values[] = '(?, ?, ?, ?, ?, ?, ?, ?)';
                     array_push($params,
                         $row['code'], $row['item_id'],
                         $row['room_id'] ?? null, $row['holder_id'] ?? null,
-                        $row['status'] ?? 'available', $row['remark'] ?? null
+                        $row['status'] ?? 'available', $row['remark'] ?? null,
+                        $row['purchase_date'] ?? null, $row['price'] ?? null
                     );
                 }
-                $sql = "INSERT INTO equipment (code, item_id, room_id, holder_id, status, remark)
+                $sql = "INSERT INTO equipment (code, item_id, room_id, holder_id, status, remark, purchase_date, price)
                     VALUES " . implode(', ', $values);
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
