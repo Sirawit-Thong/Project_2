@@ -83,11 +83,11 @@ class AdminController extends Controller
         $this->requireLogin();
         $this->authorize(['admin']);
 
-        $search = $_GET['search'] ?? '';
+        $search = $_GET['q'] ?? '';
         $page = max(1, (int)($_GET['page'] ?? 1));
 
         $result = SystemLog::getFiltered($search, $page);
-        $pageTitle = 'บันทึกระบบ';
+        $pageTitle = 'ประวัติการใช้งานระบบ (Logs)';
         $viewPath = 'admin/logs';
 
         require __DIR__ . '/../Views/layouts/main.php';
