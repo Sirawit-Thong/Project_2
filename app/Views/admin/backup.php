@@ -1,55 +1,55 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class=" mb-0"><i class="bi bi-database-down"></i> สำรองฐานข้อมูล</h4>
-    <form method="POST" action="<?= SITE_URL ?>/backup">
-        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-        <input type="hidden" name="action" value="download">
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-download"></i> ดาวน์โหลด SQL
-        </button>
-    </form>
+<?php
+$pageTitle = 'สำรองฐานข้อมูลระบบ';
+?>
+
+<div class="page-header">
+    <h1><i class="bi bi-database-down me-2"></i>สำรองฐานข้อมูลระบบ</h1>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="bi bi-table"></i> ข้อมูลตารางในฐานข้อมูล</h6>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-cloud-download me-2"></i>ดาวน์โหลด Backup</div>
+            <div class="card-body text-center">
+                <i class="bi bi-database fs-1 text-primary mb-3 d-block"></i>
+                <p>ดาวน์โหลดไฟล์ SQL สำหรับสำรองฐานข้อมูลระบบทั้งหมด</p>
+                <form method="POST" action="<?= SITE_URL ?>/backup">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="download">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-download me-2"></i>ดาวน์โหลด Backup
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th width="60">#</th>
-                        <th>ชื่อตาราง</th>
-                        <th width="140" class="text-end">จำนวนแถว</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($tableInfo)): ?>
-                        <?php $total = 0; $i = 1; ?>
-                        <?php foreach ($tableInfo as $tableName => $rowCount): ?>
-                            <?php $total += $rowCount; ?>
-                            <tr>
-                                <td><?= $i++ ?></td>
-                                <td>
-                                    <i class="bi bi-table text-info"></i>
-                                    <?= htmlspecialchars($tableName) ?>
-                                </td>
-                                <td class="text-end">
-                                    <span class="badge bg-secondary"><?= number_format($rowCount) ?></span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <tr class="table-light fw-bold">
-                            <td colspan="2" class="text-end">รวมทั้งหมด</td>
-                            <td class="text-end"><span class="badge bg-dark"><?= number_format($total) ?> แถว</span></td>
-                        </tr>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-4">ไม่พบข้อมูลตาราง</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-table me-2"></i>สถิติข้อมูลในระบบ</div>
+            <ul class="list-group list-group-flush">
+                <?php
+                $tableLabels = [
+                    'users' => 'ผู้ใช้งาน',
+                    'dept' => 'สาขา',
+                    'sets' => 'ชุดครุภัณฑ์',
+                    'items' => 'รายการครุภัณฑ์',
+                    'rooms' => 'ห้อง',
+                    'room_managers' => 'ผู้รับผิดชอบห้อง',
+                    'equipment' => 'ครุภัณฑ์',
+                    'equipment_img' => 'รูปครุภัณฑ์',
+                    'repair' => 'รายการแจ้งซ่อม',
+                    'repair_img' => 'รูปงานซ่อม',
+                    'system_logs' => 'บันทึกระบบ',
+                ];
+                foreach ($tableInfo as $table => $count):
+                ?>
+                <li class="list-group-item d-flex justify-content-between">
+                    <?= $tableLabels[$table] ?? $table ?>
+                    <span class="badge bg-primary"><?= number_format($count) ?></span>
+                </li>
+                <?php endforeach; ?>
+            </ul>
         </div>
     </div>
 </div>
