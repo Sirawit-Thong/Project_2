@@ -88,7 +88,7 @@ class RepairController extends Controller
 
         $userId = getCurrentUserId();
         $repairs = Repair::getByUser($userId);
-        $pageTitle = 'รายการซ่อมของฉัน';
+        $pageTitle = 'ประวัติการส่งรายการแจ้งซ่อมบำรุง';
         $viewPath = 'repair/mine';
 
         require __DIR__ . '/../Views/layouts/main.php';

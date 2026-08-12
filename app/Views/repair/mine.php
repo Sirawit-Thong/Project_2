@@ -1,5 +1,4 @@
 <?php
-$pageTitle = 'ประวัติการส่งรายการแจ้งซ่อมบำรุง';
 ?>
 
 <div class="page-header d-flex justify-content-between">
@@ -21,7 +20,7 @@ $pageTitle = 'ประวัติการส่งรายการแจ้
                         <tr>
                             <th class="hide-mobile">#</th>
                             <th>ครุภัณฑ์</th>
-                            <th class="hide-mobile">รายละเอียดความขัดข้อง</th>
+                            <th class="hide-mobile"><?= getCurrentRole() === 'teacher' ? 'อาการ' : 'รายละเอียดความขัดข้อง' ?></th>
                             <th>สถานะ</th>
                             <th class="hide-mobile">วันที่แจ้ง</th>
                             <th style="width: 80px;"></th>
