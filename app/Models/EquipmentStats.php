@@ -31,6 +31,16 @@ class EquipmentStats extends Model {
         return (float) self::fetchColumn($sql);
     }
 
+    public static function getAssetValue() {
+        // มูลค่าทรัพย์สินรวม (ตามสูตรออริจินอล) = ราคารวมครุภัณฑ์ + ราคารายการครุภัณฑ์ + ราคาชุดครุภัณฑ์
+        $sql = "SELECT
+            (SELECT COALESCE(SUM(price), 0) FROM equipment WHERE status != 'disposed') AS eq_val,
+            (SELECT COALESCE(SUM(i.price * (SELECT COUNT(*) FROM equipment e WHERE e.item_id = i.id AND e.status != 'disposed')), 0) FROM items i) AS item_val,
+            (SELECT COALESCE(SUM(s.price), 0) FROM sets s WHERE s.price > 0 AND EXISTS (SELECT 1 FROM items i JOIN equipment e ON i.id = e.item_id WHERE i.set_id = s.id AND e.status != 'disposed')) AS set_val";
+        $row = self::fetchOne($sql);
+        return (float) (($row['eq_val'] ?? 0) + ($row['item_val'] ?? 0) + ($row['set_val'] ?? 0));
+    }
+
     public static function countByDepartment() {
         $sql = "SELECT d.name, COUNT(e.id) AS count
             FROM equipment e

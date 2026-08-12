@@ -9,10 +9,10 @@
 ?>
 
 <!-- Page Header -->
-<div class="page-header mb-4">
-    <h4 class="mb-1"><i class="bi bi-bar-chart me-2"></i><?= $pageTitle ?></h4>
+<div class="page-header">
+    <h1><i class="bi bi-bar-chart me-2"></i>รายงานสรุปสถานะครุภัณฑ์ในสังกัด</h1>
     <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0 small">
+        <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
             <li class="breadcrumb-item active">รายงานสรุป</li>
         </ol>
@@ -111,10 +111,6 @@
                                 </td>
                                 <td class="text-end"><?= number_format($room['total_value'], 0) ?></td>
                                 <td>
-                                    <a href="<?= SITE_URL ?>/teacher/export?room=<?= $room['room_id'] ?>"
-                                        class="btn btn-sm btn-outline-success rounded-pill px-3" title="ส่งออก Excel">
-                                        <i class="bi bi-file-earmark-excel me-1"></i>ส่งออก
-                                    </a>
                                     <a href="<?= SITE_URL ?>/equipment?room=<?= urlencode($room['room_id']) ?>"
                                         class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                         <i class="bi bi-eye me-1"></i>ดู
@@ -143,7 +139,7 @@
     <!-- Charts -->
     <div class="row">
         <div class="col-md-6">
-            <div class="card mb-4">
+            <div class="card">
                 <div class="card-header">
                     <i class="bi bi-pie-chart me-2"></i>สถานะครุภัณฑ์
                 </div>
@@ -153,7 +149,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card mb-4">
+            <div class="card">
                 <div class="card-header">
                     <i class="bi bi-bar-chart me-2"></i>จำนวนครุภัณฑ์ตามห้องปฏิบัติการ
                 </div>

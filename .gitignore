@@ -13,3 +13,4 @@ uploads/repairs/*
 # ไฟล์ตั้งค่าที่เป็นความลับ
 .env
 config/*.local.php
+docs/*

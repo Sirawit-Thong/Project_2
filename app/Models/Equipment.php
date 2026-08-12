@@ -257,6 +257,10 @@ class Equipment extends Model {
         return EquipmentStats::getTotalValue();
     }
 
+    public static function getAssetValue() {
+        return EquipmentStats::getAssetValue();
+    }
+
     public static function countByDepartment() {
         return EquipmentStats::countByDepartment();
     }

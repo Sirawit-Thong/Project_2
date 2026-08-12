@@ -43,27 +43,31 @@ class Department extends Model
 
     public static function getStatsWithValues()
     {
-        // มูลค่ารวมต่อสาขา = ราคารวมของชุด/รายการครุภัณฑ์ เฉพาะกลุ่มที่มีครุภัณฑ์หลายชิ้น (>= 2)
-        // นับราคารวมแค่ชุด/รายการละ 1 ครั้ง
-        $sql = "SELECT d.id, d.name,
-            COUNT(DISTINCT e.id) AS equipment_count,
-            (
-                (SELECT COALESCE(SUM(s.price), 0) FROM sets s
-                 WHERE s.dept_id = d.id AND s.price > 0
-                   AND (SELECT COUNT(*) FROM items i JOIN equipment e ON e.item_id = i.id
-                        WHERE i.set_id = s.id AND e.status != 'disposed') >= 2)
-                +
-                (SELECT COALESCE(SUM(i.price), 0) FROM items i JOIN sets s ON s.id = i.set_id
-                 WHERE s.dept_id = d.id AND i.price > 0
-                   AND (SELECT COUNT(*) FROM equipment e WHERE e.item_id = i.id AND e.status != 'disposed') >= 2
-                   AND NOT EXISTS (SELECT 1 FROM sets s2 WHERE s2.id = i.set_id AND s2.price > 0))
-            ) AS total_value
-            FROM dept d
-            LEFT JOIN sets s ON s.dept_id = d.id
-            LEFT JOIN items i ON i.set_id = s.id
-            LEFT JOIN equipment e ON e.item_id = i.id AND e.status != 'disposed'
-            GROUP BY d.id, d.name
-            ORDER BY d.name";
-        return self::fetchAll($sql);
+        // ตามแบบออริจินอล: นับจำนวนครุภัณฑ์ + มูลค่ารวม (ครุภัณฑ์ + รายการ + ชุด) ต่อสาขา
+        $deptRows = self::fetchAll("SELECT id, name FROM dept ORDER BY name");
+
+        $stats = [];
+        foreach ($deptRows as $d) {
+            $sql = "SELECT
+                (SELECT COUNT(*) FROM equipment e JOIN items i ON e.item_id = i.id JOIN sets s ON i.set_id = s.id WHERE s.dept_id = ?) AS c,
+                (SELECT COALESCE(SUM(e.price), 0) FROM equipment e JOIN items i ON e.item_id = i.id JOIN sets s ON i.set_id = s.id WHERE s.dept_id = ?) AS eq_val,
+                (SELECT COALESCE(SUM(i.price * (SELECT COUNT(*) FROM equipment e WHERE e.item_id = i.id)), 0) FROM items i JOIN sets s ON i.set_id = s.id WHERE s.dept_id = ?) AS item_val,
+                (SELECT COALESCE(SUM(s.price), 0) FROM sets s WHERE s.dept_id = ? AND s.price > 0 AND EXISTS (SELECT 1 FROM items i JOIN equipment e ON i.id = e.item_id WHERE i.set_id = s.id)) AS set_val";
+            $row = self::fetchOne($sql, [$d['id'], $d['id'], $d['id'], $d['id']]);
+
+            if ($row['c'] > 0 || $row['eq_val'] > 0 || $row['item_val'] > 0 || $row['set_val'] > 0) {
+                $stats[] = [
+                    'name' => $d['name'],
+                    'c' => (int) $row['c'],
+                    'v' => (float) ($row['eq_val'] + $row['item_val'] + $row['set_val']),
+                ];
+            }
+        }
+
+        usort($stats, function ($a, $b) {
+            return $b['v'] <=> $a['v'];
+        });
+
+        return $stats;
     }
 }

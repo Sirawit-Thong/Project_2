@@ -1,245 +1,297 @@
 <?php
-$monthlyStats = $monthlyStats ?? [];
-$statusCounts = $statusCounts ?? [];
+$eqStats = $eqStats ?? [];
+$totalValue = $totalValue ?? 0;
+$monthlyData = $monthlyData ?? [];
 $topBroken = $topBroken ?? [];
 $deptStats = $deptStats ?? [];
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0"><i class="bi bi-graph-up"></i> รายงานสรุป</h4>
+    <div>
+        <h1 class="h3 mb-1 text-dark"><i class="bi bi-graph-up me-2 text-primary"></i>รายงานและสถิติ</h1>
+        <p class="text-muted mb-0">ภาพรวมข้อมูลครุภัณฑ์และการแจ้งซ่อมบำรุง</p>
+    </div>
     <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-            <i class="bi bi-download"></i> ส่งออกรายงาน
+        <button class="btn btn-primary shadow-sm dropdown-toggle" type="button" id="exportDropdown"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-file-earmark-arrow-down me-2"></i>ส่งออกรายงาน
         </button>
-        <ul class="dropdown-menu dropdown-menu-end">
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="exportDropdown">
             <li>
-                <a class="dropdown-item" href="<?= SITE_URL ?>/reports/export/equipment">
-                    <i class="bi bi-box-seam"></i> รายงานอุปกรณ์
-                </a>
+                <h6 class="dropdown-header">เลือกประเภทข้อมูล</h6>
             </li>
+            <li><a class="dropdown-item" href="<?= SITE_URL ?>/reports/export/equipment"><i
+                        class="bi bi-pc-display me-2 text-primary"></i>รายการครุภัณฑ์ทั้งหมด</a></li>
+            <li><a class="dropdown-item" href="<?= SITE_URL ?>/reports/export/repairs"><i
+                        class="bi bi-tools me-2 text-warning"></i>ประวัติการแจ้งซ่อม</a></li>
             <li>
-                <a class="dropdown-item" href="<?= SITE_URL ?>/reports/export/repairs">
-                    <i class="bi bi-tools"></i> รายงานซ่อมแซม
-                </a>
+                <hr class="dropdown-divider">
             </li>
-            <li>
-                <a class="dropdown-item" href="<?= SITE_URL ?>/reports/export/users">
-                    <i class="bi bi-people"></i> รายงานผู้ใช้
-                </a>
-            </li>
+            <li><a class="dropdown-item" href="<?= SITE_URL ?>/reports/export/users"><i
+                        class="bi bi-people me-2 text-info"></i>รายชื่อผู้ใช้งาน</a></li>
         </ul>
     </div>
 </div>
 
 <!-- Stats Cards -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card bg-primary text-white shadow">
-            <div class="card-body d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-box-seam" style="font-size: 2.5rem;"></i>
-                </div>
-                <div>
-                    <div class="opacity-75">อุปกรณ์ทั้งหมด</div>
-                    <div class="fs-3 fw-bold"><?= number_format($totalEquipment ?? 0) ?> ชิ้น</div>
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-white border-0 shadow-sm h-100 py-2 border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="small text-primary text-uppercase mb-1">ครุภัณฑ์ทั้งหมด</div>
+                        <div class="h5 mb-0 fw-bold text-dark">
+                            <?= number_format(array_sum($eqStats)) ?> รายการ
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-box-seam fs-1 text-muted opacity-25"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card bg-success text-white shadow">
-            <div class="card-body d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-cash-stack" style="font-size: 2.5rem;"></i>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-white border-0 shadow-sm h-100 py-2 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="small text-success text-uppercase mb-1">พร้อมใช้งาน</div>
+                        <div class="h5 mb-0 fw-bold text-dark">
+                            <?= number_format($eqStats['available'] ?? 0) ?> รายการ
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fs-1 text-muted opacity-25"></i>
+                    </div>
                 </div>
-                <div>
-                    <div class="opacity-75">มูลค่ารวม</div>
-                    <div class="fs-3 fw-bold">฿<?= number_format($totalValue ?? 0, 2) ?></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-white border-0 shadow-sm h-100 py-2 border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="small text-warning text-uppercase mb-1">สถานะไม่ปกติ</div>
+                        <div class="h5 mb-0 fw-bold text-dark">
+                            <?= number_format(($eqStats['repair'] ?? 0) + ($eqStats['broken'] ?? 0)) ?> รายการ
+                        </div>
+                        <small class="text-muted">(ส่งซ่อม/ซ่อมไม่ได้)</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-1 text-muted opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-white border-0 shadow-sm h-100 py-2 border-start border-4 border-info">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="small text-info text-uppercase mb-1">มูลค่าทรัพย์สินรวม</div>
+                        <div class="h5 mb-0 fw-bold text-dark">
+                            <?= number_format($totalValue / 1000000, 2) ?> ล้านบาท
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-currency-dollar fs-1 text-muted opacity-25"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts Row -->
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-bar-chart-line"></i> สถิติการซ่อมรายเดือน</h6>
+<!-- Charts Content -->
+<div class="row g-4 mb-4">
+    <!-- Monthly Repairs Chart -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-primary"><i
+                        class="bi bi-bar-chart-line me-2"></i>สถิติการแจ้งซ่อมย้อนหลัง 12 เดือน</h6>
             </div>
             <div class="card-body">
-                <canvas id="monthlyChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-pie-chart"></i> สถานะอุปกรณ์</h6>
-            </div>
-            <div class="card-body d-flex justify-content-center">
-                <canvas id="statusChart" width="280" height="280"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tables Row -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-exclamation-triangle text-warning"></i> อุปกรณ์ที่เสียบ่อย</h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th width="50">#</th>
-                                <th>ชื่ออุปกรณ์</th>
-                                <th width="100" class="text-center">ครั้งที่เสีย</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($topBroken)): ?>
-                                <?php foreach ($topBroken as $i => $item): ?>
-                                    <tr>
-                                        <td><?= $i + 1 ?></td>
-                                        <td><?= htmlspecialchars($item['name'] ?? '') ?></td>
-                                        <td class="text-center">
-                                            <span class="badge bg-danger"><?= $item['break_count'] ?? $item['count'] ?? 0 ?></span>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted py-3">ไม่มีข้อมูล</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                <div class="chart-area" style="height: 350px;">
+                    <canvas id="monthlyChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-building"></i> มูลค่าอุปกรณ์ตามแผนก</h6>
+
+    <!-- Equipment Status Chart -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-primary"><i
+                        class="bi bi-pie-chart me-2"></i>สัดส่วนสถานะครุภัณฑ์</h6>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th width="50">#</th>
-                                <th>แผนก</th>
-                                <th class="text-center">จำนวน</th>
-                                <th class="text-end">มูลค่า</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($deptStats)): ?>
-                                <?php foreach ($deptStats as $i => $dept): ?>
-                                    <tr>
-                                        <td><?= $i + 1 ?></td>
-                                        <td><?= htmlspecialchars($dept['name'] ?? $dept['dept_name'] ?? '') ?></td>
-                                        <td class="text-center">
-                                            <span class="badge bg-info"><?= $dept['equipment_count'] ?? $dept['count'] ?? 0 ?></span>
-                                        </td>
-                                        <td class="text-end">฿<?= number_format($dept['total_value'] ?? $dept['value'] ?? 0, 2) ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-3">ไม่มีข้อมูล</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2" style="height: 280px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="mt-4 text-center small">
+                    <span class="me-2"><i class="bi bi-circle-fill text-success"></i> พร้อมใช้งาน</span>
+                    <span class="me-2"><i class="bi bi-circle-fill text-warning"></i> ส่งซ่อม</span>
+                    <span class="me-2"><i class="bi bi-circle-fill text-danger"></i> ซ่อมไม่ได้</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<!-- Detailed Stats Rows -->
+<div class="row g-4">
+    <!-- Top Broken Items -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-danger"><i class="bi bi-tools me-2"></i>5
+                    อันดับครุภัณฑ์แจ้งซ่อมบ่อย</h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <?php foreach ($topBroken as $i => $item): ?>
+                        <li class="list-group-item px-4 py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark"><?= ($i + 1) ?>.
+                                    <?= htmlspecialchars($item['name']) ?></span>
+                                <span class="badge bg-danger rounded-pill"><?= $item['cnt'] ?> ครั้ง</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-danger" role="progressbar"
+                                    style="width: <?= min(100, $item['cnt'] * 5) ?>%"></div>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                    <?php if (empty($topBroken)): ?>
+                        <li class="list-group-item text-center text-muted py-4">ยังไม่มีข้อมูลการแจ้งซ่อม</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Stats -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-info"><i
+                        class="bi bi-building me-2"></i>มูลค่าครุภัณฑ์ตามสาขาวิชา</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">สาขาวิชา</th>
+                                <th class="text-center">จำนวน (ชิ้น)</th>
+                                <th class="text-end pe-4">มูลค่ารวม</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($deptStats as $d): ?>
+                                <tr>
+                                    <td class="ps-4 fw-medium"><?= htmlspecialchars($d['name']) ?></td>
+                                    <td class="text-center"><span
+                                            class="badge bg-secondary"><?= number_format($d['c']) ?></span></td>
+                                    <td class="text-end pe-4 text-success fw-bold"><?= number_format($d['v']) ?> ฿</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-var monthlyData = <?= json_encode($monthlyStats) ?>;
-var statusData = <?= json_encode($statusCounts) ?>;
+    // Styling logic for Charts
+    Chart.defaults.font.family = "'Prompt', sans-serif";
+    Chart.defaults.color = '#858796';
 
-var monthLabels = monthlyData.map(function(d) { return d.month || d.label || ''; });
-var monthRepairs = monthlyData.map(function(d) { return d.repair_count || d.count || 0; });
-var monthCosts = monthlyData.map(function(d) { return d.total_cost || d.cost || 0; });
-
-var statusLabels = statusData.map(function(d) { return d.status || d.label || ''; });
-var statusValues = statusData.map(function(d) { return d.count || 0; });
-var statusColors = ['#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d', '#fd7e14', '#6f42c1'];
-
-new Chart(document.getElementById('monthlyChart'), {
-    type: 'bar',
-    data: {
-        labels: monthLabels,
-        datasets: [
-            {
-                label: 'จำนวนครั้งที่ซ่อม',
-                data: monthRepairs,
-                backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                borderColor: 'rgba(13, 110, 253, 1)',
+    // Monthly Chart
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: <?= json_encode(array_column($monthlyData, 'month')) ?>,
+            datasets: [{
+                label: 'จำนวนแจ้งซ่อม',
+                data: <?= json_encode(array_column($monthlyData, 'count')) ?>,
+                backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                hoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                borderColor: 'rgba(78, 115, 223, 1)',
                 borderWidth: 1,
-                yAxisID: 'y'
-            },
-            {
-                label: 'ค่าใช้จ่าย (฿)',
-                data: monthCosts,
-                type: 'line',
-                borderColor: '#dc3545',
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                fill: true,
-                tension: 0.3,
-                yAxisID: 'y1'
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'top' }
+                borderRadius: 5
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                position: 'left',
-                title: { display: true, text: 'จำนวนครั้ง' }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyColor: "#858796",
+                    titleColor: '#6e707e',
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function (context) {
+                            return 'แจ้งซ่อม: ' + context.parsed.y + ' รายการ';
+                        }
+                    }
+                }
             },
-            y1: {
-                beginAtZero: true,
-                position: 'right',
-                grid: { drawOnChartArea: false },
-                title: { display: true, text: 'ค่าใช้จ่าย (฿)' }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [2], drawBorder: false, color: "rgb(234, 236, 244)" },
+                    ticks: { padding: 10 }
+                },
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { maxTicksLimit: 12 }
+                }
             }
         }
-    }
-});
+    });
 
-var statusCtx = document.getElementById('statusChart').getContext('2d');
-new Chart(statusCtx, {
-    type: 'doughnut',
-    data: {
-        labels: statusLabels,
-        datasets: [{
-            data: statusValues,
-            backgroundColor: statusColors.slice(0, statusLabels.length)
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'bottom', labels: { padding: 15 } }
+    // Status Chart
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['พร้อมใช้งาน', 'ส่งซ่อม', 'ซ่อมไม่ได้', 'รอจำหน่ายออก'],
+            datasets: [{
+                data: [<?= $eqStats['available'] ?? 0 ?>, <?= $eqStats['repair'] ?? 0 ?>, <?= $eqStats['broken'] ?? 0 ?>, <?= $eqStats['pending_disposal'] ?? 0 ?>],
+                backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b', '#36b9cc'],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    padding: 12,
+                }
+            },
+            cutout: '70%',
         }
-    }
-});
+    });
 </script>
