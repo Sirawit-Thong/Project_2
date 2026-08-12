@@ -147,7 +147,7 @@ function isSidebarActive($path)
 
             <div class="nav-section">
                 <span class="nav-section-title">ครุภัณฑ์ในการดูแล</span>
-                <a href="<?= SITE_URL ?>/equipment" class="nav-link <?= isSidebarActive('/equipment') ?>">
+                <a href="<?= SITE_URL ?>/equipment/my" class="nav-link <?= isSidebarActive('/equipment') ?>">
                     <i class="bi bi-clipboard-check"></i>
                     <span>ตรวจสอบครุภัณฑ์ที่รับผิดชอบ</span>
                 </a>

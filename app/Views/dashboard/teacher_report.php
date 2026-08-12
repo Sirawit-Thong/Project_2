@@ -111,7 +111,7 @@
                                 </td>
                                 <td class="text-end"><?= number_format($room['total_value'], 0) ?></td>
                                 <td>
-                                    <a href="<?= SITE_URL ?>/equipment?room=<?= urlencode($room['room_id']) ?>"
+                                    <a href="<?= SITE_URL ?>/equipment/my?room=<?= urlencode($room['room_id']) ?>"
                                         class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                         <i class="bi bi-eye me-1"></i>ดู
                                     </a>

@@ -12,7 +12,7 @@ $listLabel = $role === 'teacher' ? 'ตรวจสอบครุภัณฑ�
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
-                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/equipment"><?= $listLabel ?></a></li>
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?><?= $role === 'teacher' ? '/equipment/my' : '/equipment' ?>"><?= $listLabel ?></a></li>
                 <li class="breadcrumb-item active"><?= sanitize($equipment['code'] ?? 'รายละเอียด') ?></li>
             </ol>
         </nav>
