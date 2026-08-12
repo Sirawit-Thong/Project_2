@@ -317,34 +317,53 @@ class EquipmentController extends Controller
         $this->authorize(['admin', 'staff']);
 
         $rooms = Room::getAll();
-        $pageTitle = 'ตรวจนับประจำปี';
+        $pageTitle = 'ระบบตรวจนับครุภัณฑ์ประจำปี';
         $viewPath = 'equipment/inspection';
         $selectedRoom = $_GET['room_id'] ?? null;
+        $currentYear = date('Y');
         $equipment = [];
+        $stats = ['total' => 0, 'inspected' => 0, 'pending' => 0];
 
         if ($selectedRoom) {
             $equipment = Equipment::getByRoomForInspection($selectedRoom);
+
+            foreach ($equipment as $item) {
+                $stats['total']++;
+                $isInspected = $item['check_date'] && date('Y', strtotime($item['check_date'])) == $currentYear;
+                if ($isInspected) {
+                    $stats['inspected']++;
+                } else {
+                    $stats['pending']++;
+                }
+            }
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
 
-            $items = $_POST['items'] ?? [];
+            $selectedRoom = $_POST['room_id'] ?? $selectedRoom;
+
+            $inspectedIds = $_POST['inspected'] ?? [];
+            $statuses = $_POST['status'] ?? [];
+            $remarks = $_POST['remark'] ?? [];
+            $allIds = $_POST['item_ids'] ?? [];
+
             $updated = 0;
+            foreach ($allIds as $id) {
+                $status = $statuses[$id] ?? 'available';
+                $remark = $remarks[$id] ?? '';
+                $isInspected = in_array($id, $inspectedIds);
 
-            foreach ($items as $eqId => $data) {
-                $status = $data['status'] ?? null;
-                $remark = $data['remark'] ?? null;
-                $checked = isset($data['checked']);
-
-                if ($checked && $status) {
-                    Equipment::inspectionUpdate($eqId, $status, $remark, true);
+                if ($isInspected) {
+                    Equipment::inspectionUpdate($id, $status, $remark, true);
                     $updated++;
+                } else {
+                    Equipment::inspectionUpdate($id, $status, $remark, false);
                 }
             }
 
             logActivity(getCurrentUserId(), 'Inspection', "ตรวจนับครุภัณฑ์: {$updated} รายการ");
-            $this->flash('success', "บันทึกผลตรวจนับสำเร็จ {$updated} รายการ");
+            $this->flash('success', 'บันทึกข้อมูลการตรวจนับเรียบร้อยแล้ว');
             $this->redirect(SITE_URL . '/equipment/inspection?room_id=' . $selectedRoom);
         }
 

@@ -1,122 +1,133 @@
 <?php
-$pageTitle = 'จัดการผู้ใช้';
+$search = $_GET['search'] ?? '';
+$roleFilter = $_GET['role'] ?? '';
+$statusFilter = $_GET['status'] ?? '';
+
+$baseUrl = SITE_URL . '/users?' . http_build_query(array_filter([
+    'search' => $search,
+    'role' => $roleFilter,
+    'status' => $statusFilter,
+]));
 ?>
 
-<div class="page-header">
-    <h1><i class="bi bi-people me-2"></i>จัดการผู้ใช้</h1>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
-            <li class="breadcrumb-item active">จัดการผู้ใช้</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-people me-2"></i>บริหารจัดการบัญชีผู้ใช้งาน</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
+                <li class="breadcrumb-item active">ผู้ใช้งาน</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="<?= SITE_URL ?>/users/add" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>เพิ่มชื่อบัญชีใหม่
+        </a>
+    </div>
 </div>
 
+<!-- Filters -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" action="<?= SITE_URL ?>/users" class="row g-2 align-items-end">
+        <form method="GET" class="row g-3" id="filterForm" action="<?= SITE_URL ?>/users">
             <div class="col-md-4">
-                <label class="form-label small">ค้นหา</label>
-                <input type="text" class="form-control" name="search" placeholder="ชื่อ, อีเมล, รหัส..."
-                    value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" placeholder="ระบุคำค้นหา..."
+                        value="<?= sanitize($search) ?>">
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small">บทบาท</label>
-                <select class="form-select" name="role">
-                    <option value="">ทั้งหมด</option>
-                    <option value="admin" <?= ($_GET['role'] ?? '') === 'admin' ? 'selected' : '' ?>>ผู้ดูแลระบบ</option>
-                    <option value="staff" <?= ($_GET['role'] ?? '') === 'staff' ? 'selected' : '' ?>>เจ้าหน้าที่</option>
-                    <option value="teacher" <?= ($_GET['role'] ?? '') === 'teacher' ? 'selected' : '' ?>>อาจารย์</option>
-                    <option value="student" <?= ($_GET['role'] ?? '') === 'student' ? 'selected' : '' ?>>นักศึกษา</option>
+            <div class="col-md-3">
+                <select name="role" class="form-select">
+                    <option value="">-- ทุกบทบาท --</option>
+                    <option value="admin" <?= $roleFilter === 'admin' ? 'selected' : '' ?>>ผู้ดูแลระบบ</option>
+                    <option value="staff" <?= $roleFilter === 'staff' ? 'selected' : '' ?>>เจ้าหน้าที่</option>
+                    <option value="teacher" <?= $roleFilter === 'teacher' ? 'selected' : '' ?>>อาจารย์</option>
+                    <option value="student" <?= $roleFilter === 'student' ? 'selected' : '' ?>>นักศึกษา</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small">สถานะ</label>
-                <select class="form-select" name="status">
-                    <option value="">ทั้งหมด</option>
-                    <option value="approved" <?= ($_GET['status'] ?? '') === 'approved' ? 'selected' : '' ?>>อนุมัติแล้ว</option>
-                    <option value="pending" <?= ($_GET['status'] ?? '') === 'pending' ? 'selected' : '' ?>>รออนุมัติ</option>
-                    <option value="rejected" <?= ($_GET['status'] ?? '') === 'rejected' ? 'selected' : '' ?>>ถูกปฏิเสธ</option>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">-- ทุกสถานะ --</option>
+                    <option value="approved" <?= $statusFilter === 'approved' ? 'selected' : '' ?>>อนุมัติแล้ว</option>
+                    <option value="pending" <?= $statusFilter === 'pending' ? 'selected' : '' ?>>รออนุมัติ</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search me-1"></i>ค้นหา
-                </button>
-            </div>
-            <div class="col-md-2">
-                <a href="<?= SITE_URL ?>/users" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>รีเซ็ต
+            <div class="col-md-2 d-flex gap-1">
+                <a href="<?= SITE_URL ?>/users" class="btn btn-outline-secondary" title="ล้างตัวกรอง">
+                    <i class="bi bi-x-lg"></i> ล้าง
                 </a>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Users Table -->
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-list-ul me-2"></i>รายการผู้ใช้ทั้งหมด (<?= number_format($result['total']) ?> คน)</span>
-        <a href="<?= SITE_URL ?>/users/add" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle me-1"></i>เพิ่มผู้ใช้
-        </a>
+    <div class="card-header">
+        <i class="bi bi-table me-2"></i>รายชื่อผู้ใช้งานทั้งหมด (<?= number_format($result['total']) ?> รายการ)
     </div>
     <div class="card-body p-0">
         <?php if (empty($result['users'])): ?>
-            <div class="text-center py-5 text-muted">
-                <i class="bi bi-person-x fs-1 d-block mb-2"></i>
-                <p>ไม่พบข้อมูลผู้ใช้</p>
+            <div class="empty-state">
+                <i class="bi bi-person-x"></i>
+                <h5>ไม่พบข้อมูลบัญชีผู้ใช้ที่ค้นหา</h5>
+                <p class="text-muted">ลองเปลี่ยนเงื่อนไขการค้นหา</p>
             </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover mb-0">
+                    <thead>
                         <tr>
-                            <th style="width:60px;">#</th>
+                            <th width="60" class="hide-mobile">ID</th>
                             <th>ชื่อ-นามสกุล</th>
-                            <th>อีเมล</th>
+                            <th class="hide-mobile">อีเมล</th>
                             <th>รหัส</th>
-                            <th class="text-center">บทบาท</th>
-                            <th class="text-center">สถานะ</th>
-                            <th class="text-center" style="width:140px;">จัดการ</th>
+                            <th>บทบาท</th>
+                            <th>สถานะ</th>
+                            <th class="hide-mobile">วันที่สมัคร</th>
+                            <th width="120">ดำเนินการ</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($result['users'] as $i => $user): ?>
+                        <?php foreach ($result['users'] as $user): ?>
                             <tr>
-                                <td class="text-muted"><?= ($result['pagination']['current_page'] - 1) * 10 + $i + 1 ?></td>
+                                <td class="hide-mobile"><?= $user['id'] ?></td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center me-2" style="width:32px;height:32px;min-width:32px;">
-                                            <i class="bi bi-person text-white small"></i>
-                                        </div>
-                                        <?= htmlspecialchars($user['firstname'] . ' ' . $user['lastname']) ?>
-                                    </div>
+                                    <strong><?= sanitize($user['firstname'] . ' ' . $user['lastname']) ?></strong>
+                                    <?php if ($user['class']): ?>
+                                        <br><small class="text-muted"><?= sanitize($user['class']) ?></small>
+                                    <?php endif; ?>
                                 </td>
-                                <td class="text-muted"><?= htmlspecialchars($user['email']) ?></td>
-                                <td><?= htmlspecialchars($user['sid'] ?? '-') ?></td>
-                                <td class="text-center">
-                                    <?php
-                                    $roleColors = ['admin' => 'danger', 'staff' => 'warning', 'teacher' => 'info', 'student' => 'secondary'];
-                                    $roleColor = $roleColors[$user['role']] ?? 'secondary';
-                                    ?>
-                                    <span class="badge bg-<?= $roleColor ?>"><?= translateRole($user['role']) ?></span>
+                                <td class="hide-mobile"><?= sanitize($user['email']) ?></td>
+                                <td><?= sanitize($user['sid'] ?? '-') ?></td>
+                                <td>
+                                    <span class="badge bg-<?= $user['role'] === 'admin' ? 'danger' : ($user['role'] === 'staff' ? 'primary' : ($user['role'] === 'teacher' ? 'info' : 'secondary')) ?>">
+                                        <?= translateRole($user['role']) ?>
+                                    </span>
                                 </td>
-                                <td class="text-center">
+                                <td>
                                     <span class="badge bg-<?= getStatusBadgeClass($user['status']) ?>">
                                         <?= translateUserStatus($user['status']) ?>
                                     </span>
                                 </td>
-                                <td class="text-center">
-                                    <a href="<?= SITE_URL ?>/users/edit/<?= $user['id'] ?>" class="btn btn-outline-primary btn-sm me-1" title="แก้ไข">
+                                <td class="hide-mobile"><?= formatDateThai($user['created_at']) ?></td>
+                                <td>
+                                    <a href="<?= SITE_URL ?>/users/edit/<?= $user['id'] ?>" class="btn btn-sm btn-outline-primary"
+                                        title="แก้ไข">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form method="POST" action="<?= SITE_URL ?>/users/delete/<?= $user['id'] ?>" class="d-inline"
-                                        onsubmit="return confirm('ยืนยันลบผู้ใช้นี้? การกระทำนี้ไม่สามารถย้อนกลับได้');">
-                                        <?= csrf_field() ?>
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="ลบ">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <?php if ($user['id'] !== getCurrentUserId()): ?>
+                                        <form method="POST" action="<?= SITE_URL ?>/users/delete/<?= $user['id'] ?>" class="d-inline"
+                                            onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบผู้ใช้นี้?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -125,19 +136,23 @@ $pageTitle = 'จัดการผู้ใช้';
             </div>
         <?php endif; ?>
     </div>
-    <?php if (!empty($result['pagination'])): ?>
+    <?php if (($result['pagination']['total_pages'] ?? 1) > 1): ?>
         <div class="card-footer">
-            <?php
-            $params = http_build_query(array_filter([
-                'search' => $_GET['search'] ?? '',
-                'role' => $_GET['role'] ?? '',
-                'status' => $_GET['status'] ?? '',
-            ]));
-            $baseUrl = SITE_URL . '/users?' . ($params ? $params . '&' : '');
-            ?>
             <?= paginationLinks($result['pagination'], $baseUrl) ?>
         </div>
     <?php endif; ?>
 </div>
 
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            const selects = filterForm.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('change', function () {
+                    filterForm.submit();
+                });
+            });
+        }
+    });
+</script>

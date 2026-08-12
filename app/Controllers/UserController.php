@@ -16,7 +16,7 @@ class UserController extends Controller
         $page = max(1, (int)($_GET['page'] ?? 1));
 
         $result = User::getFiltered($search, $role, $status, $page);
-        $pageTitle = 'จัดการผู้ใช้';
+        $pageTitle = 'บริหารจัดการบัญชีผู้ใช้งาน';
         $viewPath = 'user/index';
 
         require __DIR__ . '/../Views/layouts/main.php';

@@ -56,7 +56,7 @@ class User extends Model
 
         $pagination = self::paginate($total, $page, $perPage);
 
-        $dataSql = "SELECT * FROM users {$whereSql} ORDER BY id ASC LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
+        $dataSql = "SELECT * FROM users {$whereSql} ORDER BY created_at DESC LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}";
         $users = self::fetchAll($dataSql, $params);
 
         return [

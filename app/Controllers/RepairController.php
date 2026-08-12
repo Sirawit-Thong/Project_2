@@ -19,7 +19,7 @@ class RepairController extends Controller
 
         $result = Repair::getFiltered($status, $page, $perPage);
         $statusCounts = Repair::getStatusCounts();
-        $pageTitle = 'รายการซ่อม';
+        $pageTitle = 'รายการแจ้งซ่อมครุภัณฑ์ ทั้งหมด';
         $viewPath = 'repair/index';
 
         require __DIR__ . '/../Views/layouts/main.php';
