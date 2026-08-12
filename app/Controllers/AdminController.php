@@ -98,12 +98,17 @@ class AdminController extends Controller
         $this->requireLogin();
         $this->authorize(['admin', 'staff']);
 
-        $pageTitle = 'รายงาน';
+        $pageTitle = 'รายงานและสถิติ';
         $viewPath = 'admin/reports';
-        $totalEquipment = Equipment::totalCount();
-        $totalValue = Equipment::getTotalValue();
-        $monthlyStats = Repair::getMonthlyStats(12);
-        $statusCounts = Equipment::getStatusCounts();
+
+        // สถานะครุภัณฑ์ แบบ key => count
+        $eqStats = [];
+        foreach (Equipment::getStatusCounts() as $row) {
+            $eqStats[$row['status']] = (int) $row['count'];
+        }
+
+        $totalValue = Equipment::getAssetValue();
+        $monthlyData = Repair::getMonthlyStats(12);
         $topBroken = Repair::getTopBrokenItems(5);
         $deptStats = Department::getStatsWithValues();
 
