@@ -60,7 +60,7 @@ port จากต้นฉบับโดยปรับเป็น MVC:
 - **Card header**: "รายการครุภัณฑ์ — ห้อง X" + ปุ่ม "ส่งออก Excel" → `/teacher/export?room=` + `urlencode($selectedRoom)` (`btn-success btn-sm` + `bi-file-earmark-excel`)
 - **Modal ยืนยันผล** (`#checkModal`): header `bg-success text-white` "ยืนยันผลการตรวจสอบสภาพครุภัณฑ์" + ข้อมูลครุภัณฑ์ (badge รหัส + ชื่อ) + radio การ์ด 2 ใบ (`พร้อมใช้งาน` success / `ชำรุด/เสียหาย` danger) + textarea หมายเหตุ + ปุ่ม ยกเลิก / บันทึกผลการตรวจสอบ
 - **JS**: `show.bs.modal` event → ใส่ค่า `data-id/code/name/remark` ลง modal, reset radio เป็น `ok`
-- form POST ไป `/equipment/my` + `csrf_field()`
+- form POST ไป `/equipment/my` + `csrf_field()` + ต้องพา `?room=` ไปด้วย (`action="<?= SITE_URL ?>/equipment/my?room=<?= urlencode($selectedRoom) ?>"`) เพราะ controller ใช้ห้องที่เลือกในการ verify สิทธิ์ — เช่นเดียวกับต้นฉบับที่ POST ไปยัง URL เดิมซึ่งมี `?room=` อยู่
 - ใช้ `sanitize()`, `getStatusBadgeClass()`, `translateEquipmentStatus()`, `formatDateThai()`
 
 ## การแทนที่ (ตามที่ผู้ใช้เลือก)
