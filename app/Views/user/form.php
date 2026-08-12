@@ -1,123 +1,127 @@
 <?php
-$pageTitle = $pageTitle ?? ($user ? 'แก้ไขผู้ใช้' : 'เพิ่มผู้ใช้ใหม่');
+$pageTitle = 'บริหารจัดการบัญชีผู้ใช้งาน';
 $isEdit = !empty($user);
 $formAction = $isEdit ? SITE_URL . '/users/edit/' . $user['id'] : SITE_URL . '/users/add';
 ?>
 
 <div class="page-header">
-    <h1><i class="bi bi-<?= $isEdit ? 'pencil-square' : 'person-plus' ?> me-2"></i><?= $isEdit ? 'แก้ไขผู้ใช้' : 'เพิ่มผู้ใช้ใหม่' ?></h1>
+    <h1><i class="bi bi-person-<?= $isEdit ? 'gear' : 'plus' ?> me-2"></i><?= $isEdit ? 'แก้ไขข้อมูลบัญชี' : 'ลงทะเบียนบัญชีใหม่' ?></h1>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/users">จัดการผู้ใช้</a></li>
-            <li class="breadcrumb-item active"><?= $isEdit ? 'แก้ไข' : 'เพิ่มใหม่' ?></li>
+            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/users">ผู้ใช้งาน</a></li>
+            <li class="breadcrumb-item active"><?= $isEdit ? 'แก้ไข' : 'เพิ่ม' ?></li>
         </ol>
     </nav>
 </div>
 
-<?php if (!empty($errors)): ?>
-    <div class="alert alert-danger">
-        <i class="bi bi-exclamation-circle me-2"></i>
-        <ul class="mb-0">
-            <?php foreach ($errors as $error): ?>
-                <li><?= htmlspecialchars($error) ?></li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-<?php endif; ?>
-
-<div class="row justify-content-center">
+<div class="row">
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-form me-2"></i>ข้อมูลผู้ใช้
+                <i class="bi bi-person me-2"></i>รายละเอียดบัญชีผู้ใช้งาน
             </div>
             <div class="card-body">
+                <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <ul class="mb-0 ps-3">
+                        <?php foreach ($errors as $error): ?>
+                        <li><?= htmlspecialchars($error) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <?php endif; ?>
+
                 <form method="POST" action="<?= $formAction ?>">
                     <?= csrf_field() ?>
 
-                    <div class="row g-3">
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="sid" class="form-label">รหัสประจำตัว <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="sid" name="sid"
-                                value="<?= htmlspecialchars($user['sid'] ?? ($_POST['sid'] ?? '')) ?>" required
-                                placeholder="รหัสนักศึกษาหรือบัตรพนักงาน">
+                            <label class="form-label">ชื่อ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="firstname"
+                                   value="<?= htmlspecialchars($user['firstname'] ?? ($_POST['firstname'] ?? '')) ?>" required>
                         </div>
-
                         <div class="col-md-6">
-                            <label for="email" class="form-label">อีเมล <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="email" name="email"
-                                value="<?= htmlspecialchars($user['email'] ?? ($_POST['email'] ?? '')) ?>" required
-                                placeholder="example@rmutsb.ac.th">
+                            <label class="form-label">นามสกุล <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="lastname"
+                                   value="<?= htmlspecialchars($user['lastname'] ?? ($_POST['lastname'] ?? '')) ?>" required>
                         </div>
+                    </div>
 
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="firstname" class="form-label">ชื่อ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="firstname" name="firstname"
-                                value="<?= htmlspecialchars($user['firstname'] ?? ($_POST['firstname'] ?? '')) ?>" required>
+                            <label class="form-label">อีเมล <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="email"
+                                   value="<?= htmlspecialchars($user['email'] ?? ($_POST['email'] ?? '')) ?>" required>
                         </div>
-
                         <div class="col-md-6">
-                            <label for="lastname" class="form-label">นามสกุล <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="lastname" name="lastname"
-                                value="<?= htmlspecialchars($user['lastname'] ?? ($_POST['lastname'] ?? '')) ?>" required>
+                            <label class="form-label">รหัสประจำตัว (นักศึกษา/บุคลากร)</label>
+                            <input type="text" class="form-control" name="sid"
+                                   value="<?= htmlspecialchars($user['sid'] ?? ($_POST['sid'] ?? '')) ?>">
                         </div>
+                    </div>
 
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="password" class="form-label">
-                                รหัสผ่าน <?= $isEdit ? '' : '<span class="text-danger">*</span>' ?>
-                            </label>
-                            <input type="password" class="form-control" id="password" name="password"
-                                <?= $isEdit ? '' : 'required' ?> minlength="6"
-                                placeholder="<?= $isEdit ? 'ปล่อยว่างหากไม่ต้องการเปลี่ยน' : 'อย่างน้อย 6 ตัวอักษร' ?>">
-                            <?php if ($isEdit): ?>
-                                <div class="form-text">ปล่อยว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน</div>
-                            <?php endif; ?>
+                            <label class="form-label">รหัสผ่าน <?= $isEdit ? '' : '<span class="text-danger">*</span>' ?></label>
+                            <input type="password" class="form-control" name="password"
+                                   placeholder="<?= $isEdit ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน' : '' ?>"
+                                   <?= $isEdit ? '' : 'required' ?>>
                         </div>
-
                         <div class="col-md-6">
-                            <label for="class" class="form-label">ห้อง / ชั้นปี</label>
-                            <input type="text" class="form-control" id="class" name="class"
-                                value="<?= htmlspecialchars($user['class'] ?? ($_POST['class'] ?? '')) ?>"
-                                placeholder="เช่น ปวส.2/1">
+                            <label class="form-label">ชั้นปี/ห้องเรียน</label>
+                            <input type="text" class="form-control" name="class"
+                                   value="<?= htmlspecialchars($user['class'] ?? ($_POST['class'] ?? '')) ?>"
+                                   placeholder="เช่น ITS36641N">
                         </div>
+                    </div>
 
+                    <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="role" class="form-label">บทบาท <span class="text-danger">*</span></label>
-                            <select class="form-select" id="role" name="role" required>
-                                <option value="">-- เลือกบทบาท --</option>
-                                <option value="admin" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'admin') ? 'selected' : '' ?>>ผู้ดูแลระบบ</option>
-                                <option value="staff" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'staff') ? 'selected' : '' ?>>เจ้าหน้าที่</option>
-                                <option value="teacher" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'teacher') ? 'selected' : '' ?>>อาจารย์</option>
+                            <label class="form-label">บทบาท <span class="text-danger">*</span></label>
+                            <select name="role" class="form-select" required>
                                 <option value="student" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'student') ? 'selected' : '' ?>>นักศึกษา</option>
+                                <option value="teacher" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'teacher') ? 'selected' : '' ?>>อาจารย์</option>
+                                <option value="staff" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'staff') ? 'selected' : '' ?>>เจ้าหน้าที่</option>
+                                <option value="admin" <?= (($user['role'] ?? $_POST['role'] ?? '') === 'admin') ? 'selected' : '' ?>>ผู้ดูแลระบบ</option>
                             </select>
                         </div>
-
                         <div class="col-md-6">
-                            <label for="status" class="form-label">สถานะ <span class="text-danger">*</span></label>
-                            <select class="form-select" id="status" name="status" required>
+                            <label class="form-label">สถานะ <span class="text-danger">*</span></label>
+                            <select name="status" class="form-select" required>
                                 <option value="approved" <?= (($user['status'] ?? $_POST['status'] ?? '') === 'approved') ? 'selected' : '' ?>>อนุมัติแล้ว</option>
                                 <option value="pending" <?= (($user['status'] ?? $_POST['status'] ?? '') === 'pending') ? 'selected' : '' ?>>รออนุมัติ</option>
-                                <option value="rejected" <?= (($user['status'] ?? $_POST['status'] ?? '') === 'rejected') ? 'selected' : '' ?>>ถูกปฏิเสธ</option>
                             </select>
                         </div>
                     </div>
 
-                    <hr>
-
-                    <div class="d-flex justify-content-between">
-                        <a href="<?= SITE_URL ?>/users" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>ย้อนกลับ
-                        </a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="bi bi-<?= $isEdit ? 'save' : 'plus-circle' ?> me-1"></i>
-                            <?= $isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มผู้ใช้' ?>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i><?= $isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มผู้ใช้' ?>
                         </button>
+                        <a href="<?= SITE_URL ?>/users" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>ยกเลิก
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>คำแนะนำ
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>บทบาท <strong>ผู้ดูแลระบบ</strong> สามารถเข้าถึงทุกฟังก์ชัน</li>
+                    <li>บทบาท <strong>เจ้าหน้าที่</strong> สามารถจัดการครุภัณฑ์และงานซ่อม</li>
+                    <li>บทบาท <strong>อาจารย์</strong> และ <strong>นักศึกษา</strong> สามารถแจ้งซ่อมได้</li>
+                    <li>สถานะ <strong>รออนุมัติ</strong> จะไม่สามารถเข้าสู่ระบบได้</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
-
-
