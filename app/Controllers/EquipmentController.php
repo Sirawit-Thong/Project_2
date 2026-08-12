@@ -10,6 +10,10 @@ class EquipmentController extends Controller
         $this->requireLogin();
         $role = getCurrentRole();
 
+        if ($role === 'teacher') {
+            $this->redirect(SITE_URL . '/equipment/my');
+        }
+
         if (!in_array($role, ['admin', 'staff', 'teacher'])) {
             ErrorHandler::page403();
         }
@@ -368,6 +372,93 @@ class EquipmentController extends Controller
         }
 
         require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function myEquipment()
+    {
+        $this->requireLogin();
+        $this->authorize(['teacher']);
+
+        $userId = getCurrentUserId();
+        $managedRooms = RoomManager::getManagedRoomCount($userId);
+
+        if (Equipment::hasNonManagedEquipment($userId)) {
+            $managedRooms[] = [
+                'id' => 'other',
+                'name' => 'อื่นๆ (ไม่ได้อยู่ในห้องที่รับผิดชอบ)',
+            ];
+        }
+
+        $selectedRoom = $_GET['room'] ?? '';
+        $currentYear = date('Y');
+        $equipment = [];
+        $selectedRoomName = '';
+        $eqStats = ['total' => 0, 'available' => 0, 'broken' => 0, 'inspected' => 0];
+
+        if ($selectedRoom !== '') {
+            if ($selectedRoom === 'other') {
+                $selectedRoomName = 'อื่นๆ (ไม่ได้อยู่ในห้องที่รับผิดชอบ)';
+                $equipment = Equipment::getNonManagedByHolder($userId);
+            } elseif (RoomManager::isOwner($userId, (int) $selectedRoom)) {
+                foreach ($managedRooms as $r) {
+                    if ((string) $r['id'] === (string) $selectedRoom) {
+                        $selectedRoomName = $r['name'];
+                        break;
+                    }
+                }
+                $equipment = Equipment::getByRoomWithItems((int) $selectedRoom);
+            }
+        }
+
+        foreach ($equipment as $item) {
+            $eqStats['total']++;
+            if ($item['status'] === 'available') $eqStats['available']++;
+            if ($item['status'] === 'broken') $eqStats['broken']++;
+            if ($item['check_date'] && date('Y', strtotime($item['check_date'])) == $currentYear) {
+                $eqStats['inspected']++;
+            }
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+
+            $eqId = (int) ($_POST['equipment_id'] ?? 0);
+            $checkStatus = $_POST['check_status'] ?? '';
+            $remark = trim($_POST['remark'] ?? '');
+
+            $hasAccess = $this->teacherCanAccessEquipment($eqId, $userId, $selectedRoom);
+
+            if ($hasAccess && $eqId > 0) {
+                Equipment::check($eqId, $remark);
+                if ($checkStatus === 'broken') {
+                    Equipment::updateStatus($eqId, 'broken');
+                }
+                logActivity($userId, 'Teacher Equipment Check', "ตรวจสอบครุภัณฑ์ ID: $eqId");
+                $this->flash('success', 'บันทึกการตรวจสอบสำเร็จ');
+            } else {
+                $this->flash('danger', 'คุณไม่มีสิทธิ์ตรวจสอบครุภัณฑ์นี้');
+            }
+
+            $this->redirect(SITE_URL . '/equipment/my?room=' . urlencode($selectedRoom));
+        }
+
+        $pageTitle = 'ตรวจสอบและยืนยันสภาพครุภัณฑ์';
+        $viewPath = 'equipment/my_equipment';
+
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    private function teacherCanAccessEquipment($eqId, $userId, $selectedRoom)
+    {
+        if ($selectedRoom === 'other') {
+            $sql = "SELECT id FROM equipment WHERE id = ? AND holder_id = ?";
+            return Model::fetchOne($sql, [$eqId, $userId]) !== null;
+        }
+        $sql = "SELECT e.id FROM equipment e
+            JOIN rooms r ON e.room_id = r.id
+            JOIN room_managers rm ON rm.room_id = r.id
+            WHERE e.id = ? AND rm.user_id = ?";
+        return Model::fetchOne($sql, [$eqId, $userId]) !== null;
     }
 
     public function disposal()
