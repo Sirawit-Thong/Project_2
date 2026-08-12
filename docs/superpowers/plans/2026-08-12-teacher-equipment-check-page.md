@@ -28,7 +28,7 @@
 - Consumes: `RoomManager::getManagedRoomCount($userId)` → `[{id, name, eq_count}]`; `RoomManager::isOwner($userId, $roomId)` → bool; `Equipment::hasNonManagedEquipment($userId)` → bool; `Equipment::getNonManagedByHolder($userId)` → rows; `Equipment::getByRoomWithItems($roomId)` → rows; `Equipment::check($id, $remark)`; `Equipment::updateStatus($id, 'broken')`; `getCurrentUserId()`; `logActivity()`
 - Produces: `$managedRooms` (array `{id, name, eq_count}` + `{id:'other', name:'...'}`), `$selectedRoom`, `$selectedRoomName`, `$equipment`, `$eqStats{total,available,broken,inspected}`, `$currentYear` — ให้กับ view `equipment/my_equipment`
 
-- [ ] **Step 1: เพิ่ม redirect ของอาจารย์ใน `index()`**
+- [x] **Step 1: เพิ่ม redirect ของอาจารย์ใน `index()`**
 
 ใน `index()` หลัง `$role = getCurrentRole();` (บรรทัด 11) และก่อน check `if (!in_array($role, ['admin', 'staff', 'teacher']))` (บรรทัด 13) ให้แทรก:
 
@@ -38,7 +38,7 @@
         }
 ```
 
-- [ ] **Step 2: เพิ่ม method `myEquipment()`**
+- [x] **Step 2: เพิ่ม method `myEquipment()`**
 
 ต่อท้าย method `inspection()` (ก่อน `public function disposal()`) วางโค้ดนี้ทั้ง block:
 
@@ -118,7 +118,7 @@
     }
 ```
 
-- [ ] **Step 3: เพิ่ม private helper `teacherCanAccessEquipment()`**
+- [x] **Step 3: เพิ่ม private helper `teacherCanAccessEquipment()`**
 
 วางต่อท้าย method `myEquipment()` (ก่อน `disposal()`):
 
@@ -137,12 +137,12 @@
     }
 ```
 
-- [ ] **Step 4: Lint**
+- [x] **Step 4: Lint**
 
 Run: `& "C:\xampp\php\php.exe" -l "app\Controllers\EquipmentController.php"`
 Expected: `No syntax errors detected in app\Controllers\EquipmentController.php`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/Controllers/EquipmentController.php
@@ -160,7 +160,7 @@ git commit -m "feat: Add myEquipment controller method for teacher equipment che
 - Consumes: `$managedRooms`, `$selectedRoom`, `$selectedRoomName`, `$equipment`, `$eqStats`, `$currentYear` (จาก Task 1)
 - Produces: หน้า HTML+JS ที่ form POST ไป `/equipment/my?room=<selected>` พร้อม `csrf_field()`
 
-- [ ] **Step 1: สร้างไฟล์ view**
+- [x] **Step 1: สร้างไฟล์ view**
 
 สร้าง `app/Views/equipment/my_equipment.php` ด้วยเนื้อหานี้ (port จาก `original website/teacher/my_equipment.php` — เปลี่ยนเป็น MVC):
 
@@ -442,12 +442,12 @@ git commit -m "feat: Add myEquipment controller method for teacher equipment che
 <?php endif; ?>
 ```
 
-- [ ] **Step 2: Lint**
+- [x] **Step 2: Lint**
 
 Run: `& "C:\xampp\php\php.exe" -l "app\Views\equipment\my_equipment.php"`
 Expected: `No syntax errors detected in app\Views\equipment\my_equipment.php`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/Views/equipment/my_equipment.php
@@ -465,7 +465,7 @@ git commit -m "feat: Add teacher equipment check view matching original design"
 - Consumes: `EquipmentController@myEquipment` (Task 1)
 - Produces: URL ที่เข้าถึงได้ `GET/POST /equipment/my`
 
-- [ ] **Step 1: เพิ่ม routes**
+- [x] **Step 1: เพิ่ม routes**
 
 แก้ block ระหว่าง `/equipment/bulk-add` (บรรทัด 38-39) และ `/equipment/{id}` (บรรทัด 40):
 
@@ -484,19 +484,19 @@ $router->post('/equipment/my', 'EquipmentController@myEquipment');
 $router->get('/equipment/{id}', 'EquipmentController@detail');
 ```
 
-- [ ] **Step 2: Lint**
+- [x] **Step 2: Lint**
 
 Run: `& "C:\xampp\php\php.exe" -l "index.php"`
 Expected: `No syntax errors detected in index.php`
 
-- [ ] **Step 3: ตรวจเบื้องต้นผ่าน HTTP (ไม่ต้อง login)**
+- [x] **Step 3: ตรวจเบื้องต้นผ่าน HTTP (ไม่ต้อง login)**
 
 Run: `(Invoke-WebRequest -Uri "http://localhost/P/equipment/my" -MaximumRedirection 0 -UseBasicParsing).Headers.Location`
 Expected: URL ชี้ไป `/login` (เพราะยังไม่ login — แสดงว่า route ไปถึง controller แล้วไม่ใช่ 404)
 
 หมายเหตุ: ถ้าขึ้น error หน้า `403/404` ให้ตรวจว่ามีไฟล์ route ซ้ำกันหรือตัว Router จับ `/equipment/{id}` ก่อน
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add index.php
@@ -516,7 +516,7 @@ git commit -m "feat: Register /equipment/my routes for teacher equipment check"
 - Consumes: route `/equipment/my` (Task 3)
 - Produces: อาจารย์ทุกจุดนำทางไปยังหน้าใหม่
 
-- [ ] **Step 1: แก้ `includes/sidebar.php`**
+- [x] **Step 1: แก้ `includes/sidebar.php`**
 
 เปลี่ยนบรรทัด 150 จาก:
 
@@ -532,7 +532,7 @@ git commit -m "feat: Register /equipment/my routes for teacher equipment check"
 
 (ไม่ต้องแก้ `isSidebarActive('/equipment')` เพราะ `/equipment/my` ขึ้นต้นด้วย `/equipment` → active อยู่แล้ว)
 
-- [ ] **Step 2: แก้ `app/Views/dashboard/teacher_report.php`**
+- [x] **Step 2: แก้ `app/Views/dashboard/teacher_report.php`**
 
 เปลี่ยนบรรทัด 114 จาก:
 
@@ -546,7 +546,7 @@ git commit -m "feat: Register /equipment/my routes for teacher equipment check"
 <a href="<?= SITE_URL ?>/equipment/my?room=<?= urlencode($room['room_id']) ?>"
 ```
 
-- [ ] **Step 3: แก้ `app/Views/equipment/detail.php`**
+- [x] **Step 3: แก้ `app/Views/equipment/detail.php`**
 
 เปลี่ยนบรรทัด 15 จาก:
 
@@ -562,7 +562,7 @@ git commit -m "feat: Register /equipment/my routes for teacher equipment check"
 
 ($role ถูกกำหนดไว้แล้วที่บรรทัด 3 ของไฟล์นี้)
 
-- [ ] **Step 4: Lint 3 ไฟล์**
+- [x] **Step 4: Lint 3 ไฟล์**
 
 Run (ทีละไฟล์):
 - `& "C:\xampp\php\php.exe" -l "includes\sidebar.php"`
@@ -570,7 +570,7 @@ Run (ทีละไฟล์):
 - `& "C:\xampp\php\php.exe" -l "app\Views\equipment\detail.php"`
 Expected: ทุกไฟล์ `No syntax errors detected`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add includes/sidebar.php app/Views/dashboard/teacher_report.php app/Views/equipment/detail.php
@@ -579,7 +579,7 @@ git commit -m "feat: Point teacher navigation to /equipment/my"
 
 ---
 
-### Task 5: ทดสอบแบบ end-to-end ผ่านเบราว์เซอร์
+### Task 5: ทดสอบ (SKIPPED - user opted out)แบบ end-to-end ผ่านเบราว์เซอร์
 
 **Files:** ไม่แก้โค้ด — แค่ทดสอบ
 
