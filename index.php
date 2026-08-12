@@ -37,6 +37,8 @@ $router->post('/equipment/delete-image/{id}', 'EquipmentController@deleteImage')
 $router->post('/equipment/delete/{id}', 'EquipmentController@delete');
 $router->get('/equipment/bulk-add', 'EquipmentController@bulkAdd');
 $router->post('/equipment/bulk-add', 'EquipmentController@bulkAdd');
+$router->get('/equipment/my', 'EquipmentController@myEquipment');
+$router->post('/equipment/my', 'EquipmentController@myEquipment');
 $router->get('/equipment/{id}', 'EquipmentController@detail');
 $router->get('/equipment/inspection', 'EquipmentController@inspection');
 $router->post('/equipment/inspection', 'EquipmentController@inspection');
