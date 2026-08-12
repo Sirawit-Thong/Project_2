@@ -86,7 +86,7 @@ $user = getCurrentUser();
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>รายการแจ้งซ่อมล่าสุด</h6>
-                <a href="<?= SITE_URL ?>/repairs" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                <a href="<?= SITE_URL ?>/repairs/mine" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                     ดูทั้งหมด <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             </div>
