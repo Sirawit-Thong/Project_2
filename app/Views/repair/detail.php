@@ -1,7 +1,3 @@
-<?php
-$pageTitle = 'รายละเอียดการแจ้งซ่อมบำรุง #' . $repair['id'];
-?>
-
 <!-- Page Header -->
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>

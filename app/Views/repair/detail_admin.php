@@ -1,7 +1,3 @@
-<?php
-$pageTitle = 'รายละเอียดการแจ้งซ่อม';
-?>
-
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
         <h1><i class="bi bi-wrench me-2"></i>รายละเอียดการแจ้งซ่อม #<?= (int) $repair['id'] ?></h1>

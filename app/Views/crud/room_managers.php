@@ -1,5 +1,13 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0"><i class="bi bi-people"></i> จัดการผู้ดูแลห้อง</h4>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-people me-2"></i>จัดการผู้ดูแลห้อง</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/ ">แดชบอร์ด</a></li>
+                <li class="breadcrumb-item active">กำหนดผู้ดูแลห้อง</li>
+            </ol>
+        </nav>
+    </div>
     <div>
         <form method="POST" action="<?= SITE_URL ?>/room-managers/sync/overwrite" class="d-inline"
             onsubmit="return confirm('ต้องการเขียนทับผู้ดูแลห้องทั้งหมดหรือไม่? ข้อมูลเดิมจะถูกลบและสร้างใหม่');">

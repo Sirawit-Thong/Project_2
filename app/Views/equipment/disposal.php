@@ -6,13 +6,11 @@
  * Variables from controller:
  *   $tab, $counts, $items, $pagination, $perPage, $perPageOptions
  */
-?>
-
-<div class="page-header mb-4">
-    <h4 class="mb-1"><i class="bi bi-trash3 me-2"></i><?= $pageTitle ?></h4>
+?><div class="page-header">
+    <h1><i class="bi bi-trash3 me-2"></i><?= $pageTitle ?></h1>
     <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0 small">
-            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/">แดชบอร์ด</a></li>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/ ">แดชบอร์ด</a></li>
             <li class="breadcrumb-item active"><?= $pageTitle ?></li>
         </ol>
     </nav>

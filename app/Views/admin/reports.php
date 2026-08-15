@@ -6,10 +6,16 @@ $topBroken = $topBroken ?? [];
 $deptStats = $deptStats ?? [];
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header d-flex justify-content-between align-items-center">
     <div>
-        <h1 class="h3 mb-1 text-dark"><i class="bi bi-graph-up me-2 text-primary"></i>รายงานและสถิติ</h1>
+        <h1><i class="bi bi-graph-up me-2 text-primary"></i>รายงานและสถิติ</h1>
         <p class="text-muted mb-0">ภาพรวมข้อมูลครุภัณฑ์และการแจ้งซ่อมบำรุง</p>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/ ">แดชบอร์ด</a></li>
+                <li class="breadcrumb-item active">รายงานและสถิติ</li>
+            </ol>
+        </nav>
     </div>
     <div class="dropdown">
         <button class="btn btn-primary shadow-sm dropdown-toggle" type="button" id="exportDropdown"

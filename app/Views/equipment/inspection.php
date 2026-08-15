@@ -120,7 +120,7 @@ $pageTitle = $pageTitle ?? 'ระบบตรวจนับครุภัณ�
                                 <?php foreach ($equipment as $item):
                                     $isInspectedThisYear = ($item['check_date'] && date('Y', strtotime($item['check_date'])) == $currentYear);
                                     ?>
-                                    <tr class="<?= $isInspectedThisYear ? 'bg-light-success' : '' ?>">
+                                    <tr class="<?= $isInspectedThisYear ? 'table-success' : '' ?>">
                                         <td class="text-center">
                                             <input type="hidden" name="item_ids[]" value="<?= $item['id'] ?>">
                                             <input type="checkbox" name="inspected[]" value="<?= $item['id'] ?>"

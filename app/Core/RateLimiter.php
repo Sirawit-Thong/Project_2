@@ -74,16 +74,29 @@ class RateLimiter
     }
 
     /**
-     * นับการล้มเหลวเพิ่ม 1 (รีเซ็ต window ถ้าเลย 1 ชั่วโมงไปแล้ว)
+     * นับการล้มเหลวเพิ่ม 1 (รีเซ็ต window ใหม่ถ้าช่วงเวลาเดิมหมดอายุแล้ว)
      */
-    public static function hit($key)
+    public static function hit($key, $minutes = 15)
     {
         $data = self::read($key);
-        if (time() - $data['first_attempt'] > 3600) {
+        if (time() - $data['first_attempt'] > (int) $minutes * 60) {
             $data = ['count' => 0, 'first_attempt' => time()];
         }
         $data['count']++;
         self::write($key, $data);
+    }
+
+    /**
+     * เวลาที่เหลือ (วินาที) ก่อนปลดล็อก — คืน 0 ถ้ายังไม่ถึงเกณฑ์หรือเลย window แล้ว
+     */
+    public static function lockoutRemaining($key, $minutes = 15, $maxAttempts = 5)
+    {
+        $data = self::read($key);
+        if ((int) $data['count'] < (int) $maxAttempts) {
+            return 0;
+        }
+        $remaining = $data['first_attempt'] + (int) $minutes * 60 - time();
+        return $remaining > 0 ? $remaining : 0;
     }
 
     /**

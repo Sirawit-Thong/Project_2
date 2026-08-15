@@ -110,7 +110,7 @@ class RepairController extends Controller
 
         $images = Repair::getImages($id);
         $isAdmin = in_array($role, ['admin', 'staff'], true);
-        $pageTitle = $isAdmin ? 'รายละเอียดการแจ้งซ่อม' : 'รายละเอียดการแจ้งซ่อมบำรุง';
+        $pageTitle = ($isAdmin ? 'รายละเอียดการแจ้งซ่อม' : 'รายละเอียดการแจ้งซ่อมบำรุง') . ' #' . $repair['id'];
         $viewPath = $isAdmin ? 'repair/detail_admin' : 'repair/detail';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['admin', 'staff'])) {

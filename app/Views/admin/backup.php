@@ -1,7 +1,3 @@
-<?php
-$pageTitle = 'สำรองฐานข้อมูลระบบ';
-?>
-
 <div class="page-header">
     <h1><i class="bi bi-database-down me-2"></i>สำรองฐานข้อมูลระบบ</h1>
 </div>

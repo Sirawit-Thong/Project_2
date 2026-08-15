@@ -56,16 +56,6 @@ body {
     margin-left: calc(-1 * var(--sidebar-width));
 }
 
-.sidebar-header {
-    padding: 20px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-}
-
 .sidebar-nav {
     padding: 15px 0;
 }
@@ -727,23 +717,7 @@ body {
    ADDITIONAL MOBILE UTILITIES
    ===================================================== */
 
-/* Mobile action buttons - stack vertically */
-.btn-group-mobile {
-    display: flex;
-    gap: 0.25rem;
-}
-
-@media (max-width: 575.98px) {
-    .btn-group-mobile {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .btn-group-mobile .btn {
-        width: 100%;
-    }
-
-    /* Page header buttons stack */
+/* Page header buttons stack */
     .page-header .d-flex.gap-2 {
         flex-direction: column;
         width: 100%;
@@ -852,36 +826,6 @@ body {
 .table .action-col {
     white-space: nowrap;
     width: 1%;
-}
-
-/* Mobile-friendly list view for tables */
-@media (max-width: 575.98px) {
-    .mobile-list .table thead {
-        display: none;
-    }
-
-    .mobile-list .table tbody tr {
-        display: block;
-        margin-bottom: 1rem;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 0.75rem;
-        background: #fff;
-    }
-
-    .mobile-list .table tbody td {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.25rem 0;
-        border: none;
-    }
-
-    .mobile-list .table tbody td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #6c757d;
-        flex: 0 0 40%;
-    }
 }
 
 /* Print Styles */

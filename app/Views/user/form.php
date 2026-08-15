@@ -1,5 +1,4 @@
 <?php
-$pageTitle = 'บริหารจัดการบัญชีผู้ใช้งาน';
 $isEdit = !empty($user);
 $formAction = $isEdit ? SITE_URL . '/users/edit/' . $user['id'] : SITE_URL . '/users/add';
 ?>

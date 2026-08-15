@@ -5,6 +5,10 @@
  */
 class AuthController extends Controller
 {
+    private const MAX_LOGIN_ATTEMPTS = 5;
+    private const LOCKOUT_MINUTES = 15;
+    private const MAX_PASSWORD_LENGTH = 1024;
+
     public function login()
     {
         if (isLoggedIn()) {
@@ -12,6 +16,7 @@ class AuthController extends Controller
         }
 
         $error = '';
+        $rateKey = 'login:' . $this->clientIp();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
@@ -32,6 +37,9 @@ class AuthController extends Controller
                 }
             }
         }
+
+        // สถานะ lockout (คำนวณหลัง POST ด้วย เผื่อเพิ่งโดนล็อก) — ใช้ให้หน้าเว็บปิดปุ่ม + นับถอยหลัง
+        $lockoutRemaining = RateLimiter::lockoutRemaining($rateKey, self::LOCKOUT_MINUTES, self::MAX_LOGIN_ATTEMPTS);
 
         $flash = getFlash();
         $viewPath = 'auth/login';
@@ -254,14 +262,17 @@ class AuthController extends Controller
     private function doLogin($email, $password)
     {
         // Rate limiting: max 5 ครั้งล้มเหลวต่อ IP ภายใน 15 นาที (กัน brute force — เก็บในไฟล์ชั่วคราว ไม่ใช้ตาราง DB)
-        $maxAttempts = 5;
-        $lockoutMinutes = 15;
         $rateKey = 'login:' . $this->clientIp();
 
-        $failedCount = RateLimiter::failures($rateKey, $lockoutMinutes);
+        $failedCount = RateLimiter::failures($rateKey, self::LOCKOUT_MINUTES);
 
-        if ($failedCount >= $maxAttempts) {
-            return ['success' => false, 'error' => "ลองเข้าสู่ระบบมากเกินไป กรุณารอ {$lockoutMinutes} นาที"];
+        if ($failedCount >= self::MAX_LOGIN_ATTEMPTS) {
+            return ['success' => false, 'error' => "ลองเข้าสู่ระบบมากเกินไป กรุณารอ " . self::LOCKOUT_MINUTES . " นาที"];
+        }
+
+        // จำกัดความยาวรหัสผ่าน — bcrypt ตัดที่ 72 ไบต์เงียบๆ และกัน CPU DoS จากรหัสยาวมาก
+        if (strlen($password) > self::MAX_PASSWORD_LENGTH) {
+            return ['success' => false, 'error' => 'รหัสผ่านยาวเกินไป (สูงสุด ' . self::MAX_PASSWORD_LENGTH . ' ตัวอักษร)'];
         }
 
         $input = strtolower(trim($email));
@@ -286,12 +297,12 @@ class AuthController extends Controller
         $genericError = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
 
         if (!$user) {
-            RateLimiter::hit($rateKey);
+            RateLimiter::hit($rateKey, self::LOCKOUT_MINUTES);
             return ['success' => false, 'error' => $genericError];
         }
 
         if (!password_verify($password, $user['password'])) {
-            RateLimiter::hit($rateKey);
+            RateLimiter::hit($rateKey, self::LOCKOUT_MINUTES);
             return ['success' => false, 'error' => $genericError];
         }
 

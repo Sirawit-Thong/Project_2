@@ -1,7 +1,3 @@
-<?php
-$pageTitle = 'ส่งรายการแจ้งซ่อมบำรุงครุภัณฑ์';
-?>
-
 <div class="page-header">
     <h1><i class="bi bi-wrench me-2"></i>ส่งรายการแจ้งซ่อมบำรุงครุภัณฑ์</h1>
 </div>

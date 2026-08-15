@@ -1,7 +1,3 @@
-<?php
-$pageTitle = 'ตรวจสอบบัญชีผู้ใช้งานใหม่';
-?>
-
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
         <h1><i class="bi bi-person-check me-2"></i>ตรวจสอบบัญชีผู้ใช้งานใหม่</h1>
