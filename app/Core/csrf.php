@@ -46,8 +46,10 @@ function require_csrf()
             setFlash('danger', 'คำขอไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
             $siteUrl = defined('SITE_URL') ? SITE_URL : '/';
             $referer = $_SERVER['HTTP_REFERER'] ?? $siteUrl;
-            // Only allow redirect within same site
-            if (strpos($referer, $siteUrl) !== 0) {
+            // ตรวจว่า referer อยู่ใน host เดียวกัน (เทียบ host ไม่ใช่ prefix — กัน open redirect)
+            $refererHost = parse_url($referer, PHP_URL_HOST);
+            $siteHost = parse_url($siteUrl, PHP_URL_HOST);
+            if ($refererHost !== $siteHost) {
                 $referer = $siteUrl;
             }
             redirect($referer);

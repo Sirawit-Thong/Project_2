@@ -61,6 +61,7 @@ class RoomController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         if (Room::equipmentCount($id) > 0) {
             $this->flash('danger', 'ไม่สามารถลบได้ มีครุภัณฑ์ในห้องนี้');

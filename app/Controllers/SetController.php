@@ -67,6 +67,7 @@ class SetController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         if (SetModel::childItemCount($id) > 0) {
             $this->flash('danger', 'ไม่สามารถลบได้ มีรายการครุภัณฑ์ที่เกี่ยวข้อง');

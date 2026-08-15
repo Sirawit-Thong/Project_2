@@ -45,6 +45,7 @@ class RoomManagerController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         RoomManager::delete($id);
         logActivity(getCurrentUserId(), 'Delete Room Manager', 'ลบผู้รับผิดชอบห้อง ID: ' . $id);
@@ -56,6 +57,7 @@ class RoomManagerController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         if ($mode === 'fill') {
             $updated = RoomManager::syncHoldersFill();

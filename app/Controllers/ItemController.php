@@ -76,6 +76,7 @@ class ItemController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         if (Item::childEquipmentCount($id) > 0) {
             $this->flash('danger', 'ไม่สามารถลบได้ มีครุภัณฑ์ที่เกี่ยวข้อง');

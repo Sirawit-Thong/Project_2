@@ -54,6 +54,7 @@ class DepartmentController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         if (Department::childSetCount($id) > 0) {
             $this->flash('danger', 'ไม่สามารถลบได้ มีชุดครุภัณฑ์ที่เกี่ยวข้อง');

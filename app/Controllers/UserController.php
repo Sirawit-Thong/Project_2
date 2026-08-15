@@ -133,6 +133,7 @@ class UserController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         User::approve($id);
         logActivity(getCurrentUserId(), 'Approve User', 'อนุมัติผู้ใช้ ID: ' . $id);
@@ -144,6 +145,7 @@ class UserController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         User::rejectPending($id);
         logActivity(getCurrentUserId(), 'Reject User', 'ปฏิเสธผู้ใช้ ID: ' . $id);
@@ -155,6 +157,7 @@ class UserController extends Controller
     {
         $this->requireLogin();
         $this->authorize(['admin']);
+        $this->validateCsrf();
 
         if ($id == getCurrentUserId()) {
             $this->flash('danger', 'ไม่สามารถลบตัวเองได้');

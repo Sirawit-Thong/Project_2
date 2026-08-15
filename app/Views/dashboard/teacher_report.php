@@ -183,8 +183,7 @@
         new Chart(document.getElementById('roomChart'), {
             type: 'bar',
             data: {
-                labels: [<?php foreach ($rooms as $r)
-                    echo "'" . addslashes($r['room_name']) . "',"; ?>],
+                labels: <?= json_encode(array_column($rooms, 'room_name'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
                 datasets: [{
                     label: 'จำนวนครุภัณฑ์',
                     data: [<?php foreach ($rooms as $r)

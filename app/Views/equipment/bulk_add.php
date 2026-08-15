@@ -384,7 +384,7 @@ $errors = $errors ?? [];
         });
 
         // Room manager mapping (from PHP)
-        const roomManagersData = <?= json_encode($managersByRoom, JSON_UNESCAPED_UNICODE) ?>;
+        const roomManagersData = <?= json_encode($managersByRoom, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
         // Room-based holder suggestion
         const roomSelect = document.getElementById('roomSelect');

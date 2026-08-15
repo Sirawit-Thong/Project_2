@@ -326,7 +326,7 @@ Chart.defaults.color = '#858796';
 new Chart(document.getElementById('repairChart').getContext('2d'), {
     type: 'bar',
     data: {
-        labels: <?= json_encode(array_column($monthlyStats, 'label')) ?>,
+        labels: <?= json_encode(array_column($monthlyStats, 'label'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
         datasets: [{
             label: 'จำนวนแจ้งซ่อม',
             data: <?= json_encode(array_map('intval', array_column($monthlyStats, 'count'))) ?>,
@@ -375,7 +375,7 @@ new Chart(document.getElementById('repairChart').getContext('2d'), {
 new Chart(document.getElementById('deptChart').getContext('2d'), {
     type: 'doughnut',
     data: {
-        labels: <?= json_encode(array_column($deptStats, 'name')) ?>,
+        labels: <?= json_encode(array_column($deptStats, 'name'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
         datasets: [{
             data: <?= json_encode(array_map('intval', array_column($deptStats, 'count'))) ?>,
             backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],

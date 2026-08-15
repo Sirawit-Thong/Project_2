@@ -253,6 +253,17 @@ class AuthController extends Controller
 
     private function doLogin($email, $password)
     {
+        // Rate limiting: max 5 ครั้งล้มเหลวต่อ IP ภายใน 15 นาที (กัน brute force — เก็บในไฟล์ชั่วคราว ไม่ใช้ตาราง DB)
+        $maxAttempts = 5;
+        $lockoutMinutes = 15;
+        $rateKey = 'login:' . $this->clientIp();
+
+        $failedCount = RateLimiter::failures($rateKey, $lockoutMinutes);
+
+        if ($failedCount >= $maxAttempts) {
+            return ['success' => false, 'error' => "ลองเข้าสู่ระบบมากเกินไป กรุณารอ {$lockoutMinutes} นาที"];
+        }
+
         $input = strtolower(trim($email));
 
         if (strpos($input, '@') === false) {
@@ -271,12 +282,17 @@ class AuthController extends Controller
             $user = User::findBySid($input);
         }
 
+        // ข้อความเดียวกันทั้งกรณี "ไม่มีบัญชี" และ "รหัสผิด" เพื่อกันการเดาอีเมลที่มีในระบบ (user enumeration)
+        $genericError = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+
         if (!$user) {
-            return ['success' => false, 'error' => 'ไม่พบอีเมลหรือรหัสนักศึกษานี้ในระบบ'];
+            RateLimiter::hit($rateKey);
+            return ['success' => false, 'error' => $genericError];
         }
 
         if (!password_verify($password, $user['password'])) {
-            return ['success' => false, 'error' => 'รหัสผ่านไม่ถูกต้อง'];
+            RateLimiter::hit($rateKey);
+            return ['success' => false, 'error' => $genericError];
         }
 
         if ($user['status'] === 'pending') {
@@ -293,6 +309,9 @@ class AuthController extends Controller
         // Rotate CSRF token — token เก่าของ pre-login session ใช้ไม่ได้อีกต่อไป
         unset($_SESSION['csrf_token']);
 
+        // Reset rate limiting on successful login
+        RateLimiter::clear($rateKey);
+
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_role'] = $user['role'];
         $_SESSION['user_name'] = $user['firstname'] . ' ' . $user['lastname'];
@@ -301,6 +320,14 @@ class AuthController extends Controller
         logActivity($user['id'], 'Login', 'เข้าสู่ระบบสำเร็จ');
 
         return ['success' => true, 'user' => $user];
+    }
+
+    /**
+     * ดึง IP จริงของผู้ใช้ (ไม่เชื่อ X-Forwarded-For เพื่อกัน header spoofing)
+     */
+    private function clientIp()
+    {
+        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 
     private function doRegister($data)

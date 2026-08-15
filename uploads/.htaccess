@@ -5,14 +5,20 @@
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteCond %{REQUEST_URI} \.(php|php3|php4|php5|phtml|pl|py|cgi|sh)$ [NC]
+    RewriteCond %{REQUEST_URI} \.(php|php3|php4|php5|phtml|pl|py|cgi|sh|asp|aspx|jsp)$ [NC]
     RewriteRule ^ - [F,L]
 </IfModule>
 
 # ป้องกัน directory listing
 Options -Indexes
 
-# ป้องกันการเข้าถึงไฟล์โดยตรง ( ALLOW เฉพาะ static files)
-<FilesMatch "\.(?i:jpg|jpeg|png|gif|webp|pdf|doc|docx|xls|xlsx)$">
-    # อนุญาตให้เข้าถึงได้
+# ปิดการ execute script (.php) ผ่าน handler อื่น
+<IfModule mod_php.c>
+    RemoveHandler .php .phtml .php3 .php4 .php5 .phps .phar
+    RemoveType .php .phtml .php3 .php4 .php5 .phps .phar
+</IfModule>
+
+# อนุญาตเฉพาะไฟล์ static ที่กำหนดไว้เท่านั้น — ไฟล์อื่น (รวม .php, .txt, .html, .svg ฯลฯ) ถูก DENY หมด
+<FilesMatch "\.(?!(jpg|jpeg|png|gif|webp|pdf|doc|docx|xls|xlsx)$)[^.]+$">
+    Require all denied
 </FilesMatch>
