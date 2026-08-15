@@ -207,7 +207,7 @@ $formData = [
                                                     onsubmit="return confirm('ลบรูปนี้?');">
                                                     <?= csrf_field() ?>
                                                     <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                                                    <button type="submit" class="btn-delete-img" title="ลบรูปนี้">×</button>
+                                                    <button type="submit" class="btn-delete-img" title="ลบรูปนี้" aria-label="ลบรูปนี้">×</button>
                                                 </form>
                                             </div>
                                         <?php endforeach; ?>
@@ -247,7 +247,7 @@ $formData = [
                                                     onsubmit="return confirm('ลบรูปนี้?');">
                                                     <?= csrf_field() ?>
                                                     <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                                                    <button type="submit" class="btn-delete-img" title="ลบรูปนี้">×</button>
+                                                    <button type="submit" class="btn-delete-img" title="ลบรูปนี้" aria-label="ลบรูปนี้">×</button>
                                                 </form>
                                             </div>
                                         <?php endforeach; ?>
@@ -609,7 +609,7 @@ $formData = [
                     div.dataset.idx = idx;
                     div.innerHTML = `
                     <img src="${e.target.result}" class="rounded" style="width: 100px; height: 80px; object-fit: cover;">
-                    <span class="btn-delete-img delete-preview" data-manager="${key}" data-idx="${idx}">×</span>
+                    <span class="btn-delete-img delete-preview" data-manager="${key}" data-idx="${idx}" role="button" aria-label="ลบรูปนี้">×</span>
                     <span class="badge bg-warning text-dark badge-pending">รอบันทึก</span>
                 `;
                     previewContainer.appendChild(div);

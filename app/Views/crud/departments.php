@@ -55,14 +55,14 @@
                                 </td>
                                 <td class="hide-mobile"><?= formatDateThai($dept['created_at'] ?? null) ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary"
+                                    <button class="btn btn-sm btn-outline-primary" aria-label="แก้ไข" title="แก้ไข"
                                         onclick="editDept(<?= $dept['id'] ?>, '<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>')">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <form method="POST" action="<?= SITE_URL ?>/departments/delete/<?= $dept['id'] ?>" class="d-inline"
                                         onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบสาขานี้?');">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="ลบ" title="ลบ">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -85,7 +85,7 @@
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>เพิ่มสาขาใหม่</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -115,7 +115,7 @@
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>แก้ไขสาขา</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">

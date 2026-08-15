@@ -208,18 +208,18 @@ $baseUrl = SITE_URL . '/equipment?' . http_build_query(array_filter([
                                 </td>
                                 <td>
                                     <a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="btn btn-sm btn-outline-info"
-                                        title="ดูรายละเอียด">
+                                        title="ดูรายละเอียด" aria-label="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <?php if (!$isTeacher): ?>
                                         <a href="<?= SITE_URL ?>/equipment/edit/<?= $eq['id'] ?>" class="btn btn-sm btn-outline-primary"
-                                            title="แก้ไข">
+                                            title="แก้ไข" aria-label="แก้ไข">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <form method="POST" action="<?= SITE_URL ?>/equipment/delete/<?= $eq['id'] ?>" class="d-inline"
                                             onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบครุภัณฑ์นี้?')">
                                             <?= csrf_field() ?>
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ" aria-label="ลบ">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

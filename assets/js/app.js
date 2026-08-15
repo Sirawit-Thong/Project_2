@@ -211,6 +211,64 @@ document.addEventListener('DOMContentLoaded', function () {
             window.print();
         });
     });
+
+    // Dark/Light mode toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleIcon = document.getElementById('themeToggleIcon');
+
+    function syncThemeIcon() {
+        if (!themeToggleIcon) return;
+        const dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        themeToggleIcon.className = dark ? 'bi bi-sun fs-5' : 'bi bi-moon-stars fs-5';
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function () {
+            const dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            const next = dark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', next);
+            try {
+                localStorage.setItem('theme', next);
+            } catch (e) { /* localStorage may be unavailable */ }
+            syncThemeIcon();
+        });
+    }
+    syncThemeIcon();
+});
+
+// ป้องกันการกด submit ซ้ำ — disable ปุ่ม submit + สปินเนอร์ (และ overlay ถ้ามีไฟล์อัปโหลด)
+document.addEventListener('submit', function (e) {
+    const form = e.target;
+    if (!form || form.tagName !== 'FORM') return;
+
+    // ฟอร์ม filter แบบ GET (auto-submit จาก select) ไม่ต้องแตะ
+    if (form.getAttribute('method') && form.getAttribute('method').toLowerCase() === 'get') return;
+    if (form.dataset.noSubmitProtect === '1') return;
+
+    // ถ้า validation/inline handler (เช่น confirm ลบ) ยกเลิกไปแล้ว ไม่ disable
+    if (e.defaultPrevented) return;
+
+    const submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+    if (submitButtons.length === 0) return;
+
+    const clicked = e.submitter || null;
+    submitButtons.forEach(function (btn) {
+        btn.disabled = true;
+        if (clicked && btn === clicked) {
+            btn.dataset.originalLabel = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>กำลังดำเนินการ...';
+        }
+    });
+    // ถ้าไม่มี e.submitter (submit ด้วย Enter) ใส่สปินเนอร์ให้ปุ่มแรก
+    if (!clicked && submitButtons[0]) {
+        submitButtons[0].dataset.originalLabel = submitButtons[0].innerHTML;
+        submitButtons[0].innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>กำลังดำเนินการ...';
+    }
+
+    // ฟอร์มที่มีไฟล์อัปโหลด — โชว์ overlay กันรอนาน
+    if (form.querySelector('input[type="file"]')) {
+        showLoading();
+    }
 });
 
 // Format number with commas

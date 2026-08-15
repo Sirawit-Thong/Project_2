@@ -132,17 +132,17 @@ $paginationBaseUrl = SITE_URL . '/items?dept_id=' . urlencode($deptFilter) . '&s
                                 <td>
                                     <div class="d-flex gap-1 flex-nowrap">
                                         <a href="<?= SITE_URL ?>/equipment/add?item_id=<?= $item['id'] ?>" class="btn btn-sm btn-success"
-                                            title="เพิ่มครุภัณฑ์">
+                                            title="เพิ่มครุภัณฑ์" aria-label="เพิ่มครุภัณฑ์">
                                             <i class="bi bi-plus-lg"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-outline-primary"
+                                        <button class="btn btn-sm btn-outline-primary" aria-label="แก้ไข"
                                             onclick='editItem(<?= json_encode($item, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="แก้ไข">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form method="POST" action="<?= SITE_URL ?>/items/delete/<?= $item['id'] ?>" class="d-inline"
                                             onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้?');">
                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ" aria-label="ลบ">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -171,7 +171,7 @@ $paginationBaseUrl = SITE_URL . '/items?dept_id=' . urlencode($deptFilter) . '&s
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>ลงทะเบียนรายการครุภัณฑ์ใหม่</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -250,7 +250,7 @@ $paginationBaseUrl = SITE_URL . '/items?dept_id=' . urlencode($deptFilter) . '&s
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>แก้ไขรายการครุภัณฑ์</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">

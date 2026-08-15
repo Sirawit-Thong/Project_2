@@ -150,7 +150,7 @@ $errors = $errors ?? [];
                                 <span class="input-group-text">1</span>
                                 <input type="text" class="form-control" name="codes[]"
                                     placeholder="เช่น 7440-001-0001.1/567 วท." required>
-                                <button type="button" class="btn btn-outline-danger remove-code" disabled><i
+                                <button type="button" class="btn btn-outline-danger remove-code" disabled aria-label="ลบแถวนี้"><i
                                         class="bi bi-x"></i></button>
                             </div>
                         </div>
@@ -342,7 +342,7 @@ $errors = $errors ?? [];
             div.innerHTML = `
             <span class="input-group-text">${rowNum}</span>
             <input type="text" class="form-control" name="codes[]" placeholder="เช่น 7440-001-0001.1/567 วท." value="${value.replace(/"/g, '&quot;')}" required>
-            <button type="button" class="btn btn-outline-danger remove-code"><i class="bi bi-x"></i></button>
+            <button type="button" class="btn btn-outline-danger remove-code" aria-label="ลบแถวนี้"><i class="bi bi-x"></i></button>
         `;
             codesContainer.appendChild(div);
             updateRemoveButtons();

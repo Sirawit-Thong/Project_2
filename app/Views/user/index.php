@@ -116,14 +116,14 @@ $baseUrl = SITE_URL . '/users?' . http_build_query(array_filter([
                                 <td class="hide-mobile"><?= formatDateThai($user['created_at']) ?></td>
                                 <td>
                                     <a href="<?= SITE_URL ?>/users/edit/<?= $user['id'] ?>" class="btn btn-sm btn-outline-primary"
-                                        title="แก้ไข">
+                                        title="แก้ไข" aria-label="แก้ไข">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <?php if ($user['id'] !== getCurrentUserId()): ?>
                                         <form method="POST" action="<?= SITE_URL ?>/users/delete/<?= $user['id'] ?>" class="d-inline"
                                             onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบผู้ใช้นี้?')">
                                             <?= csrf_field() ?>
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ" aria-label="ลบ">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

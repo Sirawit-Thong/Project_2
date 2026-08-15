@@ -168,7 +168,7 @@
                                     </td>
                                     <td>
                                         <a href="<?= SITE_URL ?>/equipment/<?= $eq['id'] ?>" class="btn btn-sm btn-outline-primary"
-                                            title="ดูรายละเอียด">
+                                            title="ดูรายละเอียด" aria-label="ดูรายละเอียด">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
@@ -196,7 +196,7 @@
                         <div class="modal-header bg-success text-white">
                             <h5 class="modal-title"><i class="bi bi-clipboard-check me-2"></i>ยืนยันผลการตรวจสอบสภาพครุภัณฑ์
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="ปิด"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="equipment_id" id="modalEquipmentId">

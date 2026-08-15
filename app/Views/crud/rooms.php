@@ -88,14 +88,14 @@ $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPag
                                 </td>
                                 <td class="hide-mobile"><?= formatDateThai($room['created_at'] ?? null) ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary"
+                                    <button class="btn btn-sm btn-outline-primary" aria-label="แก้ไข" title="แก้ไข"
                                         onclick="editRoom(<?= $room['id'] ?>, '<?= htmlspecialchars($room['name'], ENT_QUOTES) ?>')">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <form method="POST" action="<?= SITE_URL ?>/rooms/delete/<?= $room['id'] ?>" class="d-inline"
                                         onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบห้องนี้?');">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="ลบ" title="ลบ">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -123,7 +123,7 @@ $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPag
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>ลงทะเบียนห้องใหม่</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -150,7 +150,7 @@ $perPage = isset($_GET['per_page']) && in_array((int) $_GET['per_page'], $perPag
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>แก้ไขห้อง</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">

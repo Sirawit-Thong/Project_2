@@ -176,7 +176,7 @@ $user = getCurrentUser();
                                 <td class="text-end pe-4">
                                     <a href="<?= SITE_URL ?>/repairs/<?= $r['id'] ?>"
                                         class="btn btn-sm btn-light text-primary rounded-circle" data-bs-toggle="tooltip"
-                                        title="ดูรายละเอียด">
+                                        title="ดูรายละเอียด" aria-label="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </td>

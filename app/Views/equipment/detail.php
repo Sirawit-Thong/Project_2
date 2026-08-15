@@ -170,7 +170,8 @@ if (!empty($equipment['eq_price_remark'])) {
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="<?= SITE_URL ?>/repairs/<?= (int) $repair['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                            <a href="<?= SITE_URL ?>/repairs/<?= (int) $repair['id'] ?>" class="btn btn-sm btn-outline-primary"
+                                                title="ดูรายละเอียด" aria-label="ดูรายละเอียด">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         </td>
@@ -237,7 +238,7 @@ if (!empty($equipment['eq_price_remark'])) {
         <div class="modal-content bg-dark">
             <div class="modal-header border-0 pb-0">
                 <span id="lightboxCaption" class="text-white"></span>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="ปิด"></button>
             </div>
             <div class="modal-body text-center p-0">
                 <img id="lightboxImage" src="" alt="Full Image" class="img-fluid" style="max-height: 80vh;">

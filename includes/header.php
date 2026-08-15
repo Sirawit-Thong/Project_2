@@ -29,6 +29,18 @@ if (isset($pageTitle) && !empty($pageTitle)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?></title>
 
+    <!-- ตั้งธีม (dark/light) ก่อน render กันหน้าแรกวาบ (FOUC) -->
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('theme');
+                if (theme !== 'light' && (theme === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                }
+            } catch (e) { }
+        })();
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= SITE_URL ?>/assets/Logo.svg">
     <!-- Bootstrap 5 CSS -->
@@ -44,6 +56,7 @@ if (isset($pageTitle) && !empty($pageTitle)) {
 </head>
 
 <body>
+    <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
     <?php if (isLoggedIn()): ?>
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
@@ -60,6 +73,12 @@ if (isset($pageTitle) && !empty($pageTitle)) {
                 <button class="btn btn-link text-white d-lg-none" id="sidebarToggleMobile"
                     aria-label="เปิดเมนูด้านข้าง" aria-controls="sidebar" aria-expanded="false">
                     <i class="bi bi-list fs-4"></i>
+                </button>
+
+                <!-- Dark/Light mode toggle -->
+                <button type="button" class="btn btn-link text-white me-1" id="themeToggle"
+                    aria-label="สลับโหมดกลางวัน/กลางคืน" title="สลับโหมดกลางวัน/กลางคืน">
+                    <i class="bi bi-moon-stars fs-5" id="themeToggleIcon"></i>
                 </button>
 
                 <!-- User dropdown - always visible, aligned right -->
@@ -98,10 +117,10 @@ if (isset($pageTitle) && !empty($pageTitle)) {
         <div class="wrapper">
             <?php include __DIR__ . '/sidebar.php'; ?>
 
-            <main class="main-content">
+            <main class="main-content" id="main-content">
                 <div class="container-fluid py-4">
                     <?php flashMessage(); ?>
                 <?php else: ?>
-                    <div class="container-fluid">
+                    <div class="container-fluid" id="main-content">
                         <?php flashMessage(); ?>
                     <?php endif; ?>

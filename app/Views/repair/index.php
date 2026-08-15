@@ -103,7 +103,8 @@ $perPage = $perPage ?? 20;
                                         class="badge bg-<?= getStatusBadgeClass($repair['status']) ?>"><?= translateRepairStatus($repair['status']) ?></span>
                                 </td>
                                 <td class="hide-mobile"><?= formatDateTimeThai($repair['created_at']) ?></td>
-                                <td><a href="<?= SITE_URL ?>/repairs/<?= $repair['id'] ?>" class="btn btn-sm btn-outline-primary"><i
+                                <td><a href="<?= SITE_URL ?>/repairs/<?= $repair['id'] ?>" class="btn btn-sm btn-outline-primary"
+                                            title="ดูรายละเอียด" aria-label="ดูรายละเอียด"><i
                                             class="bi bi-eye"></i></a></td>
                             </tr>
                         <?php endforeach; ?>

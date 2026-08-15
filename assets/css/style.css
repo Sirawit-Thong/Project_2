@@ -21,6 +21,30 @@ body {
     min-height: 100vh;
 }
 
+/* Skip to content link (accessibility) */
+.skip-link {
+    position: absolute;
+    top: -60px;
+    left: 10px;
+    z-index: 3000;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 0 0 8px 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* เวลากระโดดมาที่เนื้อหาหลัก ให้เว้นระยะไม่ให้ navbar ทับ */
+#main-content {
+    scroll-margin-top: var(--navbar-height);
+}
+
 /* Navbar */
 .navbar {
     height: var(--navbar-height);
@@ -331,6 +355,13 @@ body {
 .login-card .logo i {
     font-size: 4rem;
     color: var(--primary-color);
+}
+
+.login-card .logo img {
+    max-width: 130px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 .login-card h2 {
@@ -717,6 +748,8 @@ body {
    ADDITIONAL MOBILE UTILITIES
    ===================================================== */
 
+@media (max-width: 575.98px) {
+
 /* Page header buttons stack */
     .page-header .d-flex.gap-2 {
         flex-direction: column;
@@ -841,4 +874,110 @@ body {
     .main-content {
         margin-left: 0 !important;
     }
+}
+
+/* =====================================================
+   DARK MODE (ใช้ data-bs-theme="dark" ของ Bootstrap 5.3)
+   ===================================================== */
+[data-bs-theme="dark"] body {
+    background-color: #1e2227;
+}
+
+[data-bs-theme="dark"] .sidebar {
+    background: #23272e;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .sidebar-nav .nav-link {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .sidebar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .sidebar-nav .nav-link.active {
+    background-color: rgba(67, 97, 238, 0.3);
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .nav-section-title {
+    color: #868e96;
+}
+
+[data-bs-theme="dark"] .page-header {
+    border-bottom-color: #343a40;
+}
+
+[data-bs-theme="dark"] .page-header h1 {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .table thead th {
+    background-color: #2b3036;
+    color: #dee2e6;
+    border-bottom-color: #495057;
+}
+
+[data-bs-theme="dark"] .table tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.18);
+}
+
+[data-bs-theme="dark"] .card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+[data-bs-theme="dark"] .card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-bs-theme="dark"] .card-header {
+    border-bottom-color: #343a40;
+}
+
+[data-bs-theme="dark"] .card-header.bg-white {
+    background-color: #2b3036 !important;
+}
+
+[data-bs-theme="dark"] .card.bg-white {
+    background-color: #23272e !important;
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .bg-light:not(.badge) {
+    background-color: #2b3036 !important;
+}
+
+[data-bs-theme="dark"] .login-card {
+    background: #23272e;
+}
+
+[data-bs-theme="dark"] .login-card h2 {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .loading-overlay {
+    background: rgba(30, 34, 39, 0.85);
+}
+
+[data-bs-theme="dark"] .empty-state {
+    color: #adb5bd;
+}
+
+/* ข้อความ text-dark บนการ์ด/กล่องที่พื้นหลังเปลี่ยนเป็นมืด → เปลี่ยนเป็นสว่าง
+   (ยกเว้น badge และกล่องสีเหลือง ที่ต้องคงตัวอักษรเข้มเพื่ออ่านบนสีอ่อน) */
+[data-bs-theme="dark"] .card .text-dark:not(.badge):not(.bg-warning) {
+    color: #e9ecef !important;
+}
+
+/* กล่อง bg-white ที่ไม่ใช่ card / card-header / progress-bar (เช่น ช่องวันที่บน
+   dashboard, sticky header, card-footer) → เปลี่ยนเป็นพื้นมืด */
+[data-bs-theme="dark"] .bg-white:not(.card):not(.card-header):not(.progress-bar) {
+    background-color: #2b3036 !important;
+}
+
+/* ข้อความ text-dark ในกล่อง bg-white ที่กลายเป็นมืด (เช่น วันที่บน dashboard) */
+[data-bs-theme="dark"] .bg-white:not(.card):not(.card-header):not(.progress-bar) .text-dark {
+    color: #e9ecef !important;
 }

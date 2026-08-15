@@ -133,6 +133,7 @@
                 deleteBtn.type = 'button';
                 deleteBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
                 deleteBtn.style.cssText = 'padding: 0 5px; font-size: 12px;';
+                deleteBtn.setAttribute('aria-label', 'ลบรูปนี้');
                 deleteBtn.innerHTML = '<i class="bi bi-x"></i>';
                 deleteBtn.onclick = function () {
                     selectedFiles = selectedFiles.filter(f => f.id !== fileId);

@@ -3,13 +3,13 @@ $lockoutRemaining = $lockoutRemaining ?? 0;
 ?>
 <div class="login-container">
     <div class="login-card">
-        <div class="logo"><i class="bi bi-tools"></i></div>
+        <div class="logo"><img src="<?= SITE_URL ?>/assets/Logo.svg" alt="โลโก้ <?= SITE_NAME ?>"></div>
         <h2><?= SITE_NAME ?></h2>
 
         <?php if (!empty($flash)): ?>
             <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show" role="alert">
                 <?= e($flash['message']) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="ปิด"></button>
             </div>
         <?php endif; ?>
 
