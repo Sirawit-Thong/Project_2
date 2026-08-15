@@ -128,9 +128,13 @@ class EquipmentController extends Controller
                 }
 
                 $id = Equipment::create($data);
-                $this->saveImages($id);
+                $uploadErrors = $this->saveImages($id);
                 logActivity(getCurrentUserId(), 'Add Equipment', 'เพิ่มครุภัณฑ์: ' . $data['code']);
-                $this->flash('success', 'เพิ่มครุภัณฑ์สำเร็จ');
+                if (!empty($uploadErrors)) {
+                    $this->flash('warning', 'เพิ่มครุภัณฑ์สำเร็จ แต่บางรูปไม่ถูกบันทึก:<br>' . implode('<br>', array_slice($uploadErrors, 0, 5)));
+                } else {
+                    $this->flash('success', 'เพิ่มครุภัณฑ์สำเร็จ');
+                }
                 $this->redirect(SITE_URL . '/equipment');
             }
 
@@ -186,9 +190,13 @@ class EquipmentController extends Controller
                 }
 
                 Equipment::update($id, $data);
-                $this->saveImages($id);
+                $uploadErrors = $this->saveImages($id);
                 logActivity(getCurrentUserId(), 'Edit Equipment', 'แก้ไขครุภัณฑ์: ' . $data['code']);
-                $this->flash('success', 'แก้ไขครุภัณฑ์สำเร็จ');
+                if (!empty($uploadErrors)) {
+                    $this->flash('warning', 'แก้ไขครุภัณฑ์สำเร็จ แต่บางรูปไม่ถูกบันทึก:<br>' . implode('<br>', array_slice($uploadErrors, 0, 5)));
+                } else {
+                    $this->flash('success', 'แก้ไขครุภัณฑ์สำเร็จ');
+                }
                 $this->redirect(SITE_URL . '/equipment/' . $id);
             }
 
@@ -557,11 +565,17 @@ class EquipmentController extends Controller
 
     private function saveImages($equipmentId)
     {
+        $errors = [];
+        $typeLabels = ['purchase' => 'ภาพตอนซื้อ', 'current_condition' => 'ภาพสภาพปัจจุบัน'];
+
         foreach (['purchase' => 'purchase_images', 'current_condition' => 'current_images'] as $type => $field) {
             if (empty($_FILES[$field]['name'][0])) continue;
 
             foreach ($_FILES[$field]['tmp_name'] as $key => $tmpName) {
-                if ($_FILES[$field]['error'][$key] !== UPLOAD_ERR_OK) continue;
+                if ($_FILES[$field]['error'][$key] !== UPLOAD_ERR_OK) {
+                    $errors[] = $typeLabels[$type] . ' รูปที่ ' . ($key + 1) . ': ' . uploadErrorMessage($_FILES[$field]['error'][$key]);
+                    continue;
+                }
 
                 $file = [
                     'name' => $_FILES[$field]['name'][$key],
@@ -573,8 +587,11 @@ class EquipmentController extends Controller
                 $result = uploadImage($file, 'equipment');
                 if ($result['success']) {
                     Equipment::addImage($equipmentId, $result['path'], $type);
+                } else {
+                    $errors[] = $typeLabels[$type] . ' รูปที่ ' . ($key + 1) . ': ' . $result['error'];
                 }
             }
         }
+        return $errors;
     }
 }

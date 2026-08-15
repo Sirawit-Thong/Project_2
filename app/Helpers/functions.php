@@ -252,12 +252,32 @@ function paginationLinks($pagination, $baseUrl)
 // File Upload (Secure)
 // ============================================
 
+function uploadErrorMessage($code)
+{
+    switch ($code) {
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'ขนาดไฟล์เกินกำหนด (สูงสุด 5MB)';
+        case UPLOAD_ERR_PARTIAL:
+            return 'ไฟล์ถูกอัปโหลดไม่สมบูรณ์';
+        case UPLOAD_ERR_NO_FILE:
+            return 'ไม่พบไฟล์ที่เลือก';
+        case UPLOAD_ERR_NO_TMP_DIR:
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'เซิร์ฟเวอร์ไม่สามารถบันทึกไฟล์ได้';
+        case UPLOAD_ERR_EXTENSION:
+            return 'การอัปโหลดถูกบล็อกโดยส่วนขยาย PHP';
+        default:
+            return 'เกิดข้อผิดพลาดในการอัปโหลด (code: ' . $code . ')';
+    }
+}
+
 function uploadImage($file, $folder = 'equipment')
 {
     $maxSize = 5 * 1024 * 1024; // 5MB
 
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'error' => 'เกิดข้อผิดพลาดในการอัปโหลด (code: ' . $file['error'] . ')'];
+        return ['success' => false, 'error' => uploadErrorMessage($file['error'])];
     }
 
     if ($file['size'] > $maxSize) {

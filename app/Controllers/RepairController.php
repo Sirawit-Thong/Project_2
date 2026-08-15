@@ -51,25 +51,35 @@ class RepairController extends Controller
                 $repairId = Repair::createRepair($equipmentId, getCurrentUserId(), $issue);
 
                 // Handle image uploads
+                $uploadErrors = [];
                 if (!empty($_FILES['images']['name'][0])) {
                     foreach ($_FILES['images']['name'] as $key => $name) {
-                        if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
-                            $file = [
-                                'name' => $name,
-                                'type' => $_FILES['images']['type'][$key],
-                                'tmp_name' => $_FILES['images']['tmp_name'][$key],
-                                'size' => $_FILES['images']['size'][$key],
-                            ];
-                            $result = uploadImage($file, 'repair');
-                            if ($result['success']) {
-                                Repair::addImage($repairId, $result['path']);
-                            }
+                        if ($_FILES['images']['error'][$key] !== UPLOAD_ERR_OK) {
+                            $uploadErrors[] = 'รูปที่ ' . ($key + 1) . ': ' . uploadErrorMessage($_FILES['images']['error'][$key]);
+                            continue;
+                        }
+
+                        $file = [
+                            'name' => $name,
+                            'type' => $_FILES['images']['type'][$key],
+                            'tmp_name' => $_FILES['images']['tmp_name'][$key],
+                            'size' => $_FILES['images']['size'][$key],
+                        ];
+                        $result = uploadImage($file, 'repairs');
+                        if ($result['success']) {
+                            Repair::addImage($repairId, $result['path']);
+                        } else {
+                            $uploadErrors[] = 'รูปที่ ' . ($key + 1) . ': ' . $result['error'];
                         }
                     }
                 }
 
                 logActivity(getCurrentUserId(), 'Submit Repair', 'แจ้งซ่อม ID: ' . $repairId);
-                $this->flash('success', 'แจ้งซ่อมสำเร็จ');
+                if (!empty($uploadErrors)) {
+                    $this->flash('warning', 'แจ้งซ่อมสำเร็จ แต่บางรูปไม่ถูกบันทึก:<br>' . implode('<br>', array_slice($uploadErrors, 0, 5)));
+                } else {
+                    $this->flash('success', 'แจ้งซ่อมสำเร็จ');
+                }
                 $this->redirect(SITE_URL . '/repairs/mine');
             }
         }
