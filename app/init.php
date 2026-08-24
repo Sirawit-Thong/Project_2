@@ -40,6 +40,11 @@ spl_autoload_register(function ($class) {
         'SystemLog'   => __DIR__ . '/Models/SystemLog.php',
         'EquipmentImage' => __DIR__ . '/Models/EquipmentImage.php',
         'EquipmentStats' => __DIR__ . '/Models/EquipmentStats.php',
+        'AssetCategory'       => __DIR__ . '/Models/AssetCategory.php',
+        'DepreciationSetting' => __DIR__ . '/Models/DepreciationSetting.php',
+        'DepreciationReport'  => __DIR__ . '/Models/DepreciationReport.php',
+        'Satisfaction'        => __DIR__ . '/Models/Satisfaction.php',
+        'DepreciationCalculator' => __DIR__ . '/Core/DepreciationCalculator.php',
         'RateLimiter'    => __DIR__ . '/Core/RateLimiter.php',
         // Controllers
         'AuthController'      => __DIR__ . '/Controllers/AuthController.php',
@@ -53,6 +58,8 @@ spl_autoload_register(function ($class) {
         'RoomController'      => __DIR__ . '/Controllers/RoomController.php',
         'RoomManagerController' => __DIR__ . '/Controllers/RoomManagerController.php',
         'AdminController'     => __DIR__ . '/Controllers/AdminController.php',
+        'DepreciationController' => __DIR__ . '/Controllers/DepreciationController.php',
+        'SatisfactionController' => __DIR__ . '/Controllers/SatisfactionController.php',
     ];
 
     if (isset($map[$class])) {
