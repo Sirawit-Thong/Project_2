@@ -1,9 +1,11 @@
 -- ============================================================
 -- Upgrade Script: ระบบค่าเสื่อมราคา + ระบบความพึงพอใจ
 -- รันครั้งเดียวบนฐานข้อมูล equipment_db ที่มีข้อมูลอยู่แล้ว
--- ใช้: cmd /c "C:\xampp\mysql\bin\mysql.exe -u root equipment_db < database_upgrade_depreciation_satisfaction.sql"
+-- ใช้: cmd /c "C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 equipment_db < database_upgrade_depreciation_satisfaction.sql"
+-- ⚠️ ต้องใส่ --default-character-set=utf8mb4 เสมอ ไม่งั้นข้อความไทยจะถูกเก็บแบบ double-encoded เพี้ยน
 -- ============================================================
 USE equipment_db;
+SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS asset_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,

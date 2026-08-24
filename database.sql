@@ -1,7 +1,11 @@
 -- Create Database
 -- สร้างฐานข้อมูล equipment_db และกำหนดชุดตัวอักษรเป็น UTF-8
+--
+-- วิธี import ผ่าน CLI (ต้องมี --default-character-set=utf8mb4 เสมอ ไม่งั้นภาษาไทยเพี้ยน):
+-- cmd /c "C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 < database.sql"
 CREATE DATABASE IF NOT EXISTS equipment_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE equipment_db;
+SET NAMES utf8mb4;
 
 -- Table: users (Use Email for Login)
 -- ตาราง: ผู้ใช้งาน (ใช้อีเมลในการเข้าสู่ระบบ)
