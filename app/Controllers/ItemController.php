@@ -23,6 +23,7 @@ class ItemController extends Controller
         $result = Item::getFiltered($setFilter, $deptFilter, $page, $perPage);
         $departments = Department::getAll();
         $allSets = SetModel::getAllWithDept();
+        $assetCategories = AssetCategory::getAll();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->validateCsrf();
@@ -33,6 +34,7 @@ class ItemController extends Controller
             if ($action === 'save') {
                 $data = [
                     'set_id' => $_POST['set_id'] ?? null,
+                    'category_id' => ($_POST['category_id'] ?? '') !== '' ? (int) $_POST['category_id'] : null,
                     'name' => trim($_POST['name'] ?? ''),
                     'brand' => trim($_POST['brand'] ?? ''),
                     'model' => trim($_POST['model'] ?? ''),

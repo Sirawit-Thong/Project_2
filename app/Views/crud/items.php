@@ -193,6 +193,15 @@ $paginationBaseUrl = SITE_URL . '/items?dept_id=' . urlencode($deptFilter) . '&s
                         </small>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">หมวดหมู่ครุภัณฑ์ <small class="text-muted">(ใช้กำหนดเกณฑ์ค่าเสื่อมราคา)</small></label>
+                        <select class="form-select" name="category_id">
+                            <option value="">-- ไม่ระบุ --</option>
+                            <?php foreach ($assetCategories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">ชื่อรายการครุภัณฑ์ <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="name" required
                             placeholder="เช่น เครื่องคอมพิวเตอร์">
@@ -270,6 +279,15 @@ $paginationBaseUrl = SITE_URL . '/items?dept_id=' . urlencode($deptFilter) . '&s
                         </small>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">หมวดหมู่ครุภัณฑ์ <small class="text-muted">(ใช้กำหนดเกณฑ์ค่าเสื่อมราคา)</small></label>
+                        <select class="form-select" name="category_id" id="editCategoryId">
+                            <option value="">-- ไม่ระบุ --</option>
+                            <?php foreach ($assetCategories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">ชื่อรายการ <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="name" id="editName" required>
                     </div>
@@ -320,6 +338,7 @@ $paginationBaseUrl = SITE_URL . '/items?dept_id=' . urlencode($deptFilter) . '&s
     function editItem(item) {
         document.getElementById('editId').value = item.id;
         document.getElementById('editSetId').value = item.set_id;
+        document.getElementById('editCategoryId').value = item.category_id || '';
         document.getElementById('editName').value = item.name;
         document.getElementById('editBrand').value = item.brand || '';
         document.getElementById('editModel').value = item.model || '';
