@@ -113,4 +113,77 @@ class DepreciationController extends Controller
         $viewPath = 'depreciation/settings';
         require __DIR__ . '/../Views/layouts/main.php';
     }
+
+    /**
+     * 1.3.2.10-1: รายงานสรุป + กราฟค่าเสื่อมรายปี (admin/staff)
+     */
+    public function report()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $filters = $this->getFilters();
+        $rows = DepreciationReport::getEquipmentRows($filters);
+        $byYear = DepreciationReport::summarizeByYear($rows);
+        $byCategory = DepreciationReport::summarizeByCategory($rows);
+        $totals = DepreciationReport::totals($rows);
+
+        $pageTitle = 'รายงานค่าเสื่อมราคาครุภัณฑ์';
+        $viewPath = 'depreciation/report';
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    /**
+     * 1.3.2.10-1: Export CSV รายงานสรุปประจำปี (type=summary|detail)
+     */
+    public function export()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+        $type = $_GET['type'] ?? 'detail';
+        $rows = DepreciationReport::getEquipmentRows($this->getFilters());
+        logActivity(getCurrentUserId(), 'Export Depreciation Report', 'type: ' . $type . ' (' . count($rows) . ' รายการ)');
+
+        if ($type === 'summary') {
+            $data = DepreciationReport::summarizeByYear($rows);
+            $header = ['ปีงบประมาณ (พ.ศ.)', 'จำนวนชิ้น', 'ราคาต้นทุนรวม', 'ค่าเสื่อมรายปีรวม', 'ค่าเสื่อมสะสมรวม', 'มูลค่าคงเหลือสุทธิรวม'];
+            $filename = 'depreciation_summary_' . date('Y-m-d') . '.csv';
+            $lineFn = fn($r) => [
+                $r['year'], $r['count'], number_format($r['total_cost'], 2),
+                number_format($r['total_annual'], 2), number_format($r['total_accumulated'], 2),
+                number_format($r['total_nbv'], 2),
+            ];
+        } else {
+            $data = $rows;
+            $header = ['รหัส', 'รายการ', 'หมวดหมู่', 'ชุด', 'ปีจัดซื้อ (พ.ศ.)', 'สาขา', 'ห้อง', 'ผู้ถือครอง', 'สถานะ', 'ราคาต้นทุน', 'อายุการใช้งาน (ปี)', '% ค่าเสื่อม', 'วิธีคิด', 'ค่าเสื่อม/ปี', 'ผ่านมา (ปี)', 'ค่าเสื่อมสะสม', 'มูลค่าคงเหลือ', 'หมายเหตุ'];
+            $filename = 'depreciation_detail_' . date('Y-m-d') . '.csv';
+            $lineFn = function ($r) {
+                return [
+                    $r['code'], $r['item_name'], $r['category_name'] ?? '-', $r['set_name'],
+                    $r['set_year'], $r['dept_name'] ?? '-', $r['room_name'] ?? '-',
+                    trim(($r['holder_firstname'] ?? '') . ' ' . ($r['holder_lastname'] ?? '')),
+                    translateEquipmentStatus($r['status']), number_format((float) $r['price'], 2),
+                    $r['useful_life_years'] ?? '-',
+                    $r['dep_rate'] !== null ? rtrim(rtrim(number_format((float) $r['dep_rate'], 2), '0'), '.') . '%' : '-',
+                    $r['method'] === 'declining_balance' ? 'ลดยอดคงเหลือ' : 'เส้นตรง',
+                    $r['dep_ok'] ? number_format($r['annual_dep'], 2) : '-',
+                    $r['dep_ok'] ? $r['years_elapsed'] : '-',
+                    $r['dep_ok'] ? number_format($r['accumulated'], 2) : '-',
+                    $r['dep_ok'] ? number_format($r['nbv'], 2) : '-',
+                    $r['dep_ok'] ? '' : translateDepReason($r['dep_reason']),
+                ];
+            };
+        }
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM สำหรับ Excel
+        $output = fopen('php://output', 'w');
+        fputcsv($output, $header);
+        foreach ($data as $row) {
+            fputcsv($output, $lineFn($row));
+        }
+        fclose($output);
+        exit;
+    }
 }
