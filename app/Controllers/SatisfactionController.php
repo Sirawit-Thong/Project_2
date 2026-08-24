@@ -7,14 +7,15 @@ class SatisfactionController extends Controller
 {
     /**
      * 1.3.2.11-1: ผู้แจ้งซ่อม (teacher/student) ให้คะแนนหลังสถานะเป็น completed
+     * หมายเหตุ: param ต้องชื่อ $id ให้ตรงกับ {id} ใน route — Router ส่งค่าแบบ named arguments (PHP 8)
      */
-    public function submit($repairId)
+    public function submit($id)
     {
         $this->requireLogin();
         $this->authorize(['teacher', 'student']);
         $this->validateCsrf();
 
-        $repairId = (int) $repairId;
+        $repairId = (int) $id;
         $backUrl = SITE_URL . '/repairs/' . $repairId;
 
         $repair = Repair::find($repairId);
