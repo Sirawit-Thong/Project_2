@@ -28,6 +28,30 @@ CREATE TABLE IF NOT EXISTS dept (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Table: asset_categories (หมวดหมู่ครุภัณฑ์สำหรับเกณฑ์ค่าเสื่อมราคา)
+CREATE TABLE IF NOT EXISTS asset_categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    remark TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: depreciation_settings (เกณฑ์ค่าเสื่อมราคาต่อหมวดหมู่ — 1 หมวด = 1 เกณฑ์)
+CREATE TABLE IF NOT EXISTS depreciation_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL, -- หมวดหมู่ (FK -> asset_categories.id) UNIQUE
+    useful_life_years INT NOT NULL, -- อายุการใช้งาน (ปี)
+    dep_rate DECIMAL(5, 2) NOT NULL, -- เปอร์เซ็นต์ค่าเสื่อมต่อปี (เช่น 20.00 = 20%)
+    method ENUM('straight_line', 'declining_balance') NOT NULL DEFAULT 'straight_line', -- วิธีคิด: เส้นตรง / ลดยอดคงเหลือ
+    updated_by INT DEFAULT NULL, -- ผู้แก้ไขล่าสุด (FK -> users.id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES asset_categories(id) ON DELETE CASCADE,
+    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE KEY uq_dep_setting_category (category_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Table: sets (Level 1: ชุดครุภัณฑ์)
 -- ตาราง: ชุดครุภัณฑ์ (Grouping ของครุภัณฑ์ตามปี/ชุดจัดซื้อ)
 CREATE TABLE IF NOT EXISTS sets (
@@ -48,6 +72,7 @@ CREATE TABLE IF NOT EXISTS sets (
 CREATE TABLE IF NOT EXISTS items (
     id INT AUTO_INCREMENT PRIMARY KEY, -- รหัสรายการ
     set_id INT NOT NULL, -- อ้างอิงชุด (Foreign Key -> sets.id)
+    category_id INT DEFAULT NULL, -- หมวดหมู่ครุภัณฑ์ (FK -> asset_categories.id) ใช้อ้างเกณฑ์ค่าเสื่อมราคา
     name VARCHAR(255) NOT NULL, -- ชื่อรายการครุภัณฑ์ (เช่น เครื่องคอมพิวเตอร์)
     brand VARCHAR(100), -- ยี่ห้อ
     model VARCHAR(100), -- รุ่น
@@ -58,7 +83,8 @@ CREATE TABLE IF NOT EXISTS items (
     remark TEXT, -- หมายเหตุ
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (set_id) REFERENCES sets(id) ON DELETE CASCADE
+    FOREIGN KEY (set_id) REFERENCES sets(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES asset_categories(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: rooms (Master Data: ห้อง)
@@ -150,6 +176,20 @@ CREATE TABLE IF NOT EXISTS repair_img (
     FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Table: satisfaction_surveys (แบบประเมินความพึงพอใจหลังซ่อมเสร็จ — 1 ใบซ่อมประเมินได้ 1 ครั้ง)
+CREATE TABLE IF NOT EXISTS satisfaction_surveys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    repair_id INT NOT NULL, -- ใบแจ้งซ่อม (FK -> repair.id) UNIQUE — ป้องกันประเมินซ้ำ
+    user_id INT DEFAULT NULL, -- ผู้ประเมิน (FK -> users.id)
+    rating TINYINT UNSIGNED NOT NULL, -- คะแนนความพึงพอใจ 1-5
+    comment TEXT, -- คำติชม/ข้อเสนอแนะ
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE KEY uq_survey_repair (repair_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Table: system_logs (Audit Trail / Activity Logs)
 -- ตาราง: บันทึกการใช้งานระบบ (Audit Log)
 CREATE TABLE IF NOT EXISTS system_logs (
@@ -162,6 +202,21 @@ CREATE TABLE IF NOT EXISTS system_logs (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ข้อมูลหมวดหมู่ครุภัณฑ์เริ่มต้น + เกณฑ์ค่าเสื่อม (อ้างอิงอายุการใช้งานตามหลักเกณฑ์ทั่วไป)
+INSERT INTO asset_categories (name, remark) VALUES
+('เครื่องคอมพิวเตอร์และอุปกรณ์ไอที', 'คอมพิวเตอร์ โน้ตบุ๊ก เซิร์ฟเวอร์ อุปกรณ์เครือข่าย'),
+('อุปกรณ์ทดลองวิทยาศาสตร์', 'เครื่องมือวิทยาศาสตร์/อุปกรณ์ห้องปฏิบัติการ'),
+('เครื่องจักรและเครื่องมือช่าง', 'เครื่องจักรกล เครื่องมือช่าง'),
+('เฟอร์นิเจอร์และของใช้สำนักงาน', 'โต๊ะ เก้าอี้ ตู้ เคาน์เตอร์'),
+('ยานพาหนะ', 'รถยนต์ รถตู้ รถจักรยานยนต์');
+
+INSERT INTO depreciation_settings (category_id, useful_life_years, dep_rate, method) VALUES
+(1, 5, 20.00, 'straight_line'),
+(2, 10, 10.00, 'straight_line'),
+(3, 10, 10.00, 'straight_line'),
+(4, 10, 10.00, 'straight_line'),
+(5, 8, 12.50, 'straight_line');
 
 -- ข้อมูลผู้ใช้เริ่มต้น (รหัสผ่านคือ 123456)
 INSERT INTO users (sid, email, password, firstname, lastname, role, status, class) VALUES
