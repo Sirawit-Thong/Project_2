@@ -1,0 +1,462 @@
+- generic [active] [ref=f2e1]:
+  - link "ข้ามไปยังเนื้อหาหลัก" [ref=f2e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation [ref=f2e3]:
+    - generic [ref=f2e4]:
+      - text: 
+      - link " ระบบแจ้งซ่อมครุภัณฑ์" [ref=f2e5] [cursor=pointer]:
+        - /url: http://localhost/P
+        - generic [ref=f2e6]: 
+        - text: ระบบแจ้งซ่อมครุภัณฑ์
+      - button "เปิดเมนูด้านข้าง" [ref=f2e7] [cursor=pointer]:
+        - generic [ref=f2e8]: 
+      - button "สลับโหมดกลางวัน/กลางคืน" [ref=f2e9] [cursor=pointer]:
+        - generic [ref=f2e10]: 
+      - generic [ref=f2e11]:
+        - link " ผู้ดูแลระบบ ทดสอบ ผู้ดูแลระบบ" [ref=f2e12] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=f2e13]: 
+          - generic [ref=f2e14]: ผู้ดูแลระบบ ทดสอบ
+          - generic [ref=f2e15]: ผู้ดูแลระบบ
+        - text:  
+  - generic [ref=f2e16]:
+    - complementary [ref=f2e17]:
+      - navigation [ref=f2e18]:
+        - generic [ref=f2e19]:
+          - generic [ref=f2e20]: แดชบอร์ด
+          - link " ภาพรวมระบบ" [ref=f2e21] [cursor=pointer]:
+            - /url: http://localhost/P/
+            - generic [ref=f2e22]: 
+            - generic [ref=f2e23]: ภาพรวมระบบ
+        - generic [ref=f2e24]:
+          - generic [ref=f2e25]: จัดการข้อมูลพื้นฐาน
+          - link " สาขาวิชา" [ref=f2e26] [cursor=pointer]:
+            - /url: http://localhost/P/departments
+            - generic [ref=f2e27]: 
+            - generic [ref=f2e28]: สาขาวิชา
+          - link " ชุดครุภัณฑ์" [ref=f2e29] [cursor=pointer]:
+            - /url: http://localhost/P/sets
+            - generic [ref=f2e30]: 
+            - generic [ref=f2e31]: ชุดครุภัณฑ์
+          - link " รายการครุภัณฑ์ทั้งหมด" [ref=f2e32] [cursor=pointer]:
+            - /url: http://localhost/P/items
+            - generic [ref=f2e33]: 
+            - generic [ref=f2e34]: รายการครุภัณฑ์ทั้งหมด
+          - link " ห้อง/สถานที่" [ref=f2e35] [cursor=pointer]:
+            - /url: http://localhost/P/rooms
+            - generic [ref=f2e36]: 
+            - generic [ref=f2e37]: ห้อง/สถานที่
+        - generic [ref=f2e38]:
+          - generic [ref=f2e39]: ครุภัณฑ์
+          - link " ทะเบียนครุภัณฑ์" [ref=f2e40] [cursor=pointer]:
+            - /url: http://localhost/P/equipment
+            - generic [ref=f2e41]: 
+            - generic [ref=f2e42]: ทะเบียนครุภัณฑ์
+          - link " รายการจำหน่าย/แทงจำหน่าย" [ref=f2e43] [cursor=pointer]:
+            - /url: http://localhost/P/equipment/disposal
+            - generic [ref=f2e44]: 
+            - generic [ref=f2e45]: รายการจำหน่าย/แทงจำหน่าย
+          - link " การตรวจนับครุภัณฑ์ประจำปี" [ref=f2e46] [cursor=pointer]:
+            - /url: http://localhost/P/equipment/inspection
+            - generic [ref=f2e47]: 
+            - generic [ref=f2e48]: การตรวจนับครุภัณฑ์ประจำปี
+        - generic [ref=f2e49]:
+          - generic [ref=f2e50]: ซ่อมบำรุง
+          - link " รายการแจ้งซ่อมทั้งหมด 2" [ref=f2e51] [cursor=pointer]:
+            - /url: http://localhost/P/repairs
+            - generic [ref=f2e52]: 
+            - generic [ref=f2e53]: รายการแจ้งซ่อมทั้งหมด
+            - generic [ref=f2e54]: "2"
+        - generic [ref=f2e55]:
+          - generic [ref=f2e56]: ค่าเสื่อมราคา
+          - link " คำนวณค่าเสื่อมราคา" [ref=f2e57] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation
+            - generic [ref=f2e58]: 
+            - generic [ref=f2e59]: คำนวณค่าเสื่อมราคา
+          - link " รายงานค่าเสื่อมราคา" [ref=f2e60] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/report
+            - generic [ref=f2e61]: 
+            - generic [ref=f2e62]: รายงานค่าเสื่อมราคา
+          - link " ตั้งค่าเกณฑ์ค่าเสื่อมราคา" [ref=f2e63] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/settings
+            - generic [ref=f2e64]: 
+            - generic [ref=f2e65]: ตั้งค่าเกณฑ์ค่าเสื่อมราคา
+        - generic [ref=f2e66]:
+          - generic [ref=f2e67]: ความพึงพอใจ
+          - link " สรุปความพึงพอใจ" [ref=f2e68] [cursor=pointer]:
+            - /url: http://localhost/P/satisfaction
+            - generic [ref=f2e69]: 
+            - generic [ref=f2e70]: สรุปความพึงพอใจ
+        - generic [ref=f2e71]:
+          - generic [ref=f2e72]: ผู้ใช้งาน
+          - link " ผู้ใช้งานรออนุมัติ" [ref=f2e73] [cursor=pointer]:
+            - /url: http://localhost/P/users/pending
+            - generic [ref=f2e74]: 
+            - generic [ref=f2e75]: ผู้ใช้งานรออนุมัติ
+        - generic [ref=f2e76]:
+          - generic [ref=f2e77]: จัดการผู้ใช้
+          - link " จัดการบัญชีผู้ใช้งาน" [ref=f2e78] [cursor=pointer]:
+            - /url: http://localhost/P/users
+            - generic [ref=f2e79]: 
+            - generic [ref=f2e80]: จัดการบัญชีผู้ใช้งาน
+          - link " กำหนดผู้ดูแลห้อง" [ref=f2e81] [cursor=pointer]:
+            - /url: http://localhost/P/room-managers
+            - generic [ref=f2e82]: 
+            - generic [ref=f2e83]: กำหนดผู้ดูแลห้อง
+        - generic [ref=f2e84]:
+          - generic [ref=f2e85]: รายงาน
+          - link " รายงานและสถิติ" [ref=f2e86] [cursor=pointer]:
+            - /url: http://localhost/P/reports
+            - generic [ref=f2e87]: 
+            - generic [ref=f2e88]: รายงานและสถิติ
+        - generic [ref=f2e89]:
+          - generic [ref=f2e90]: ระบบ
+          - link " สำรองข้อมูล" [ref=f2e91] [cursor=pointer]:
+            - /url: http://localhost/P/backup
+            - generic [ref=f2e92]: 
+            - generic [ref=f2e93]: สำรองข้อมูล
+          - link " ประวัติการใช้งานระบบ" [ref=f2e94] [cursor=pointer]:
+            - /url: http://localhost/P/logs
+            - generic [ref=f2e95]: 
+            - generic [ref=f2e96]: ประวัติการใช้งานระบบ
+    - main [ref=f2e97]:
+      - generic [ref=f2e98]:
+        - generic [ref=f2e99]:
+          - generic [ref=f2e100]:
+            - heading " คำนวณค่าเสื่อมราคาครุภัณฑ์" [level=1] [ref=f2e101]:
+              - generic [ref=f2e102]: 
+              - text: คำนวณค่าเสื่อมราคาครุภัณฑ์
+            - navigation "breadcrumb" [ref=f2e103]:
+              - list [ref=f2e104]:
+                - listitem [ref=f2e105]:
+                  - link "แดชบอร์ด" [ref=f2e106] [cursor=pointer]:
+                    - /url: http://localhost/P/
+                - listitem [ref=f2e107]: / ค่าเสื่อมราคา
+          - link " รายงานสรุปและกราฟ" [ref=f2e109] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/report
+            - generic [ref=f2e110]: 
+            - text: รายงานสรุปและกราฟ
+        - generic [ref=f2e113]:
+          - generic [ref=f2e114]:
+            - generic [ref=f2e115]: สาขาวิชา
+            - combobox [ref=f2e116]:
+              - option "-- ทุกสาขา --" [selected]
+              - option "????????? Smoke"
+              - option "มัลติมีเดีย"
+              - option "เทคโนโลยีสารสนเทศ"
+          - generic [ref=f2e117]:
+            - generic [ref=f2e118]: หมวดหมู่
+            - combobox [ref=f2e119]:
+              - option "-- ทุกหมวดหมู่ --" [selected]
+              - option "ยานพาหนะ"
+              - option "อุปกรณ์ทดลองวิทยาศาสตร์"
+              - option "เครื่องคอมพิวเตอร์และอุปกรณ์ไอที"
+              - option "เครื่องจักรและเครื่องมือช่าง"
+              - option "เฟอร์นิเจอร์และของใช้สำนักงาน"
+          - generic [ref=f2e120]:
+            - generic [ref=f2e121]: ปีจัดซื้อ
+            - combobox [ref=f2e122]:
+              - option "-- ทุกปี --" [selected]
+              - option "2567"
+              - option "2566"
+              - option "2564"
+              - option "2562"
+              - option "2561"
+              - option "2560"
+              - option "2559"
+              - option "2557"
+              - option "2556"
+              - option "2554"
+              - option "2553"
+          - generic [ref=f2e123]:
+            - generic [ref=f2e124]: สถานะ
+            - combobox [ref=f2e125]:
+              - option "-- ทุกสถานะ --" [selected]
+              - option "พร้อมใช้งาน"
+              - option "ส่งซ่อม"
+              - option "ซ่อมไม่ได้"
+          - link " ล้าง" [ref=f2e127] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation
+            - generic [ref=f2e128]: 
+            - text: ล้าง
+        - generic [ref=f2e129]:
+          - generic [ref=f2e132]:
+            - generic [ref=f2e133]: รวมราคาต้นทุน
+            - heading "100,000.00 ฿" [level=5] [ref=f2e134]
+          - generic [ref=f2e137]:
+            - generic [ref=f2e138]: ค่าเสื่อมสะสมรวม
+            - heading "60,000.00 ฿" [level=5] [ref=f2e139]
+          - generic [ref=f2e142]:
+            - generic [ref=f2e143]: มูลค่าคงเหลือสุทธิรวม
+            - heading "40,000.00 ฿" [level=5] [ref=f2e144]
+          - generic [ref=f2e147]:
+            - generic [ref=f2e148]: คำนวณได้ / ข้าม (รวม 821 ชิ้น)
+            - heading "1 / 820" [level=5] [ref=f2e149]
+        - generic [ref=f2e150]:
+          - generic [ref=f2e151]:
+            - generic [ref=f2e152]: 
+            - text: ค่าเสื่อมราคารายชิ้น (821 รายการ)
+          - table [ref=f2e155]:
+            - rowgroup [ref=f2e156]:
+              - row [ref=f2e157]:
+                - columnheader "#" [ref=f2e158]
+                - columnheader "ครุภัณฑ์" [ref=f2e159]
+                - columnheader "ปีจัดซื้อ" [ref=f2e160]
+                - columnheader "ราคาต้นทุน" [ref=f2e161]
+                - columnheader "ค่าเสื่อม/ปี" [ref=f2e162]
+                - columnheader "สะสม" [ref=f2e163]
+                - columnheader "มูลค่าคงเหลือ" [ref=f2e164]
+                - columnheader [ref=f2e165]
+            - rowgroup [ref=f2e166]:
+              - row [ref=f2e167]:
+                - cell "1" [ref=f2e168]
+                - cell [ref=f2e169]:
+                  - strong [ref=f2e170]: SMOKE-001
+                  - text: "???????????????????????"
+                - cell "2567" [ref=f2e171]
+                - cell "100,000.00" [ref=f2e172]
+                - cell "20,000.00" [ref=f2e173]
+                - cell "60,000.00" [ref=f2e174]
+                - cell "40,000.00" [ref=f2e175]
+                - cell [ref=f2e176]:
+                  - button "" [ref=f2e177] [cursor=pointer]
+              - text: 
+              - row [ref=f2e179]:
+                - cell "2" [ref=f2e180]
+                - cell [ref=f2e181]:
+                  - strong [ref=f2e182]: 5895-009-0072/661 วท.
+                  - text: 1.1 อุปกรณ์กระจายสัญญาณไร้สาย (Access Point)
+                - cell "2566" [ref=f2e183]
+                - cell "0.00" [ref=f2e184]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e185]:
+                  - generic [ref=f2e186]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e187]
+              - row [ref=f2e188]:
+                - cell "3" [ref=f2e189]
+                - cell [ref=f2e190]:
+                  - strong [ref=f2e191]: 5895-009-0073/661 วท.
+                  - text: 2.1 อุปกรณ์กระจายสัญญาณไร้สาย (Access Point)
+                - cell "2566" [ref=f2e192]
+                - cell "0.00" [ref=f2e193]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e194]:
+                  - generic [ref=f2e195]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e196]
+              - row [ref=f2e197]:
+                - cell "4" [ref=f2e198]
+                - cell [ref=f2e199]:
+                  - strong [ref=f2e200]: 5895-009-0074/661 วท.
+                  - text: 3.1 อุปกรณ์กระจายสัญญาณไร้สาย (Access Point)
+                - cell "2566" [ref=f2e201]
+                - cell "0.00" [ref=f2e202]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e203]:
+                  - generic [ref=f2e204]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e205]
+              - row [ref=f2e206]:
+                - cell "5" [ref=f2e207]
+                - cell [ref=f2e208]:
+                  - strong [ref=f2e209]: 5965-001-0134/661 วท.
+                  - text: 2.7 ชุดไมโครโฟนบันทึกเสียง ชนิด Condenser
+                - cell "2566" [ref=f2e210]
+                - cell "0.00" [ref=f2e211]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e212]:
+                  - generic [ref=f2e213]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e214]
+              - row [ref=f2e215]:
+                - cell "6" [ref=f2e216]
+                - cell [ref=f2e217]:
+                  - strong [ref=f2e218]: 5965-001-0135/661 วท.
+                  - text: 2.7 ชุดไมโครโฟนบันทึกเสียง ชนิด Condenser
+                - cell "2566" [ref=f2e219]
+                - cell "0.00" [ref=f2e220]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e221]:
+                  - generic [ref=f2e222]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e223]
+              - row [ref=f2e224]:
+                - cell "7" [ref=f2e225]
+                - cell [ref=f2e226]:
+                  - strong [ref=f2e227]: 5965-001-0136/661 วท.
+                  - text: 2.7 ชุดไมโครโฟนบันทึกเสียง ชนิด Condenser
+                - cell "2566" [ref=f2e228]
+                - cell "0.00" [ref=f2e229]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e230]:
+                  - generic [ref=f2e231]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e232]
+              - row [ref=f2e233]:
+                - cell "8" [ref=f2e234]
+                - cell [ref=f2e235]:
+                  - strong [ref=f2e236]: 5965-001-0137/661 วท.
+                  - text: 2.7 ชุดไมโครโฟนบันทึกเสียง ชนิด Condenser
+                - cell "2566" [ref=f2e237]
+                - cell "0.00" [ref=f2e238]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e239]:
+                  - generic [ref=f2e240]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e241]
+              - row [ref=f2e242]:
+                - cell "9" [ref=f2e243]
+                - cell [ref=f2e244]:
+                  - strong [ref=f2e245]: 5965-001-0138/661 วท.
+                  - text: 2.7 ชุดไมโครโฟนบันทึกเสียง ชนิด Condenser
+                - cell "2566" [ref=f2e246]
+                - cell "0.00" [ref=f2e247]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e248]:
+                  - generic [ref=f2e249]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e250]
+              - row [ref=f2e251]:
+                - cell "10" [ref=f2e252]
+                - cell [ref=f2e253]:
+                  - strong [ref=f2e254]: 5965-002-0110/661 วท.
+                  - text: 2.8 ลำโพงมอนิเตอร์ Active monitor speaker
+                - cell "2566" [ref=f2e255]
+                - cell "0.00" [ref=f2e256]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e257]:
+                  - generic [ref=f2e258]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e259]
+              - row [ref=f2e260]:
+                - cell "11" [ref=f2e261]
+                - cell [ref=f2e262]:
+                  - strong [ref=f2e263]: 5965-002-0111/661 วท.
+                  - text: 2.8 ลำโพงมอนิเตอร์ Active monitor speaker
+                - cell "2566" [ref=f2e264]
+                - cell "0.00" [ref=f2e265]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e266]:
+                  - generic [ref=f2e267]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e268]
+              - row [ref=f2e269]:
+                - cell "12" [ref=f2e270]
+                - cell [ref=f2e271]:
+                  - strong [ref=f2e272]: 5965-002-0112/661 วท.
+                  - text: 2.8 ลำโพงมอนิเตอร์ Active monitor speaker
+                - cell "2566" [ref=f2e273]
+                - cell "0.00" [ref=f2e274]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e275]:
+                  - generic [ref=f2e276]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e277]
+              - row [ref=f2e278]:
+                - cell "13" [ref=f2e279]
+                - cell [ref=f2e280]:
+                  - strong [ref=f2e281]: 5965-002-0113/661 วท.
+                  - text: 2.8 ลำโพงมอนิเตอร์ Active monitor speaker
+                - cell "2566" [ref=f2e282]
+                - cell "0.00" [ref=f2e283]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e284]:
+                  - generic [ref=f2e285]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e286]
+              - row [ref=f2e287]:
+                - cell "14" [ref=f2e288]
+                - cell [ref=f2e289]:
+                  - strong [ref=f2e290]: 5965-002-0114/661 วท.
+                  - text: 2.8 ลำโพงมอนิเตอร์ Active monitor speaker
+                - cell "2566" [ref=f2e291]
+                - cell "0.00" [ref=f2e292]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e293]:
+                  - generic [ref=f2e294]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e295]
+              - row [ref=f2e296]:
+                - cell "15" [ref=f2e297]
+                - cell [ref=f2e298]:
+                  - strong [ref=f2e299]: 5965-009-0001/661 วท.
+                  - text: 2.9 ชุดหูฟัง (DJ Headphone Monitor
+                - cell "2566" [ref=f2e300]
+                - cell "0.00" [ref=f2e301]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e302]:
+                  - generic [ref=f2e303]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e304]
+              - row [ref=f2e305]:
+                - cell "16" [ref=f2e306]
+                - cell [ref=f2e307]:
+                  - strong [ref=f2e308]: 5965-009-0002/661 วท.
+                  - text: 2.9 ชุดหูฟัง (DJ Headphone Monitor
+                - cell "2566" [ref=f2e309]
+                - cell "0.00" [ref=f2e310]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e311]:
+                  - generic [ref=f2e312]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e313]
+              - row [ref=f2e314]:
+                - cell "17" [ref=f2e315]
+                - cell [ref=f2e316]:
+                  - strong [ref=f2e317]: 5965-009-0003/661 วท.
+                  - text: 2.9 ชุดหูฟัง (DJ Headphone Monitor
+                - cell "2566" [ref=f2e318]
+                - cell "0.00" [ref=f2e319]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e320]:
+                  - generic [ref=f2e321]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e322]
+              - row [ref=f2e323]:
+                - cell "18" [ref=f2e324]
+                - cell [ref=f2e325]:
+                  - strong [ref=f2e326]: 5965-009-0004/661 วท.
+                  - text: 2.9 ชุดหูฟัง (DJ Headphone Monitor
+                - cell "2566" [ref=f2e327]
+                - cell "0.00" [ref=f2e328]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e329]:
+                  - generic [ref=f2e330]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e331]
+              - row [ref=f2e332]:
+                - cell "19" [ref=f2e333]
+                - cell [ref=f2e334]:
+                  - strong [ref=f2e335]: 5965-009-0005/661 วท.
+                  - text: 2.9 ชุดหูฟัง (DJ Headphone Monitor
+                - cell "2566" [ref=f2e336]
+                - cell "0.00" [ref=f2e337]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e338]:
+                  - generic [ref=f2e339]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e340]
+              - row [ref=f2e341]:
+                - cell "20" [ref=f2e342]
+                - cell [ref=f2e343]:
+                  - strong [ref=f2e344]: 5965-010-0001.1/661 วท.
+                  - text: 1.11.1 เครื่องผสมและขยายสัญญาณเสียง
+                - cell "2566" [ref=f2e345]
+                - cell "0.00" [ref=f2e346]
+                - cell "- ไม่มีราคาต้นทุน" [ref=f2e347]:
+                  - generic [ref=f2e348]: "-"
+                  - text: ไม่มีราคาต้นทุน
+                - cell [ref=f2e349]
+          - generic [ref=f2e350]:
+            - navigation [ref=f2e351]:
+              - list [ref=f2e352]:
+                - listitem [ref=f2e353]:
+                  - link "1" [ref=f2e354] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=1
+                - listitem [ref=f2e355]:
+                  - link "2" [ref=f2e356] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=2
+                - listitem [ref=f2e357]:
+                  - link "3" [ref=f2e358] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=3
+                - listitem [ref=f2e359]:
+                  - link "4" [ref=f2e360] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=4
+                - listitem [ref=f2e361]:
+                  - link "5" [ref=f2e362] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=5
+                - listitem [ref=f2e363]:
+                  - generic: ...
+                - listitem [ref=f2e364]:
+                  - link "42" [ref=f2e365] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=42
+                - listitem [ref=f2e366]:
+                  - link "ถัดไป" [ref=f2e367] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=2
+                - listitem [ref=f2e368]:
+                  - link "" [ref=f2e369] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation?&per_page=20&page=42
+            - generic [ref=f2e371]: หน้า 1 จาก 42 (ทั้งหมด 821 รายการ)

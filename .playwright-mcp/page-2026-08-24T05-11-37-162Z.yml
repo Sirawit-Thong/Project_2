@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - link "ข้ามไปยังเนื้อหาหลัก" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - img "โลโก้ ระบบแจ้งซ่อมครุภัณฑ์" [ref=e7]
+    - heading "ระบบแจ้งซ่อมครุภัณฑ์" [level=2] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: 
+          - text: บัญชีผู้ใช้ / อีเมล
+        - textbox " บัญชีผู้ใช้ / อีเมล" [ref=e13]:
+          - /placeholder: ระบุชื่อบัญชีผู้ใช้ หรืออีเมล
+        - generic [ref=e14]: นักศึกษาสามารถใช้รหัสนักศึกษาเข้าใช้งานได้
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: 
+          - text: รหัสผ่าน
+        - generic [ref=e18]:
+          - textbox " รหัสผ่าน" [ref=e19]:
+            - /placeholder: ระบุรหัสผ่าน
+          - button "แสดง/ซ่อนรหัสผ่าน" [ref=e20] [cursor=pointer]:
+            - generic [ref=e21]: 
+      - button " เข้าสู่ระบบ" [ref=e22] [cursor=pointer]:
+        - generic [ref=e23]: 
+        - text: เข้าสู่ระบบ
+    - separator [ref=e24]
+    - generic [ref=e25]:
+      - paragraph [ref=e26]: หากยังไม่มีบัญชีผู้ใช้งาน
+      - link " สำหรับนักศึกษา" [ref=e27] [cursor=pointer]:
+        - /url: http://localhost/P/register/student
+        - generic [ref=e28]: 
+        - text: สำหรับนักศึกษา
+      - link " สำหรับอาจารย์" [ref=e29] [cursor=pointer]:
+        - /url: http://localhost/P/register/teacher
+        - generic [ref=e30]: 
+        - text: สำหรับอาจารย์

@@ -1,0 +1,280 @@
+- generic [active] [ref=f9e1]:
+  - link "ข้ามไปยังเนื้อหาหลัก" [ref=f9e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation [ref=f9e3]:
+    - generic [ref=f9e4]:
+      - text: 
+      - link " ระบบแจ้งซ่อมครุภัณฑ์" [ref=f9e5] [cursor=pointer]:
+        - /url: http://localhost/P
+        - generic [ref=f9e6]: 
+        - text: ระบบแจ้งซ่อมครุภัณฑ์
+      - button "เปิดเมนูด้านข้าง" [ref=f9e7] [cursor=pointer]:
+        - generic [ref=f9e8]: 
+      - button "สลับโหมดกลางวัน/กลางคืน" [ref=f9e9] [cursor=pointer]:
+        - generic [ref=f9e10]: 
+      - generic [ref=f9e11]:
+        - link " ผู้ดูแลระบบ ทดสอบ ผู้ดูแลระบบ" [ref=f9e12] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=f9e13]: 
+          - generic [ref=f9e14]: ผู้ดูแลระบบ ทดสอบ
+          - generic [ref=f9e15]: ผู้ดูแลระบบ
+        - text:  
+  - generic [ref=f9e16]:
+    - complementary [ref=f9e17]:
+      - navigation [ref=f9e18]:
+        - generic [ref=f9e19]:
+          - generic [ref=f9e20]: แดชบอร์ด
+          - link " ภาพรวมระบบ" [ref=f9e21] [cursor=pointer]:
+            - /url: http://localhost/P/
+            - generic [ref=f9e22]: 
+            - generic [ref=f9e23]: ภาพรวมระบบ
+        - generic [ref=f9e24]:
+          - generic [ref=f9e25]: จัดการข้อมูลพื้นฐาน
+          - link " สาขาวิชา" [ref=f9e26] [cursor=pointer]:
+            - /url: http://localhost/P/departments
+            - generic [ref=f9e27]: 
+            - generic [ref=f9e28]: สาขาวิชา
+          - link " ชุดครุภัณฑ์" [ref=f9e29] [cursor=pointer]:
+            - /url: http://localhost/P/sets
+            - generic [ref=f9e30]: 
+            - generic [ref=f9e31]: ชุดครุภัณฑ์
+          - link " รายการครุภัณฑ์ทั้งหมด" [ref=f9e32] [cursor=pointer]:
+            - /url: http://localhost/P/items
+            - generic [ref=f9e33]: 
+            - generic [ref=f9e34]: รายการครุภัณฑ์ทั้งหมด
+          - link " ห้อง/สถานที่" [ref=f9e35] [cursor=pointer]:
+            - /url: http://localhost/P/rooms
+            - generic [ref=f9e36]: 
+            - generic [ref=f9e37]: ห้อง/สถานที่
+        - generic [ref=f9e38]:
+          - generic [ref=f9e39]: ครุภัณฑ์
+          - link " ทะเบียนครุภัณฑ์" [ref=f9e40] [cursor=pointer]:
+            - /url: http://localhost/P/equipment
+            - generic [ref=f9e41]: 
+            - generic [ref=f9e42]: ทะเบียนครุภัณฑ์
+          - link " รายการจำหน่าย/แทงจำหน่าย" [ref=f9e43] [cursor=pointer]:
+            - /url: http://localhost/P/equipment/disposal
+            - generic [ref=f9e44]: 
+            - generic [ref=f9e45]: รายการจำหน่าย/แทงจำหน่าย
+          - link " การตรวจนับครุภัณฑ์ประจำปี" [ref=f9e46] [cursor=pointer]:
+            - /url: http://localhost/P/equipment/inspection
+            - generic [ref=f9e47]: 
+            - generic [ref=f9e48]: การตรวจนับครุภัณฑ์ประจำปี
+        - generic [ref=f9e49]:
+          - generic [ref=f9e50]: ซ่อมบำรุง
+          - link " รายการแจ้งซ่อมทั้งหมด 2" [ref=f9e51] [cursor=pointer]:
+            - /url: http://localhost/P/repairs
+            - generic [ref=f9e52]: 
+            - generic [ref=f9e53]: รายการแจ้งซ่อมทั้งหมด
+            - generic [ref=f9e54]: "2"
+        - generic [ref=f9e55]:
+          - generic [ref=f9e56]: ค่าเสื่อมราคา
+          - link " คำนวณค่าเสื่อมราคา" [ref=f9e57] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation
+            - generic [ref=f9e58]: 
+            - generic [ref=f9e59]: คำนวณค่าเสื่อมราคา
+          - link " รายงานค่าเสื่อมราคา" [ref=f9e60] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/report
+            - generic [ref=f9e61]: 
+            - generic [ref=f9e62]: รายงานค่าเสื่อมราคา
+          - link " ตั้งค่าเกณฑ์ค่าเสื่อมราคา" [ref=f9e63] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/settings
+            - generic [ref=f9e64]: 
+            - generic [ref=f9e65]: ตั้งค่าเกณฑ์ค่าเสื่อมราคา
+        - generic [ref=f9e66]:
+          - generic [ref=f9e67]: ความพึงพอใจ
+          - link " สรุปความพึงพอใจ" [ref=f9e68] [cursor=pointer]:
+            - /url: http://localhost/P/satisfaction
+            - generic [ref=f9e69]: 
+            - generic [ref=f9e70]: สรุปความพึงพอใจ
+        - generic [ref=f9e71]:
+          - generic [ref=f9e72]: ผู้ใช้งาน
+          - link " ผู้ใช้งานรออนุมัติ" [ref=f9e73] [cursor=pointer]:
+            - /url: http://localhost/P/users/pending
+            - generic [ref=f9e74]: 
+            - generic [ref=f9e75]: ผู้ใช้งานรออนุมัติ
+        - generic [ref=f9e76]:
+          - generic [ref=f9e77]: จัดการผู้ใช้
+          - link " จัดการบัญชีผู้ใช้งาน" [ref=f9e78] [cursor=pointer]:
+            - /url: http://localhost/P/users
+            - generic [ref=f9e79]: 
+            - generic [ref=f9e80]: จัดการบัญชีผู้ใช้งาน
+          - link " กำหนดผู้ดูแลห้อง" [ref=f9e81] [cursor=pointer]:
+            - /url: http://localhost/P/room-managers
+            - generic [ref=f9e82]: 
+            - generic [ref=f9e83]: กำหนดผู้ดูแลห้อง
+        - generic [ref=f9e84]:
+          - generic [ref=f9e85]: รายงาน
+          - link " รายงานและสถิติ" [ref=f9e86] [cursor=pointer]:
+            - /url: http://localhost/P/reports
+            - generic [ref=f9e87]: 
+            - generic [ref=f9e88]: รายงานและสถิติ
+        - generic [ref=f9e89]:
+          - generic [ref=f9e90]: ระบบ
+          - link " สำรองข้อมูล" [ref=f9e91] [cursor=pointer]:
+            - /url: http://localhost/P/backup
+            - generic [ref=f9e92]: 
+            - generic [ref=f9e93]: สำรองข้อมูล
+          - link " ประวัติการใช้งานระบบ" [ref=f9e94] [cursor=pointer]:
+            - /url: http://localhost/P/logs
+            - generic [ref=f9e95]: 
+            - generic [ref=f9e96]: ประวัติการใช้งานระบบ
+    - main [ref=f9e97]:
+      - generic [ref=f9e98]:
+        - generic [ref=f9e99]:
+          - generic [ref=f9e100]:
+            - heading " รายงานค่าเสื่อมราคาครุภัณฑ์" [level=1] [ref=f9e101]:
+              - generic [ref=f9e102]: 
+              - text: รายงานค่าเสื่อมราคาครุภัณฑ์
+            - navigation "breadcrumb" [ref=f9e103]:
+              - list [ref=f9e104]:
+                - listitem [ref=f9e105]:
+                  - link "แดชบอร์ด" [ref=f9e106] [cursor=pointer]:
+                    - /url: http://localhost/P/
+                - listitem [ref=f9e107]:
+                  - text: /
+                  - link "ค่าเสื่อมราคา" [ref=f9e108] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation
+                - listitem [ref=f9e109]: / รายงานสรุป
+          - generic [ref=f9e110]:
+            - button " ส่งออกรายงาน (CSV)" [ref=f9e111] [cursor=pointer]:
+              - generic [ref=f9e112]: 
+              - text: ส่งออกรายงาน (CSV)
+            - text:  
+        - generic [ref=f9e113]:
+          - generic [ref=f9e116]:
+            - generic [ref=f9e117]: ราคาต้นทุนรวม (ทั้งระบบ)
+            - heading "100,000.00 ฿" [level=5] [ref=f9e118]
+          - generic [ref=f9e121]:
+            - generic [ref=f9e122]: ค่าเสื่อมรายปีรวม
+            - heading "20,000.00 ฿" [level=5] [ref=f9e123]
+          - generic [ref=f9e126]:
+            - generic [ref=f9e127]: ค่าเสื่อมสะสมรวม
+            - heading "60,000.00 ฿" [level=5] [ref=f9e128]
+          - generic [ref=f9e131]:
+            - generic [ref=f9e132]: มูลค่าคงเหลือสุทธิรวม
+            - heading "40,000.00 ฿" [level=5] [ref=f9e133]
+        - generic [ref=f9e134]:
+          - generic [ref=f9e137]:
+            - generic [ref=f9e138]: 
+            - text: ค่าเสื่อมรายปี แยกตามปีจัดซื้อ (บาท)
+          - generic [ref=f9e143]:
+            - generic [ref=f9e144]: 
+            - text: มูลค่าสะสม vs มูลค่าคงเหลือสุทธิ (บาท)
+        - generic [ref=f9e147]:
+          - generic [ref=f9e149]:
+            - generic [ref=f9e150]:
+              - generic [ref=f9e151]: 
+              - text: สรุปแยกตามปีจัดซื้อ
+            - table [ref=f9e153]:
+              - rowgroup [ref=f9e154]:
+                - row [ref=f9e155]:
+                  - columnheader "ปี (พ.ศ.)" [ref=f9e156]
+                  - columnheader "ชิ้น" [ref=f9e157]
+                  - columnheader "ต้นทุน" [ref=f9e158]
+                  - columnheader "ค่าเสื่อม/ปี" [ref=f9e159]
+                  - columnheader "สะสม" [ref=f9e160]
+                  - columnheader "คงเหลือ" [ref=f9e161]
+              - rowgroup [ref=f9e162]:
+                - row [ref=f9e163]:
+                  - cell "2553" [ref=f9e164]
+                  - cell "4" [ref=f9e165]
+                  - cell "0.00" [ref=f9e166]
+                  - cell "0.00" [ref=f9e167]
+                  - cell "0.00" [ref=f9e168]
+                  - cell "0.00" [ref=f9e169]
+                - row [ref=f9e170]:
+                  - cell "2554" [ref=f9e171]
+                  - cell "5" [ref=f9e172]
+                  - cell "0.00" [ref=f9e173]
+                  - cell "0.00" [ref=f9e174]
+                  - cell "0.00" [ref=f9e175]
+                  - cell "0.00" [ref=f9e176]
+                - row [ref=f9e177]:
+                  - cell "2556" [ref=f9e178]
+                  - cell "36" [ref=f9e179]
+                  - cell "0.00" [ref=f9e180]
+                  - cell "0.00" [ref=f9e181]
+                  - cell "0.00" [ref=f9e182]
+                  - cell "0.00" [ref=f9e183]
+                - row [ref=f9e184]:
+                  - cell "2557" [ref=f9e185]
+                  - cell "97" [ref=f9e186]
+                  - cell "0.00" [ref=f9e187]
+                  - cell "0.00" [ref=f9e188]
+                  - cell "0.00" [ref=f9e189]
+                  - cell "0.00" [ref=f9e190]
+                - row [ref=f9e191]:
+                  - cell "2559" [ref=f9e192]
+                  - cell "85" [ref=f9e193]
+                  - cell "0.00" [ref=f9e194]
+                  - cell "0.00" [ref=f9e195]
+                  - cell "0.00" [ref=f9e196]
+                  - cell "0.00" [ref=f9e197]
+                - row [ref=f9e198]:
+                  - cell "2560" [ref=f9e199]
+                  - cell "9" [ref=f9e200]
+                  - cell "0.00" [ref=f9e201]
+                  - cell "0.00" [ref=f9e202]
+                  - cell "0.00" [ref=f9e203]
+                  - cell "0.00" [ref=f9e204]
+                - row [ref=f9e205]:
+                  - cell "2561" [ref=f9e206]
+                  - cell "6" [ref=f9e207]
+                  - cell "0.00" [ref=f9e208]
+                  - cell "0.00" [ref=f9e209]
+                  - cell "0.00" [ref=f9e210]
+                  - cell "0.00" [ref=f9e211]
+                - row [ref=f9e212]:
+                  - cell "2562" [ref=f9e213]
+                  - cell "80" [ref=f9e214]
+                  - cell "0.00" [ref=f9e215]
+                  - cell "0.00" [ref=f9e216]
+                  - cell "0.00" [ref=f9e217]
+                  - cell "0.00" [ref=f9e218]
+                - row [ref=f9e219]:
+                  - cell "2564" [ref=f9e220]
+                  - cell "323" [ref=f9e221]
+                  - cell "0.00" [ref=f9e222]
+                  - cell "0.00" [ref=f9e223]
+                  - cell "0.00" [ref=f9e224]
+                  - cell "0.00" [ref=f9e225]
+                - row [ref=f9e226]:
+                  - cell "2566" [ref=f9e227]
+                  - cell "175" [ref=f9e228]
+                  - cell "0.00" [ref=f9e229]
+                  - cell "0.00" [ref=f9e230]
+                  - cell "0.00" [ref=f9e231]
+                  - cell "0.00" [ref=f9e232]
+                - row [ref=f9e233]:
+                  - cell "2567" [ref=f9e234]
+                  - cell "1" [ref=f9e235]
+                  - cell "100,000.00" [ref=f9e236]
+                  - cell "20,000.00" [ref=f9e237]
+                  - cell "60,000.00" [ref=f9e238]
+                  - cell "40,000.00" [ref=f9e239]
+          - generic [ref=f9e241]:
+            - generic [ref=f9e242]:
+              - generic [ref=f9e243]: 
+              - text: สรุปแยกตามหมวดหมู่
+            - table [ref=f9e245]:
+              - rowgroup [ref=f9e246]:
+                - row [ref=f9e247]:
+                  - columnheader "หมวดหมู่" [ref=f9e248]
+                  - columnheader "ชิ้น" [ref=f9e249]
+                  - columnheader "ต้นทุน" [ref=f9e250]
+                  - columnheader "สะสม" [ref=f9e251]
+                  - columnheader "คงเหลือ" [ref=f9e252]
+              - rowgroup [ref=f9e253]:
+                - row [ref=f9e254]:
+                  - cell "เครื่องคอมพิวเตอร์และอุปกรณ์ไอที" [ref=f9e255]
+                  - cell "1" [ref=f9e256]
+                  - cell "100,000.00" [ref=f9e257]
+                  - cell "60,000.00" [ref=f9e258]
+                  - cell "40,000.00" [ref=f9e259]
+                - row [ref=f9e260]:
+                  - cell "ไม่ระบุหมวดหมู่" [ref=f9e261]
+                  - cell "820" [ref=f9e262]
+                  - cell "0.00" [ref=f9e263]
+                  - cell "0.00" [ref=f9e264]
+                  - cell "0.00" [ref=f9e265]

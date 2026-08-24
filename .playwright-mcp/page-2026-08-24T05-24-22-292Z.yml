@@ -1,0 +1,271 @@
+- generic [active] [ref=f5e1]:
+  - link "ข้ามไปยังเนื้อหาหลัก" [ref=f5e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation [ref=f5e3]:
+    - generic [ref=f5e4]:
+      - text: 
+      - link " ระบบแจ้งซ่อมครุภัณฑ์" [ref=f5e5] [cursor=pointer]:
+        - /url: http://localhost/P
+        - generic [ref=f5e6]: 
+        - text: ระบบแจ้งซ่อมครุภัณฑ์
+      - button "เปิดเมนูด้านข้าง" [ref=f5e7] [cursor=pointer]:
+        - generic [ref=f5e8]: 
+      - button "สลับโหมดกลางวัน/กลางคืน" [ref=f5e9] [cursor=pointer]:
+        - generic [ref=f5e10]: 
+      - generic [ref=f5e11]:
+        - link " ผู้ดูแลระบบ ทดสอบ ผู้ดูแลระบบ" [ref=f5e12] [cursor=pointer]:
+          - /url: "#"
+          - generic [ref=f5e13]: 
+          - generic [ref=f5e14]: ผู้ดูแลระบบ ทดสอบ
+          - generic [ref=f5e15]: ผู้ดูแลระบบ
+        - text:  
+  - generic [ref=f5e16]:
+    - complementary [ref=f5e17]:
+      - navigation [ref=f5e18]:
+        - generic [ref=f5e19]:
+          - generic [ref=f5e20]: แดชบอร์ด
+          - link " ภาพรวมระบบ" [ref=f5e21] [cursor=pointer]:
+            - /url: http://localhost/P/
+            - generic [ref=f5e22]: 
+            - generic [ref=f5e23]: ภาพรวมระบบ
+        - generic [ref=f5e24]:
+          - generic [ref=f5e25]: จัดการข้อมูลพื้นฐาน
+          - link " สาขาวิชา" [ref=f5e26] [cursor=pointer]:
+            - /url: http://localhost/P/departments
+            - generic [ref=f5e27]: 
+            - generic [ref=f5e28]: สาขาวิชา
+          - link " ชุดครุภัณฑ์" [ref=f5e29] [cursor=pointer]:
+            - /url: http://localhost/P/sets
+            - generic [ref=f5e30]: 
+            - generic [ref=f5e31]: ชุดครุภัณฑ์
+          - link " รายการครุภัณฑ์ทั้งหมด" [ref=f5e32] [cursor=pointer]:
+            - /url: http://localhost/P/items
+            - generic [ref=f5e33]: 
+            - generic [ref=f5e34]: รายการครุภัณฑ์ทั้งหมด
+          - link " ห้อง/สถานที่" [ref=f5e35] [cursor=pointer]:
+            - /url: http://localhost/P/rooms
+            - generic [ref=f5e36]: 
+            - generic [ref=f5e37]: ห้อง/สถานที่
+        - generic [ref=f5e38]:
+          - generic [ref=f5e39]: ครุภัณฑ์
+          - link " ทะเบียนครุภัณฑ์" [ref=f5e40] [cursor=pointer]:
+            - /url: http://localhost/P/equipment
+            - generic [ref=f5e41]: 
+            - generic [ref=f5e42]: ทะเบียนครุภัณฑ์
+          - link " รายการจำหน่าย/แทงจำหน่าย" [ref=f5e43] [cursor=pointer]:
+            - /url: http://localhost/P/equipment/disposal
+            - generic [ref=f5e44]: 
+            - generic [ref=f5e45]: รายการจำหน่าย/แทงจำหน่าย
+          - link " การตรวจนับครุภัณฑ์ประจำปี" [ref=f5e46] [cursor=pointer]:
+            - /url: http://localhost/P/equipment/inspection
+            - generic [ref=f5e47]: 
+            - generic [ref=f5e48]: การตรวจนับครุภัณฑ์ประจำปี
+        - generic [ref=f5e49]:
+          - generic [ref=f5e50]: ซ่อมบำรุง
+          - link " รายการแจ้งซ่อมทั้งหมด 2" [ref=f5e51] [cursor=pointer]:
+            - /url: http://localhost/P/repairs
+            - generic [ref=f5e52]: 
+            - generic [ref=f5e53]: รายการแจ้งซ่อมทั้งหมด
+            - generic [ref=f5e54]: "2"
+        - generic [ref=f5e55]:
+          - generic [ref=f5e56]: ค่าเสื่อมราคา
+          - link " คำนวณค่าเสื่อมราคา" [ref=f5e57] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation
+            - generic [ref=f5e58]: 
+            - generic [ref=f5e59]: คำนวณค่าเสื่อมราคา
+          - link " รายงานค่าเสื่อมราคา" [ref=f5e60] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/report
+            - generic [ref=f5e61]: 
+            - generic [ref=f5e62]: รายงานค่าเสื่อมราคา
+          - link " ตั้งค่าเกณฑ์ค่าเสื่อมราคา" [ref=f5e63] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation/settings
+            - generic [ref=f5e64]: 
+            - generic [ref=f5e65]: ตั้งค่าเกณฑ์ค่าเสื่อมราคา
+        - generic [ref=f5e66]:
+          - generic [ref=f5e67]: ความพึงพอใจ
+          - link " สรุปความพึงพอใจ" [ref=f5e68] [cursor=pointer]:
+            - /url: http://localhost/P/satisfaction
+            - generic [ref=f5e69]: 
+            - generic [ref=f5e70]: สรุปความพึงพอใจ
+        - generic [ref=f5e71]:
+          - generic [ref=f5e72]: ผู้ใช้งาน
+          - link " ผู้ใช้งานรออนุมัติ" [ref=f5e73] [cursor=pointer]:
+            - /url: http://localhost/P/users/pending
+            - generic [ref=f5e74]: 
+            - generic [ref=f5e75]: ผู้ใช้งานรออนุมัติ
+        - generic [ref=f5e76]:
+          - generic [ref=f5e77]: จัดการผู้ใช้
+          - link " จัดการบัญชีผู้ใช้งาน" [ref=f5e78] [cursor=pointer]:
+            - /url: http://localhost/P/users
+            - generic [ref=f5e79]: 
+            - generic [ref=f5e80]: จัดการบัญชีผู้ใช้งาน
+          - link " กำหนดผู้ดูแลห้อง" [ref=f5e81] [cursor=pointer]:
+            - /url: http://localhost/P/room-managers
+            - generic [ref=f5e82]: 
+            - generic [ref=f5e83]: กำหนดผู้ดูแลห้อง
+        - generic [ref=f5e84]:
+          - generic [ref=f5e85]: รายงาน
+          - link " รายงานและสถิติ" [ref=f5e86] [cursor=pointer]:
+            - /url: http://localhost/P/reports
+            - generic [ref=f5e87]: 
+            - generic [ref=f5e88]: รายงานและสถิติ
+        - generic [ref=f5e89]:
+          - generic [ref=f5e90]: ระบบ
+          - link " สำรองข้อมูล" [ref=f5e91] [cursor=pointer]:
+            - /url: http://localhost/P/backup
+            - generic [ref=f5e92]: 
+            - generic [ref=f5e93]: สำรองข้อมูล
+          - link " ประวัติการใช้งานระบบ" [ref=f5e94] [cursor=pointer]:
+            - /url: http://localhost/P/logs
+            - generic [ref=f5e95]: 
+            - generic [ref=f5e96]: ประวัติการใช้งานระบบ
+    - main [ref=f5e97]:
+      - generic [ref=f5e98]:
+        - alert [ref=f5e99]:
+          - text: บันทึกเกณฑ์ค่าเสื่อม 5 หมวดหมู่สำเร็จ
+          - button "ปิด" [ref=f5e100] [cursor=pointer]
+        - generic [ref=f5e101]:
+          - generic [ref=f5e102]:
+            - heading " ตั้งค่าเกณฑ์ค่าเสื่อมราคา" [level=1] [ref=f5e103]:
+              - generic [ref=f5e104]: 
+              - text: ตั้งค่าเกณฑ์ค่าเสื่อมราคา
+            - navigation "breadcrumb" [ref=f5e105]:
+              - list [ref=f5e106]:
+                - listitem [ref=f5e107]:
+                  - link "แดชบอร์ด" [ref=f5e108] [cursor=pointer]:
+                    - /url: http://localhost/P/
+                - listitem [ref=f5e109]:
+                  - text: /
+                  - link "ค่าเสื่อมราคา" [ref=f5e110] [cursor=pointer]:
+                    - /url: http://localhost/P/depreciation
+                - listitem [ref=f5e111]: / ตั้งค่าเกณฑ์
+          - link " กลับหน้าคำนวณ" [ref=f5e112] [cursor=pointer]:
+            - /url: http://localhost/P/depreciation
+            - generic [ref=f5e113]: 
+            - text: กลับหน้าคำนวณ
+        - generic [ref=f5e114]:
+          - generic [ref=f5e116]:
+            - generic [ref=f5e117]:
+              - generic [ref=f5e118]: 
+              - text: หมวดหมู่ครุภัณฑ์
+            - generic [ref=f5e119]:
+              - generic [ref=f5e120]:
+                - textbox "ชื่อหมวดหมู่ใหม่ *" [ref=f5e122]
+                - textbox "หมายเหตุ (ถ้ามี)" [ref=f5e124]
+                - button " เพิ่มหมวดหมู่" [ref=f5e126] [cursor=pointer]:
+                  - generic [ref=f5e127]: 
+                  - text: เพิ่มหมวดหมู่
+              - table [ref=f5e128]:
+                - rowgroup [ref=f5e129]:
+                  - row [ref=f5e130]:
+                    - columnheader "หมวดหมู่" [ref=f5e131]
+                    - columnheader [ref=f5e132]
+                - rowgroup [ref=f5e133]:
+                  - row [ref=f5e134]:
+                    - cell [ref=f5e135]:
+                      - generic [ref=f5e136]:
+                        - textbox [ref=f5e137]: ยานพาหนะ
+                        - textbox "หมายเหตุ" [ref=f5e138]: รถยนต์ รถตู้ รถจักรยานยนต์
+                    - cell [ref=f5e139]:
+                      - button "" [ref=f5e140] [cursor=pointer]
+                      - button "" [ref=f5e143] [cursor=pointer]
+                  - row [ref=f5e145]:
+                    - cell [ref=f5e146]:
+                      - generic [ref=f5e147]:
+                        - textbox [ref=f5e148]: อุปกรณ์ทดลองวิทยาศาสตร์
+                        - textbox "หมายเหตุ" [ref=f5e149]: เครื่องมือวิทยาศาสตร์/อุปกรณ์ห้องปฏิบัติการ
+                    - cell [ref=f5e150]:
+                      - button "" [ref=f5e151] [cursor=pointer]
+                      - button "" [ref=f5e154] [cursor=pointer]
+                  - row [ref=f5e156]:
+                    - cell [ref=f5e157]:
+                      - generic [ref=f5e158]:
+                        - textbox [ref=f5e159]: เครื่องคอมพิวเตอร์และอุปกรณ์ไอที
+                        - textbox "หมายเหตุ" [ref=f5e160]: คอมพิวเตอร์ โน้ตบุ๊ก เซิร์ฟเวอร์ อุปกรณ์เครือข่าย
+                    - cell [ref=f5e161]:
+                      - button "" [ref=f5e162] [cursor=pointer]
+                      - button "" [ref=f5e165] [cursor=pointer]
+                  - row [ref=f5e167]:
+                    - cell [ref=f5e168]:
+                      - generic [ref=f5e169]:
+                        - textbox [ref=f5e170]: เครื่องจักรและเครื่องมือช่าง
+                        - textbox "หมายเหตุ" [ref=f5e171]: เครื่องจักรกล เครื่องมือช่าง
+                    - cell [ref=f5e172]:
+                      - button "" [ref=f5e173] [cursor=pointer]
+                      - button "" [ref=f5e176] [cursor=pointer]
+                  - row [ref=f5e178]:
+                    - cell [ref=f5e179]:
+                      - generic [ref=f5e180]:
+                        - textbox [ref=f5e181]: เฟอร์นิเจอร์และของใช้สำนักงาน
+                        - textbox "หมายเหตุ" [ref=f5e182]: โต๊ะ เก้าอี้ ตู้ เคาน์เตอร์
+                    - cell [ref=f5e183]:
+                      - button "" [ref=f5e184] [cursor=pointer]
+                      - button "" [ref=f5e187] [cursor=pointer]
+          - generic [ref=f5e190]:
+            - generic [ref=f5e191]:
+              - generic [ref=f5e192]: 
+              - text: เกณฑ์อายุการใช้งานและ % ค่าเสื่อมต่อหมวดหมู่
+            - generic [ref=f5e194]:
+              - table [ref=f5e196]:
+                - rowgroup [ref=f5e197]:
+                  - row [ref=f5e198]:
+                    - columnheader "หมวดหมู่" [ref=f5e199]
+                    - columnheader "อายุ (ปี)" [ref=f5e200]
+                    - columnheader "%/ปี" [ref=f5e201]
+                    - columnheader "วิธีคิด" [ref=f5e202]
+                - rowgroup [ref=f5e203]:
+                  - row [ref=f5e204]:
+                    - cell "ยานพาหนะ" [ref=f5e205]
+                    - cell [ref=f5e206]:
+                      - spinbutton [ref=f5e207]: "8"
+                    - cell [ref=f5e208]:
+                      - spinbutton [ref=f5e209]: "12.5"
+                    - cell "เส้นตรง" [ref=f5e210]:
+                      - combobox [ref=f5e211]:
+                        - option "เส้นตรง" [selected]
+                        - option "ลดยอดคงเหลือ"
+                  - row [ref=f5e212]:
+                    - cell "อุปกรณ์ทดลองวิทยาศาสตร์" [ref=f5e213]
+                    - cell [ref=f5e214]:
+                      - spinbutton [ref=f5e215]: "10"
+                    - cell [ref=f5e216]:
+                      - spinbutton [ref=f5e217]: "10"
+                    - cell "เส้นตรง" [ref=f5e218]:
+                      - combobox [ref=f5e219]:
+                        - option "เส้นตรง" [selected]
+                        - option "ลดยอดคงเหลือ"
+                  - row [ref=f5e220]:
+                    - cell "เครื่องคอมพิวเตอร์และอุปกรณ์ไอที" [ref=f5e221]
+                    - cell [ref=f5e222]:
+                      - spinbutton [ref=f5e223]: "4"
+                    - cell [ref=f5e224]:
+                      - spinbutton [ref=f5e225]: "20"
+                    - cell "เส้นตรง" [ref=f5e226]:
+                      - combobox [ref=f5e227]:
+                        - option "เส้นตรง" [selected]
+                        - option "ลดยอดคงเหลือ"
+                  - row [ref=f5e228]:
+                    - cell "เครื่องจักรและเครื่องมือช่าง" [ref=f5e229]
+                    - cell [ref=f5e230]:
+                      - spinbutton [ref=f5e231]: "10"
+                    - cell [ref=f5e232]:
+                      - spinbutton [ref=f5e233]: "10"
+                    - cell "เส้นตรง" [ref=f5e234]:
+                      - combobox [ref=f5e235]:
+                        - option "เส้นตรง" [selected]
+                        - option "ลดยอดคงเหลือ"
+                  - row [ref=f5e236]:
+                    - cell "เฟอร์นิเจอร์และของใช้สำนักงาน" [ref=f5e237]
+                    - cell [ref=f5e238]:
+                      - spinbutton [ref=f5e239]: "10"
+                    - cell [ref=f5e240]:
+                      - spinbutton [ref=f5e241]: "10"
+                    - cell "เส้นตรง" [ref=f5e242]:
+                      - combobox [ref=f5e243]:
+                        - option "เส้นตรง" [selected]
+                        - option "ลดยอดคงเหลือ"
+              - generic [ref=f5e244]:
+                - button " บันทึกเกณฑ์ทั้งหมด" [ref=f5e245] [cursor=pointer]:
+                  - generic [ref=f5e246]: 
+                  - text: บันทึกเกณฑ์ทั้งหมด
+                - generic [ref=f5e247]: "* การเปลี่ยนเกณฑ์มีผลทันทีกับการคำนวณทุกหน้า"
