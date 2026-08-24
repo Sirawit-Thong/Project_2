@@ -328,3 +328,21 @@ function uploadImage($file, $folder = 'equipment')
 
 function page404() { ErrorHandler::page404(); }
 function page403() { ErrorHandler::page403(); }
+
+// ============================================
+// Depreciation Report Helpers
+// ============================================
+
+/**
+ * แปลง reason ที่คำนวณค่าเสื่อมไม่ได้ เป็นข้อความไทยแสดงในตาราง
+ */
+function translateDepReason(?string $reason): string
+{
+    $map = [
+        'no_price'     => 'ไม่มีราคาต้นทุน',
+        'invalid_year' => 'ปีที่จัดซื้อไม่ถูกต้อง',
+        'invalid_life' => 'ยังไม่ได้กำหนดเกณฑ์อายุการใช้งาน',
+        'invalid_rate' => 'เกณฑ์เปอร์เซ็นต์ค่าเสื่อมไม่ถูกต้อง',
+    ];
+    return $map[$reason] ?? '-';
+}
