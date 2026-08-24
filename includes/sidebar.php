@@ -15,9 +15,9 @@ $requestUri = rtrim($requestUri, '/') ?: '/';
 
 // path ทั้งหมดที่เมนูของแต่ละ role ใช้ตรวจ active
 $roleLinks = [
-    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
-    'staff'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/users/pending'],
-    'teacher' => ['/', '/repairs/submit', '/repairs/mine', '/equipment', '/teacher/report'],
+    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
+    'staff'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/users/pending'],
+    'teacher' => ['/', '/repairs/submit', '/repairs/mine', '/equipment', '/teacher/report', '/depreciation/my'],
     'student' => ['/', '/repairs/submit', '/repairs/mine'],
 ];
 $roleLinks = $roleLinks[$role] ?? [];
@@ -129,6 +129,24 @@ if (in_array($role, ['admin', 'staff'], true)) {
                         <span class="badge bg-warning text-dark"><?= $pendingRepairCount ?></span>
                     <?php endif; ?>
                 </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">ค่าเสื่อมราคา</span>
+                <a href="<?= SITE_URL ?>/depreciation" <?= sidebarNavLink('/depreciation') ?>>
+                    <i class="bi bi-calculator"></i>
+                    <span>คำนวณค่าเสื่อมราคา</span>
+                </a>
+                <a href="<?= SITE_URL ?>/depreciation/report" <?= sidebarNavLink('/depreciation/report') ?>>
+                    <i class="bi bi-graph-down"></i>
+                    <span>รายงานค่าเสื่อมราคา</span>
+                </a>
+                <?php if ($role === 'admin'): ?>
+                    <a href="<?= SITE_URL ?>/depreciation/settings" <?= sidebarNavLink('/depreciation/settings') ?>>
+                        <i class="bi bi-sliders"></i>
+                        <span>ตั้งค่าเกณฑ์ค่าเสื่อมราคา</span>
+                    </a>
+                <?php endif; ?>
             </div>
 
             <div class="nav-section">

@@ -56,6 +56,17 @@ $router->get('/repairs/{id}', 'RepairController@detail');
 $router->post('/repairs/{id}', 'RepairController@detail');
 
 // ============================================
+// Depreciation Routes (ค่าเสื่อมราคา)
+// ============================================
+$router->get('/depreciation', 'DepreciationController@index');
+$router->get('/depreciation/settings', 'DepreciationController@settings');
+$router->post('/depreciation/settings', 'DepreciationController@settings');
+$router->get('/depreciation/report', 'DepreciationController@report');
+$router->get('/depreciation/export', 'DepreciationController@export');
+$router->get('/depreciation/my', 'DepreciationController@my');
+$router->get('/depreciation/my/export', 'DepreciationController@myExport');
+
+// ============================================
 // Teacher Report Routes
 // ============================================
 $router->get('/teacher/report', 'DashboardController@teacherReport');
