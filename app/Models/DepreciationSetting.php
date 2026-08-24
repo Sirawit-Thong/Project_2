@@ -22,7 +22,7 @@ class DepreciationSetting extends Model
 
     public static function findByCategoryId(int $categoryId): ?array
     {
-        return self::findBy('category_id', $categoryId);
+        return self::findBy(static::$table, 'category_id', $categoryId);
     }
 
     /**
