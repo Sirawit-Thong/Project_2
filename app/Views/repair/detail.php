@@ -159,6 +159,47 @@
             </div>
         </div>
 
+        <!-- Satisfaction Survey (1.3.2.11) -->
+        <?php if ($repair['status'] === 'completed'): ?>
+            <div class="card mb-4 border-warning">
+                <div class="card-header"><i class="bi bi-star me-2"></i>ประเมินความพึงพอใจงานซ่อม</div>
+                <div class="card-body">
+                    <?php if ($survey): ?>
+                        <p class="mb-1">
+                            ท่านให้คะแนนไว้:
+                            <?php for ($s = 1; $s <= 5; $s++): ?>
+                                <i class="bi bi-star<?= $s <= (int) $survey['rating'] ? '-fill' : '' ?> text-warning"></i>
+                            <?php endfor; ?>
+                            (<?= (int) $survey['rating'] ?>/5)
+                        </p>
+                        <?php if (!empty($survey['comment'])): ?>
+                            <p class="mb-0 text-muted"><i class="bi bi-chat-left-text me-1"></i><?= nl2br(htmlspecialchars($survey['comment'])) ?></p>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <p class="text-muted">กรุณาให้คะแนนความพึงพอใจและคำติชม เพื่อนำไปปรับปรุงคุณภาพการบริการบำรุงรักษาครุภัณฑ์</p>
+                        <form method="POST" action="<?= SITE_URL ?>/satisfaction/submit/<?= (int) $repair['id'] ?>">
+                            <?= csrf_field() ?>
+                            <div class="mb-3">
+                                <label class="form-label d-block">ระดับความพึงพอใจ <span class="text-danger">*</span></label>
+                                <?php foreach ([5 => 'ดีมาก', 4 => 'ดี', 3 => 'ปานกลาง', 2 => 'พอใช้', 1 => 'ควรปรับปรุง'] as $val => $label): ?>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rating" value="<?= $val ?>" id="rate<?= $val ?>" required>
+                                        <label class="form-check-label" for="rate<?= $val ?>"><?= $val ?> - <?= $label ?></label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="surveyComment">คำติชม / ข้อเสนอแนะ (ถ้ามี)</label>
+                                <textarea class="form-control" id="surveyComment" name="comment" rows="3" maxlength="1000"
+                                    placeholder="แสดงความคิดเห็นเกี่ยวกับการซ่อมบำรุงครั้งนี้..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning"><i class="bi bi-send me-1"></i>ส่งแบบประเมิน</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Images -->
         <div class="card">
             <div class="card-header">

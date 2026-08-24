@@ -35,6 +35,10 @@
                                 <td class="hide-mobile"><?= mb_substr(htmlspecialchars($r['issue']), 0, 50) ?>...</td>
                                 <td><span
                                         class="badge bg-<?= getStatusBadgeClass($r['status']) ?>"><?= translateRepairStatus($r['status']) ?></span>
+                                    <?php if ($r['status'] === 'completed' && empty($r['survey_id'])): ?>
+                                        <br><a href="<?= SITE_URL ?>/repairs/<?= $r['id'] ?>"
+                                               class="btn btn-sm btn-warning mt-1"><i class="bi bi-star me-1"></i>ประเมินความพึงพอใจ</a>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="hide-mobile"><?= formatDateTimeThai($r['created_at']) ?></td>
                                 <td>

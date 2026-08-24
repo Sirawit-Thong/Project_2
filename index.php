@@ -67,6 +67,13 @@ $router->get('/depreciation/my', 'DepreciationController@my');
 $router->get('/depreciation/my/export', 'DepreciationController@myExport');
 
 // ============================================
+// Satisfaction Routes (ความพึงพอใจ)
+// ============================================
+$router->post('/satisfaction/submit/{id}', 'SatisfactionController@submit');
+$router->get('/satisfaction', 'SatisfactionController@dashboard');
+$router->get('/satisfaction/export', 'SatisfactionController@export');
+
+// ============================================
 // Teacher Report Routes
 // ============================================
 $router->get('/teacher/report', 'DashboardController@teacherReport');

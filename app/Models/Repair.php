@@ -116,10 +116,12 @@ class Repair extends Model
 
     public static function getByUser($userId)
     {
-        $sql = "SELECT r.*, e.code AS eq_code, i.name AS item_name, i.brand, i.model
+        $sql = "SELECT r.*, e.code AS eq_code, i.name AS item_name, i.brand, i.model,
+                ss.id AS survey_id
             FROM repair r
             LEFT JOIN equipment e ON r.equipment_id = e.id
             LEFT JOIN items i ON e.item_id = i.id
+            LEFT JOIN satisfaction_surveys ss ON ss.repair_id = r.id
             WHERE r.user_id = ?
             ORDER BY r.created_at DESC";
         return self::fetchAll($sql, [$userId]);

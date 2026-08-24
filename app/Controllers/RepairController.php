@@ -120,6 +120,7 @@ class RepairController extends Controller
 
         $images = Repair::getImages($id);
         $isAdmin = in_array($role, ['admin', 'staff'], true);
+        $survey = !$isAdmin && $repair['status'] === 'completed' ? Satisfaction::getByRepairId((int) $repair['id']) : null;
         $pageTitle = ($isAdmin ? 'รายละเอียดการแจ้งซ่อม' : 'รายละเอียดการแจ้งซ่อมบำรุง') . ' #' . $repair['id'];
         $viewPath = $isAdmin ? 'repair/detail_admin' : 'repair/detail';
 
