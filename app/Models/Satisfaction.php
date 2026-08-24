@@ -50,7 +50,7 @@ class Satisfaction extends Model
 
         $stats = [];
         for ($i = $months - 1; $i >= 0; $i--) {
-            $date = new DateTime();
+            $date = new DateTime(date('Y-m-01'));
             $date->modify("-{$i} months");
             $ym = $date->format('Y-m');
             $stats[] = [

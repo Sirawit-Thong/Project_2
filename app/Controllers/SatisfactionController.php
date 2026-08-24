@@ -49,4 +49,48 @@ class SatisfactionController extends Controller
         }
         $this->redirect($backUrl);
     }
+
+    /**
+     * 1.3.2.11-2: Dashboard สรุปคะแนนเฉลี่ยรายเดือน (admin/staff)
+     */
+    public function dashboard()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $monthly = Satisfaction::getMonthlyStats(12);
+        $overall = Satisfaction::getOverall();
+        $responseRate = Satisfaction::responseRate();
+        $completed = Satisfaction::completedRepairCount();
+        $recent = Satisfaction::getRecent(20);
+
+        $pageTitle = 'สรุปความพึงพอใจงานซ่อมบำรุง';
+        $viewPath = 'satisfaction/dashboard';
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function export()
+    {
+        $this->requireLogin();
+        $this->authorize(['admin', 'staff']);
+
+        $rows = Satisfaction::getAllForExport();
+        logActivity(getCurrentUserId(), 'Export Satisfaction Surveys', count($rows) . ' รายการ');
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="satisfaction_' . date('Y-m-d') . '.csv"');
+        echo "\xEF\xBB\xBF";
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['ID', 'ใบซ่อม #', 'ครุภัณฑ์', 'รายการ', 'ผู้ประเมิน', 'บทบาท', 'คะแนน', 'ความคิดเห็น', 'วันที่ประเมิน']);
+        foreach ($rows as $r) {
+            fputcsv($output, [
+                $r['id'], $r['repair_id'], $r['eq_code'], $r['item_name'],
+                trim(($r['firstname'] ?? '') . ' ' . ($r['lastname'] ?? '')),
+                translateRole($r['role'] ?? ''),
+                $r['rating'], $r['comment'], formatDateTimeThai($r['created_at']),
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
 }

@@ -15,8 +15,8 @@ $requestUri = rtrim($requestUri, '/') ?: '/';
 
 // path ทั้งหมดที่เมนูของแต่ละ role ใช้ตรวจ active
 $roleLinks = [
-    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
-    'staff'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/users/pending'],
+    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/satisfaction', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
+    'staff'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/satisfaction', '/users/pending'],
     'teacher' => ['/', '/repairs/submit', '/repairs/mine', '/equipment', '/teacher/report', '/depreciation/my'],
     'student' => ['/', '/repairs/submit', '/repairs/mine'],
 ];
@@ -147,6 +147,14 @@ if (in_array($role, ['admin', 'staff'], true)) {
                         <span>ตั้งค่าเกณฑ์ค่าเสื่อมราคา</span>
                     </a>
                 <?php endif; ?>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">ความพึงพอใจ</span>
+                <a href="<?= SITE_URL ?>/satisfaction" <?= sidebarNavLink('/satisfaction') ?>>
+                    <i class="bi bi-emoji-smile"></i>
+                    <span>สรุปความพึงพอใจ</span>
+                </a>
             </div>
 
             <div class="nav-section">
