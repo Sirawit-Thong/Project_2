@@ -226,6 +226,10 @@ if (in_array($role, ['admin', 'staff'], true)) {
                     <i class="bi bi-bar-chart"></i>
                     <span>รายงานสรุป</span>
                 </a>
+                <a href="<?= SITE_URL ?>/depreciation/my" <?= sidebarNavLink('/depreciation/my') ?>>
+                    <i class="bi bi-calculator"></i>
+                    <span>ค่าเสื่อมราคาครุภัณฑ์ที่ดูแล</span>
+                </a>
             </div>
 
         <?php elseif ($role === 'student'): ?>

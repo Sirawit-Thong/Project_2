@@ -186,4 +186,48 @@ class DepreciationController extends Controller
         fclose($output);
         exit;
     }
+
+    /**
+     * 1.3.2.10-2: ค่าเสื่อมครุภัณฑ์ในความดูแลของอาจารย์
+     */
+    public function my()
+    {
+        $this->requireLogin();
+        $this->authorize(['teacher']);
+
+        $rows = DepreciationReport::getEquipmentRows([], getCurrentUserId());
+        $totals = DepreciationReport::totals($rows);
+
+        $pageTitle = 'ค่าเสื่อมราคาครุภัณฑ์ในความดูแล';
+        $viewPath = 'depreciation/my';
+        require __DIR__ . '/../Views/layouts/main.php';
+    }
+
+    public function myExport()
+    {
+        $this->requireLogin();
+        $this->authorize(['teacher']);
+
+        $rows = DepreciationReport::getEquipmentRows([], getCurrentUserId());
+        logActivity(getCurrentUserId(), 'Export My Depreciation', count($rows) . ' รายการ');
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="my_depreciation_' . date('Y-m-d') . '.csv"');
+        echo "\xEF\xBB\xBF";
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['รหัส', 'รายการ', 'หมวดหมู่', 'ห้อง', 'ปีจัดซื้อ (พ.ศ.)', 'ราคาต้นทุน', 'ค่าเสื่อม/ปี', 'ผ่านมา (ปี)', 'ค่าเสื่อมสะสม', 'มูลค่าคงเหลือ', 'หมายเหตุ']);
+        foreach ($rows as $r) {
+            fputcsv($output, [
+                $r['code'], $r['item_name'], $r['category_name'] ?? '-', $r['room_name'] ?? '-',
+                $r['set_year'], number_format((float) $r['price'], 2),
+                $r['dep_ok'] ? number_format($r['annual_dep'], 2) : '-',
+                $r['dep_ok'] ? $r['years_elapsed'] : '-',
+                $r['dep_ok'] ? number_format($r['accumulated'], 2) : '-',
+                $r['dep_ok'] ? number_format($r['nbv'], 2) : '-',
+                $r['dep_ok'] ? '' : translateDepReason($r['dep_reason']),
+            ]);
+        }
+        fclose($output);
+        exit;
+    }
 }
