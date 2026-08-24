@@ -101,10 +101,10 @@
 
 <script>
 (function () {
-    const labels = <?= json_encode(array_map(fn($y) => $y['year'], $byYear), JSON_UNESCAPED_UNICODE) ?>;
-    const annual = <?= json_encode(array_map(fn($y) => round((float) $y['total_annual'], 2), $byYear)) ?>;
-    const acc = <?= json_encode(array_map(fn($y) => round((float) $y['total_accumulated'], 2), $byYear)) ?>;
-    const nbv = <?= json_encode(array_map(fn($y) => round((float) $y['total_nbv'], 2), $byYear)) ?>;
+    const labels = <?= json_encode(array_map(fn($y) => $y['year'], $byYear), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const annual = <?= json_encode(array_map(fn($y) => round((float) $y['total_annual'], 2), $byYear), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const acc = <?= json_encode(array_map(fn($y) => round((float) $y['total_accumulated'], 2), $byYear), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const nbv = <?= json_encode(array_map(fn($y) => round((float) $y['total_nbv'], 2), $byYear), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 
     new Chart(document.getElementById('chartAnnual'), {
         type: 'bar',

@@ -346,3 +346,15 @@ function translateDepReason(?string $reason): string
     ];
     return $map[$reason] ?? '-';
 }
+
+/**
+ * ป้องกัน CSV Formula Injection — เติม ' นำหน้าค่าที่ขึ้นต้นด้วย = + - @ TAB CR
+ * (Excel จะถือเป็นข้อความ ไม่รันเป็นสูตร)
+ */
+function csvSafe($value)
+{
+    if (is_string($value) && $value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+        return "'" . $value;
+    }
+    return $value;
+}

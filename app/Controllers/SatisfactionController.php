@@ -83,12 +83,12 @@ class SatisfactionController extends Controller
         $output = fopen('php://output', 'w');
         fputcsv($output, ['ID', 'ใบซ่อม #', 'ครุภัณฑ์', 'รายการ', 'ผู้ประเมิน', 'บทบาท', 'คะแนน', 'ความคิดเห็น', 'วันที่ประเมิน']);
         foreach ($rows as $r) {
-            fputcsv($output, [
+            fputcsv($output, array_map('csvSafe', [
                 $r['id'], $r['repair_id'], $r['eq_code'], $r['item_name'],
                 trim(($r['firstname'] ?? '') . ' ' . ($r['lastname'] ?? '')),
                 translateRole($r['role'] ?? ''),
                 $r['rating'], $r['comment'], formatDateTimeThai($r['created_at']),
-            ]);
+            ]));
         }
         fclose($output);
         exit;

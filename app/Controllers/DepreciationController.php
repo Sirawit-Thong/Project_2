@@ -75,6 +75,9 @@ class DepreciationController extends Controller
                 }
             } elseif ($action === 'save_setting') {
                 $bulk = $_POST['setting'] ?? [];
+                if (!is_array($bulk)) {
+                    $bulk = [];
+                }
                 $saved = 0;
                 foreach ($bulk as $categoryId => $cfg) {
                     $categoryId = (int) $categoryId;
@@ -181,7 +184,7 @@ class DepreciationController extends Controller
         $output = fopen('php://output', 'w');
         fputcsv($output, $header);
         foreach ($data as $row) {
-            fputcsv($output, $lineFn($row));
+            fputcsv($output, array_map('csvSafe', $lineFn($row)));
         }
         fclose($output);
         exit;
@@ -217,7 +220,7 @@ class DepreciationController extends Controller
         $output = fopen('php://output', 'w');
         fputcsv($output, ['รหัส', 'รายการ', 'หมวดหมู่', 'ห้อง', 'ปีจัดซื้อ (พ.ศ.)', 'ราคาต้นทุน', 'ค่าเสื่อม/ปี', 'ผ่านมา (ปี)', 'ค่าเสื่อมสะสม', 'มูลค่าคงเหลือ', 'หมายเหตุ']);
         foreach ($rows as $r) {
-            fputcsv($output, [
+            fputcsv($output, array_map('csvSafe', [
                 $r['code'], $r['item_name'], $r['category_name'] ?? '-', $r['room_name'] ?? '-',
                 $r['set_year'], number_format((float) $r['price'], 2),
                 $r['dep_ok'] ? number_format($r['annual_dep'], 2) : '-',
@@ -225,7 +228,7 @@ class DepreciationController extends Controller
                 $r['dep_ok'] ? number_format($r['accumulated'], 2) : '-',
                 $r['dep_ok'] ? number_format($r['nbv'], 2) : '-',
                 $r['dep_ok'] ? '' : translateDepReason($r['dep_reason']),
-            ]);
+            ]));
         }
         fclose($output);
         exit;
