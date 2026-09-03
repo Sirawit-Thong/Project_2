@@ -69,24 +69,15 @@ if ($dbSize !== null) {
 }
 ?>
 
-<!-- Alert อธิบายความต่างระหว่าง สำรองฐานข้อมูล vs สำรองไฟล์แนบ -->
+<!-- Alert สำรองฐานข้อมูล -->
 <div class="alert alert-info d-flex align-items-start" role="alert">
     <i class="bi bi-info-circle flex-shrink-0 me-3 fs-4" aria-hidden="true"></i>
     <div>
-        <h6 class="alert-heading mb-1"><i class="bi bi-info-circle me-1"></i>ความแตกต่างระหว่าง สำรองฐานข้อมูล vs สำรองไฟล์แนบ</h6>
-        <ul class="mb-1 ps-3 small">
-            <li><strong>สำรองฐานข้อมูล (.sql / .sql.gz)</strong> — ไฟล์ SQL dump ประกอบด้วยโครงสร้างและข้อมูลทั้ง 14 ตาราง (ผู้ใช้งาน, สาขา, หมวดหมู่ครุภัณฑ์, เกณฑ์ค่าเสื่อมราคา, ชุดครุภัณฑ์, รายการครุภัณฑ์, ห้อง, ผู้รับผิดชอบห้อง, ครุภัณฑ์, รูปครุภัณฑ์, รายการแจ้งซ่อม, รูปงานซ่อม, แบบประเมินความพึงพอใจ, บันทึกระบบ) ใช้กู้คืนผ่าน phpMyAdmin หรือ CLI <code>mysql</code></li>
-            <li><strong>สำรองไฟล์แนบ (uploads.zip)</strong> — ไฟล์ ZIP ของโฟลเดอร์ <code>uploads/</code> ประกอบด้วยรูปครุภัณฑ์ (<code>uploads/equipment/</code>) และรูปงานซ่อม (<code>uploads/repairs/</code>) ซึ่ง <em>ไม่อยู่ในไฟล์ SQL</em> ต้องสำรองแยกและแตกไฟล์กลับไปที่เดิมเมื่อกู้คืน</li>
-        </ul>
-        <small class="text-muted">คำแนะนำ: ควรสำรอง <strong>ทั้งสองอย่าง</strong> ทุกครั้งหลังมีการเปลี่ยนแปลงสำคัญ และทดสอบกู้คืนเป็นระยะ</small>
+        <h6 class="alert-heading mb-1"><i class="bi bi-info-circle me-1"></i>สำรองฐานข้อมูล</h6>
+        <p class="mb-1 small">ไฟล์ SQL dump ประกอบด้วยโครงสร้างและข้อมูลทั้ง 14 ตาราง (ผู้ใช้งาน, สาขา, หมวดหมู่ครุภัณฑ์, เกณฑ์ค่าเสื่อมราคา, ชุดครุภัณฑ์, รายการครุภัณฑ์, ห้อง, ผู้รับผิดชอบห้อง, ครุภัณฑ์, รูปครุภัณฑ์, รายการแจ้งซ่อม, รูปงานซ่อม, แบบประเมินความพึงพอใจ, บันทึกระบบ) ใช้กู้คืนผ่าน phpMyAdmin หรือ CLI <code>mysql</code></p>
+        <small class="text-muted">คำแนะนำ: สำรองเป็นระยะและเก็บไว้อย่างน้อย 2 ที่</small>
     </div>
 </div>
-
-<div class="card mb-4"><div class="card-body text-center">
-  <i class="bi bi-files fs-1 text-warning"></i>
-  <p>สำรองรูปจำนวนมากแบบทีละไฟล์ (InfinityFree)</p>
-  <a href="<?= SITE_URL ?>/backup/filebyfile" class="btn btn-warning">ไปหน้าสำรองทีละไฟล์</a>
-</div></div>
 
 <div class="row g-4">
     <!-- Card 1: ดาวน์โหลด Backup SQL + GZIP -->
@@ -113,29 +104,6 @@ if ($dbSize !== null) {
                 <small class="text-muted d-block mt-2">ไฟล์ GZIP จะถูกส่งแบบบีบอัดหากเซิร์ฟเวอร์รองรับ (ประหยัดแบนด์วิธ)</small>
                 <div class="mt-auto pt-3 small text-muted text-start bg-light rounded p-2">
                     <i class="bi bi-lightbulb me-1"></i>นำไฟล์ .sql ไปกู้คืนได้ที่ phpMyAdmin &gt; นำเข้า (Import) หรือคำสั่ง <code>mysql -u root equipment_db &lt; backup.sql</code>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card 2: ดาวน์โหลดไฟล์แนบ uploads.zip -->
-    <div class="col-lg-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-header"><i class="bi bi-file-earmark-zip me-2" aria-hidden="true"></i>ดาวน์โหลดไฟล์แนบ</div>
-            <div class="card-body text-center d-flex flex-column">
-                <i class="bi bi-file-earmark-zip fs-1 text-success mb-3 d-block" aria-hidden="true"></i>
-                <p class="mb-1">ดาวน์โหลดไฟล์แนบทั้งหมดเป็นไฟล์ ZIP</p>
-                <p class="small text-muted mb-3">รวมรูปครุภัณฑ์และรูปงานซ่อมจากโฟลเดอร์ <code>uploads/</code><br>ใช้ควบคู่กับไฟล์ SQL เพื่อกู้คืนระบบให้สมบูรณ์</p>
-                <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="action" value="files">
-                    <button type="submit" class="btn btn-success btn-lg" aria-label="ดาวน์โหลดไฟล์แนบทั้งหมดเป็น ZIP">
-                        <i class="bi bi-download me-2" aria-hidden="true"></i>ดาวน์โหลดไฟล์แนบ (uploads.zip)
-                    </button>
-                </form>
-                <small class="text-muted d-block mt-2">หากไม่มีไฟล์แนบ ระบบจะแจ้งว่าไม่พบไฟล์ให้ดาวน์โหลด</small>
-                <div class="mt-auto pt-3 small text-muted text-start bg-light rounded p-2">
-                    <i class="bi bi-folder2-open me-1"></i>แตกไฟล์แล้ววางทับโฟลเดอร์ <code>uploads/</code> เดิมบนเซิร์ฟเวอร์
                 </div>
             </div>
         </div>
@@ -188,8 +156,7 @@ if ($dbSize !== null) {
                 <h6 class="fw-bold"><i class="bi bi-arrow-counterclockwise me-1 text-primary"></i>วิธีกู้คืน</h6>
                 <ol class="small mb-3 ps-3">
                     <li>นำเข้าไฟล์ <code>.sql</code> ผ่าน phpMyAdmin &gt; นำเข้า หรือ <code>mysql -u root equipment_db &lt; backup.sql</code></li>
-                    <li>แตกไฟล์ <code>uploads.zip</code> แล้วอัปโหลดทับโฟลเดอร์ <code>uploads/</code> บนเซิร์ฟเวอร์</li>
-                    <li>ตรวจสอบสิทธิ์โฟลเดอร์ <code>uploads/</code> ให้เขียนได้ (755)</li>
+                    <li>ตรวจสอบว่าระบบกลับมาทำงานปกติ</li>
                 </ol>
                 <hr>
                 <div class="small">

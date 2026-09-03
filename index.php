@@ -126,12 +126,6 @@ $router->get('/reports', 'AdminController@reports');
 $router->get('/reports/export', 'AdminController@export');
 $router->get('/reports/export/{type}', 'AdminController@export');
 
-$router->get('/backup/filebyfile', 'BackupController@index');
-$router->post('/backup/manifest/create', 'BackupController@createManifest');
-$router->get('/backup/manifest/{id}', 'BackupController@getManifest');
-$router->get('/backup/progress/{id}', 'BackupController@getProgress');
-$router->get('/backup/file', 'BackupController@downloadFile');
-
 // ============================================
 // Cron Routes — Automated backup (token or CLI bypass)
 // ============================================

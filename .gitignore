@@ -20,7 +20,4 @@ docs/*
 backups/*
 !backups/.htaccess
 !backups/README.md
-!backups/private/
-!backups/private/.htaccess
-!backups/private/README.md
 *.sql.gz
