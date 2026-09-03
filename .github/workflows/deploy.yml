@@ -122,7 +122,8 @@ jobs:
           echo "Ref: ${{ github.ref }}" >> backups/deploy.log
           echo "Timestamp: ${TIMESTAMP}" >> backups/deploy.log
 
-          tar -czf "pre-deploy-${SHA}.tar.gz" \
+          # เขียน tarball ลง backups/ (ที่ถูก exclude) กัน "file changed as we read it"
+          tar -czf "backups/pre-deploy-${SHA}.tar.gz" \
             --exclude=.git \
             --exclude=.github \
             --exclude=node_modules \
@@ -130,12 +131,13 @@ jobs:
             --exclude=uploads \
             --exclude="original website" \
             --exclude=database.sql \
+            --exclude='pre-deploy-*.tar.gz' \
             .
 
-          test -s "pre-deploy-${SHA}.tar.gz"
+          test -s "backups/pre-deploy-${SHA}.tar.gz"
 
           echo "Backup created:"
-          ls -lh "pre-deploy-${SHA}.tar.gz"
+          ls -lh "backups/pre-deploy-${SHA}.tar.gz"
 
       # --------------------------------------------------
       # 5. Try to download existing server backups
@@ -178,7 +180,7 @@ jobs:
         with:
           name: pre-deploy-prod-${{ github.sha }}
           path: |
-            pre-deploy-${{ github.sha }}.tar.gz
+            backups/pre-deploy-${{ github.sha }}.tar.gz
             backups/deploy.log
             server-backup/
           if-no-files-found: warn
