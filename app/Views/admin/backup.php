@@ -1,5 +1,6 @@
 <div class="page-header">
     <h1><i class="bi bi-database-down me-2"></i>สำรองฐานข้อมูลระบบ</h1>
+    <p class="text-muted mb-0">สำรองและกู้คืนข้อมูลทั้ง 14 ตาราง — ปลอดภัย ครบถ้วน พร้อมใช้งาน</p>
 </div>
 
 <?php
@@ -20,25 +21,16 @@ $tableLabels = [
     'satisfaction_surveys'   => 'แบบประเมินความพึงพอใจ',
     'system_logs'            => 'บันทึกระบบ',
 ];
-// รองรับกรณี controller ยังส่งไม่ครบ — เติม ?? 0 ไว้แล้วด้านล่าง
 $tableInfo = $tableInfo ?? [];
-
-// เวลาสำรองล่าสุด — 優先ใช้ตัวแปรจาก Controller ถ้ามี ถ้าไม่มีให้ query เอง (try/catch กัน error)
 $lastBackupAt = $lastBackupAt ?? ($lastBackup ?? null);
 if (empty($lastBackupAt)) {
     try {
         $pdoTmp = getDB();
         $stmt = $pdoTmp->query("SELECT created_at FROM system_logs WHERE action='Backup' ORDER BY created_at DESC LIMIT 1");
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!empty($row['created_at'])) {
-            $lastBackupAt = $row['created_at'];
-        }
-    } catch (Throwable $e) {
-        $lastBackupAt = null;
-    }
+        if (!empty($row['created_at'])) $lastBackupAt = $row['created_at'];
+    } catch (Throwable $e) { $lastBackupAt = null; }
 }
-
-// ขนาด DB โดยประมาณ — ลองจาก information_schema ถ้าได้ ถ้าไม่ได้ให้ fallback เป็นจำนวนรายการรวม
 $dbSizeText = null;
 $dbSize = $dbSize ?? null;
 if ($dbSize !== null) {
@@ -51,135 +43,186 @@ if ($dbSize !== null) {
         $stmt2->execute([$dbName]);
         $sz = $stmt2->fetchColumn();
         if ($sz !== false && $sz !== null) {
-            if ($sz >= 1048576) {
-                $dbSizeText = number_format($sz / 1048576, 2) . ' MB';
-            } elseif ($sz >= 1024) {
-                $dbSizeText = number_format($sz / 1024, 2) . ' KB';
-            } else {
-                $dbSizeText = number_format((int)$sz) . ' bytes';
-            }
+            if ($sz >= 1048576) $dbSizeText = number_format($sz / 1048576, 2) . ' MB';
+            elseif ($sz >= 1024) $dbSizeText = number_format($sz / 1024, 2) . ' KB';
+            else $dbSizeText = number_format((int)$sz) . ' bytes';
         }
-    } catch (Throwable $e) {
-        $dbSizeText = null;
-    }
+    } catch (Throwable $e) { $dbSizeText = null; }
     if ($dbSizeText === null) {
         $totalRows = array_sum(array_map('intval', (array)$tableInfo));
         $dbSizeText = number_format($totalRows) . ' รายการ (ประมาณ)';
     }
 }
+$totalRows = array_sum(array_map('intval', (array)$tableInfo));
 ?>
 
-<!-- Alert สำรองฐานข้อมูล -->
-<div class="alert alert-info d-flex align-items-start" role="alert">
-    <i class="bi bi-info-circle flex-shrink-0 me-3 fs-4" aria-hidden="true"></i>
-    <div>
-        <h6 class="alert-heading mb-1"><i class="bi bi-info-circle me-1"></i>สำรองฐานข้อมูล</h6>
-        <p class="mb-1 small">ไฟล์ SQL dump ประกอบด้วยโครงสร้างและข้อมูลทั้ง 14 ตาราง (ผู้ใช้งาน, สาขา, หมวดหมู่ครุภัณฑ์, เกณฑ์ค่าเสื่อมราคา, ชุดครุภัณฑ์, รายการครุภัณฑ์, ห้อง, ผู้รับผิดชอบห้อง, ครุภัณฑ์, รูปครุภัณฑ์, รายการแจ้งซ่อม, รูปงานซ่อม, แบบประเมินความพึงพอใจ, บันทึกระบบ) ใช้กู้คืนผ่าน phpMyAdmin หรือ CLI <code>mysql</code></p>
-        <small class="text-muted">คำแนะนำ: สำรองเป็นระยะและเก็บไว้อย่างน้อย 2 ที่</small>
+<style>
+/* Modern backup layout — grid + container queries, no extra deps */
+.backup-hero{
+  display:flex; flex-wrap:wrap; gap:1rem; align-items:center; justify-content:space-between;
+  background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+  color:#fff; border-radius:1rem; padding:1.25rem 1.5rem; margin-bottom:1.25rem;
+}
+.backup-hero h2{ margin:0; font-size:clamp(1.1rem,2.5cqi,1.5rem); }
+.backup-hero .meta{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+.backup-hero .badge{ background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25); backdrop-filter: blur(6px); }
+.backup-layout{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap:1.25rem;
+  align-items:start;
+}
+.backup-layout .span-full{ grid-column:1 / -1; }
+.backup-card{ container: backup-card / inline-size; }
+@container backup-card (min-width: 420px){
+  .backup-actions{ display:grid; grid-template-columns: 1fr 1fr; gap:.75rem; }
+}
+.stat-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap:.5rem;
+}
+.stat-item{
+  display:grid; grid-template-rows: auto 1fr; /* subgrid fallback */
+  gap:.25rem; padding:.6rem .75rem; border:1px solid #e9ecef; border-radius:.6rem; background:#fff;
+}
+.stat-item .label{ font-size:.8rem; color:#6c757d; }
+.stat-item .value{ font-weight:700; font-size:1.05rem; }
+@media (prefers-color-scheme: dark){
+  .stat-item{ background:#212529; border-color:#343a40; }
+}
+</style>
+
+<!-- Hero: สรุปสถานะ -->
+<div class="backup-hero shadow-sm" role="region" aria-label="สรุปสถานะการสำรอง">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-white text-primary rounded-3 d-flex align-items-center justify-content-center" style="inline-size:48px; block-size:48px;">
+            <i class="bi bi-database fs-4" aria-hidden="true"></i>
+        </div>
+        <div>
+            <h2 class="h5 mb-1">ฐานข้อมูลพร้อมสำรอง</h2>
+            <div class="small opacity-75">14 ตาราง • <?= number_format($totalRows) ?> รายการ • <?= htmlspecialchars($dbSizeText, ENT_QUOTES, 'UTF-8') ?></div>
+        </div>
+    </div>
+    <div class="meta">
+        <span class="badge rounded-pill px-3 py-2"><i class="bi bi-hdd me-1"></i><?= htmlspecialchars($dbSizeText, ENT_QUOTES, 'UTF-8') ?></span>
+        <?php if (!empty($lastBackupAt)): ?>
+            <span class="badge rounded-pill px-3 py-2" title="<?= htmlspecialchars($lastBackupAt, ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-clock-history me-1"></i><?= htmlspecialchars(formatDateTimeThai($lastBackupAt), ENT_QUOTES, 'UTF-8') ?></span>
+        <?php else: ?>
+            <span class="badge rounded-pill px-3 py-2">ยังไม่มีประวัติสำรอง</span>
+        <?php endif; ?>
+        <span class="badge bg-light text-dark rounded-pill px-3 py-2"><?= count($tableLabels) ?> ตาราง</span>
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- Card 1: ดาวน์โหลด Backup SQL + GZIP -->
-    <div class="col-lg-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-header"><i class="bi bi-database me-2" aria-hidden="true"></i>ดาวน์โหลด Backup ฐานข้อมูล</div>
-            <div class="card-body text-center d-flex flex-column">
-                <i class="bi bi-database fs-1 text-primary mb-3 d-block" aria-hidden="true"></i>
-                <p class="mb-3">ดาวน์โหลดไฟล์ SQL สำหรับสำรองฐานข้อมูลระบบทั้งหมด<br><small class="text-muted">รองรับทั้งไฟล์ .sql ปกติและ .sql.gz แบบบีบอัด</small></p>
-                <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid gap-2">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="action" value="download">
-                    <button type="submit" class="btn btn-primary btn-lg" aria-label="ดาวน์โหลดไฟล์ Backup ฐานข้อมูลรูปแบบ SQL">
-                        <i class="bi bi-download me-2" aria-hidden="true"></i>ดาวน์โหลด Backup (.sql)
-                    </button>
-                </form>
-                <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid mt-2">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="action" value="gzip">
-                    <button type="submit" class="btn btn-outline-primary" aria-label="ดาวน์โหลดไฟล์ Backup แบบบีบอัด GZIP">
-                        <i class="bi bi-file-earmark-zip me-2" aria-hidden="true"></i>ดาวน์โหลด GZIP (.sql.gz)
-                    </button>
-                </form>
-                <small class="text-muted d-block mt-2">ไฟล์ GZIP จะถูกส่งแบบบีบอัดหากเซิร์ฟเวอร์รองรับ (ประหยัดแบนด์วิธ)</small>
-                <div class="mt-auto pt-3 small text-muted text-start bg-light rounded p-2">
-                    <i class="bi bi-lightbulb me-1"></i>นำไฟล์ .sql ไปกู้คืนได้ที่ phpMyAdmin &gt; นำเข้า (Import) หรือคำสั่ง <code>mysql -u root equipment_db &lt; backup.sql</code>
+<div class="backup-layout">
+    <!-- ดาวน์โหลด -->
+    <section class="backup-card" aria-labelledby="dl-title">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span id="dl-title"><i class="bi bi-cloud-download me-2"></i>ดาวน์โหลดไฟล์สำรอง</span>
+                <span class="badge bg-primary">SQL</span>
+            </div>
+            <div class="card-body d-flex flex-column gap-3">
+                <div class="d-flex gap-3 align-items-start">
+                    <div class="text-primary"><i class="bi bi-file-earmark-code fs-1"></i></div>
+                    <div>
+                        <h3 class="h6 mb-1">ไฟล์ SQL มาตรฐาน</h3>
+                        <p class="small text-muted mb-0">นำไปกู้คืนได้ทันทีด้วย phpMyAdmin หรือ <code>mysql</code> CLI • <code>SET NAMES utf8mb4</code> + <code>FOREIGN_KEY_CHECKS=0</code> ครบ</p>
+                    </div>
+                </div>
+
+                <div class="backup-actions">
+                    <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="action" value="download">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-download me-2"></i>ดาวน์โหลด .sql
+                        </button>
+                        <small class="text-muted text-center mt-1">ไฟล์ปกติ อ่านง่าย</small>
+                    </form>
+                    <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="action" value="gzip">
+                        <button type="submit" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-file-earmark-zip me-2"></i>ดาวน์โหลด .sql.gz
+                        </button>
+                        <small class="text-muted text-center mt-1">บีบอัด ประหยัด 60-80%</small>
+                    </form>
+                </div>
+
+                <div class="alert alert-light border small mb-0 d-flex gap-2">
+                    <i class="bi bi-lightbulb text-warning fs-5"></i>
+                    <div>กู้คืน: phpMyAdmin &gt; นำเข้า หรือ <code>mysql -u root --default-character-set=utf8mb4 equipment_db &lt; backup.sql</code></div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Card 3: สถิติข้อมูล ครบ 14 ตาราง (รองรับ ?? 0) -->
-    <div class="col-lg-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-table me-2" aria-hidden="true"></i>สถิติข้อมูลในระบบ</span>
-                <span class="badge bg-secondary"><?= count($tableLabels) ?> ตาราง</span>
-            </div>
-            <ul class="list-group list-group-flush" role="list">
-                <?php foreach ($tableLabels as $table => $label): ?>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?> <small class="text-muted">(<?= htmlspecialchars($table, ENT_QUOTES, 'UTF-8') ?>)</small></span>
-                    <span class="badge bg-primary rounded-pill"><?= number_format($tableInfo[$table] ?? 0) ?></span>
-                </li>
-                <?php endforeach; ?>
-                <?php
-                // แสดงตารางอื่น ๆ ที่อาจมีใน $tableInfo แต่ไม่อยู่ใน $tableLabels (รองรับกรณีเพิ่มตารางใหม่เป็น 15)
-                $extraTables = array_diff_key((array)$tableInfo, $tableLabels);
-                foreach ($extraTables as $table => $count):
-                ?>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><?= htmlspecialchars($table, ENT_QUOTES, 'UTF-8') ?></span>
-                    <span class="badge bg-secondary rounded-pill"><?= number_format($count ?? 0) ?></span>
-                </li>
-                <?php endforeach; ?>
-            </ul>
             <div class="card-footer small text-muted d-flex justify-content-between">
-                <span>รวมทั้งหมด</span>
-                <span class="fw-bold"><?= number_format(array_sum(array_map('intval', (array)$tableInfo))) ?> รายการ</span>
+                <span><i class="bi bi-shield-check me-1"></i>ใช้ <code>$pdo-&gt;quote</code> + <code>unbuffered</code> ปลอดภัย UTF-8</span>
+                <span><?= htmlspecialchars(DB_NAME, ENT_QUOTES, 'UTF-8') ?></span>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Card 4: คำแนะนำ + ขนาด DB + เวลาสำรองล่าสุด -->
-    <div class="col-lg-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-header"><i class="bi bi-info-circle me-2" aria-hidden="true"></i>คำแนะนำการสำรอง / กู้คืน</div>
+    <!-- สถิติ -->
+    <section class="backup-card" aria-labelledby="stat-title">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span id="stat-title"><i class="bi bi-table me-2"></i>สถิติข้อมูล</span>
+                <span class="badge bg-light text-dark border"><?= number_format($totalRows) ?> รายการ</span>
+            </div>
             <div class="card-body">
-                <h6 class="fw-bold"><i class="bi bi-shield-check me-1 text-success"></i>แนวทางสำรองข้อมูล</h6>
-                <ul class="small mb-3 ps-3">
-                    <li>สำรอง <strong>ทุกสัปดาห์</strong> หรือหลังเพิ่ม/แก้ไขครุภัณฑ์จำนวนมาก</li>
-                    <li>เก็บไฟล์สำรองไว้ <strong>อย่างน้อย 2 ที่</strong> (เช่น เครื่องตนเอง + Google Drive)</li>
-                    <li>ตั้งชื่อไฟล์ให้มีวันที่ เช่น <code>backup_2025-09-03.sql</code> เพื่อย้อนกลับง่าย</li>
-                    <li>ทดสอบกู้คืนบนเครื่องทดสอบก่อนนำไปใช้จริง</li>
-                </ul>
-                <h6 class="fw-bold"><i class="bi bi-arrow-counterclockwise me-1 text-primary"></i>วิธีกู้คืน</h6>
-                <ol class="small mb-3 ps-3">
-                    <li>นำเข้าไฟล์ <code>.sql</code> ผ่าน phpMyAdmin &gt; นำเข้า หรือ <code>mysql -u root equipment_db &lt; backup.sql</code></li>
-                    <li>ตรวจสอบว่าระบบกลับมาทำงานปกติ</li>
-                </ol>
-                <hr>
-                <div class="small">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="bi bi-hdd me-1"></i>ขนาด DB โดยประมาณ</span>
-                        <span class="badge bg-light text-dark border"><?= htmlspecialchars($dbSizeText, ENT_QUOTES, 'UTF-8') ?></span>
+                <div class="stat-grid" role="list">
+                    <?php foreach ($tableLabels as $table => $label): ?>
+                    <div class="stat-item" role="listitem">
+                        <span class="label"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="value"><?= number_format($tableInfo[$table] ?? 0) ?> <small class="text-muted fw-normal"><?= htmlspecialchars($table, ENT_QUOTES, 'UTF-8') ?></small></span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted"><i class="bi bi-clock-history me-1"></i>สำรองล่าสุด</span>
-                        <?php if (!empty($lastBackupAt)): ?>
-                            <span class="badge bg-success" title="<?= htmlspecialchars($lastBackupAt, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars(formatDateTimeThai($lastBackupAt), ENT_QUOTES, 'UTF-8') ?></span>
-                        <?php else: ?>
-                            <span class="text-muted">— ยังไม่มีประวัติสำรอง —</span>
-                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    <?php $extraTables = array_diff_key((array)$tableInfo, $tableLabels); foreach ($extraTables as $table => $count): ?>
+                    <div class="stat-item" role="listitem">
+                        <span class="label"><?= htmlspecialchars($table, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="value"><?= number_format($count ?? 0) ?></span>
                     </div>
-                    <?php if (!empty($lastBackupAt)): ?>
-                    <small class="text-muted d-block mt-1">อ้างอิงจาก system_logs where action='Backup' ล่าสุด</small>
-                    <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <div class="card-footer small text-muted">
-                <i class="bi bi-exclamation-triangle me-1 text-warning"></i>คำเตือน: ไฟล์สำรองอาจมีข้อมูลส่วนบุคคล ควรเก็บรักษาอย่างปลอดภัย
+                <i class="bi bi-info-circle me-1"></i>นับจาก <code>SELECT COUNT(*)</code> แบบ real-time
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- คำแนะนำ -->
+    <section class="span-full">
+        <div class="card shadow-sm">
+            <div class="card-header"><i class="bi bi-life-preserver me-2"></i>คำแนะนำการสำรอง &amp; กู้คืน</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold"><i class="bi bi-shield-check text-success me-1"></i>แนวทางสำรอง</h6>
+                        <ul class="small mb-0 ps-3">
+                            <li>สำรอง <strong>ทุกสัปดาห์</strong> หรือหลังเพิ่ม/แก้ไขครุภัณฑ์จำนวนมาก</li>
+                            <li>เก็บไฟล์ไว้ <strong>อย่างน้อย 2 ที่</strong> (เครื่องตนเอง + Drive)</li>
+                            <li>ตั้งชื่อ <code>backup_YYYY-MM-DD_His.sql</code> เพื่อย้อนง่าย</li>
+                            <li>ทดสอบกู้คืนบน DB ทดสอบก่อนใช้จริง</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold"><i class="bi bi-arrow-counterclockwise text-primary me-1"></i>วิธีกู้คืน</h6>
+                        <ol class="small mb-0 ps-3">
+                            <li>phpMyAdmin &gt; เลือก DB &gt; นำเข้า &gt; เลือก <code>.sql</code> หรือ <code>.sql.gz</code></li>
+                            <li>หรือ CLI: <code>mysql -u root --default-character-set=utf8mb4 equipment_db &lt; backup.sql</code></li>
+                            <li>ตรวจ <code>system_logs</code> ว่าไม่มี error</li>
+                        </ol>
+                    </div>
+                </div>
+                <?php if (!empty($lastBackupAt)): ?>
+                <div class="small text-muted mt-3">อ้างอิง <code>system_logs WHERE action='Backup'</code> ล่าสุด: <?= htmlspecialchars($lastBackupAt, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+            </div>
+            <div class="card-footer small text-muted d-flex gap-2 align-items-center">
+                <i class="bi bi-exclamation-triangle text-warning"></i>ไฟล์สำรองมีข้อมูลส่วนบุคคล — เก็บอย่างปลอดภัย หลีกเลี่ยงแชร์สาธารณะ
+            </div>
+        </div>
+    </section>
 </div>
