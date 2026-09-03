@@ -15,7 +15,7 @@ $requestUri = rtrim($requestUri, '/') ?: '/';
 
 // path ทั้งหมดที่เมนูของแต่ละ role ใช้ตรวจ active
 $roleLinks = [
-    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/satisfaction', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
+    'admin'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/depreciation/settings', '/satisfaction', '/users/pending', '/users', '/room-managers', '/reports', '/backup', '/logs'],
     'staff'   => ['/', '/departments', '/sets', '/items', '/rooms', '/equipment', '/equipment/disposal', '/equipment/inspection', '/repairs', '/depreciation', '/depreciation/report', '/satisfaction', '/users/pending'],
     'teacher' => ['/', '/repairs/submit', '/repairs/mine', '/equipment', '/teacher/report', '/depreciation/my'],
     'student' => ['/', '/repairs/submit', '/repairs/mine'],

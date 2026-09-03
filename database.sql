@@ -1,11 +1,51 @@
--- Create Database
--- สร้างฐานข้อมูล equipment_db และกำหนดชุดตัวอักษรเป็น UTF-8
+-- ============================================================
+-- database.sql — Fresh Database Schema + Starter Data
+-- ฐานข้อมูล: equipment_db (utf8mb4_unicode_ci)
+-- รองรับภาษาไทยด้วย utf8mb4 ทั้งฐานข้อมูลและตาราง
+-- มีข้อมูลเริ่มต้นสำหรับทดสอบระบบ: Admin / Staff / Teacher / Test Student
+-- ============================================================
+-- วิธี import (ไม่ต้องแก้ไฟล์นี้):
+-- 1) XAMPP / CLI (Local):
+--    cmd /c "C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 equipment_db < database.sql"
+--    ⚠️ ต้องใส่ --default-character-set=utf8mb4 และระบุ DB (equipment_db) ก่อน < ไฟล์ — ไม่ต้องแก้ USE ในไฟล์
+--    ⚠️ ต้องใส่ --default-character-set=utf8mb4 เสมอ ไม่งั้นภาษาไทยเพี้ยน (double-encoded)
 --
--- วิธี import ผ่าน CLI (ต้องมี --default-character-set=utf8mb4 เสมอ ไม่งั้นภาษาไทยเพี้ยน):
--- cmd /c "C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 < database.sql"
+-- 2) phpMyAdmin / InfinityFree (Production):
+--    - เลือกฐานข้อมูล if0_40083938_equipment_db ก่อน
+--    - Import ไฟล์นี้ได้เลย — ไม่ต้องแก้ไฟล์, ไม่ต้องใส่ USE
+--    - phpMyAdmin จัดการ charset utf8mb4 ให้เอง
+--    - หลังจากสร้างโครงสร้างแล้ว ให้นำเข้าไฟล์ if0_40083938_equipment_db_import.sql
+--      เพื่อเติมข้อมูล Production (ไฟล์นี้เป็น Data Import โดยเฉพาะ ไม่สร้างตารางซ้ำ)
+-- 3) นำเข้าข้อมูลจริง if0_40083938_equipment_db.sql โดยไม่ต้องแก้ไฟล์ if0:
+--    ไฟล์ if0 เป็น dump แบบไม่มี IF NOT EXISTS และมี sets.name ซ้ำ 1 ชื่อ (19 แถว) ทำให้ import ตรงๆ จะ error #1050 (Table exists) และ #1062 (Duplicate entry for key 'name')
+--    ให้รันแบบเติม IF NOT EXISTS + ลบ UNIQUE ของ sets ชั่วคราวโดยไม่ต้องแก้ไฟล์ถาวร:
+--    powershell -Command "$c=Get-Content 'if0_40083938_equipment_db.sql' -Raw -Encoding UTF8; $c=$c -replace 'CREATE TABLE `','CREATE TABLE IF NOT EXISTS `'; $c=$c -replace 'INSERT INTO `','INSERT IGNORE INTO `'; $c=$c -replace '\s+ADD UNIQUE KEY `name` \(`name`\),',''; $c | C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 --force equipment_db"
+--    # คำสั่งนี้ไม่แก้ไฟล์ if0 ถาวร แค่เติม IF NOT EXISTS, INSERT IGNORE และลบ UNIQUE ของ sets (ทุกตารางที่มี ADD UNIQUE KEY `name`) ชั่วคราวก่อน pipe เข้า mysql, --force จะข้าม FK/index duplicate ที่เหลือ (ERROR 1068 Multiple primary key, 121 Duplicate key) แต่ข้อมูล 18-19 sets จะถูกนำเข้า
+--    # ใช้ได้ทั้งสองลำดับ:
+--    # ลำดับ A: database.sql ก่อน → if0 ทีหลัง (เช่น local มีโครงสร้างแล้ว อยากได้ข้อมูล production)
+--    #   C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 equipment_db < database.sql
+--    #   powershell -Command "...if0..." | C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 --force equipment_db
+--    # ลำดับ B: if0 ก่อน → database.sql ทีหลัง (fresh production → upgrade) — แนะนำสำหรับ production
+--    #   powershell -Command "...if0..." | C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 --force if0_40083938_equipment_db
+--    #   C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 if0_40083938_equipment_db < database.sql
+--    # phpMyAdmin: หาก Import if0 แล้วเจอ #1050/#1062 ให้ติ๊ก "Enable foreign key checks" ออก หรือใช้วิธี CLI ข้างบนแทน
+--    หมายเหตุ: database.sql ถูกแก้ให้ sets.name ไม่ UNIQUE ใน CREATE และเพิ่ม UNIQUE แบบ conditional ท้ายไฟล์ (เช็ค duplicate ก่อน) จึงไม่ error #1062 แม้ if0 มีชื่อซ้ำ
+-- ============================================================
+
+-- Auto-create DB (ไม่ต้องแก้ไฟล์): สร้าง equipment_db ไว้ถ้ายังไม่มี (ไม่เปลี่ยน DB ปัจจุบัน)
 CREATE DATABASE IF NOT EXISTS equipment_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE equipment_db;
+-- ไฟล์นี้เลือกฐานข้อมูล equipment_db ให้เอง จึง import ผ่าน phpMyAdmin ได้โดยไม่ต้องเลือกฐานข้อมูลล่วงหน้า:
+-- CLI (แนะนำ): mysql -u root --default-character-set=utf8mb4 equipment_db < database.sql
+-- phpMyAdmin: สามารถ Import ไฟล์นี้ได้เลย เพราะไฟล์เลือก equipment_db ให้เอง
+
 SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ============================================================
+-- TABLE DEFINITIONS (เรียงตามลำดับ Foreign Key)
+-- ทุกตารางใช้ IF NOT EXISTS เพื่อรันซ้ำได้ (idempotent)
+-- ============================================================
 
 -- Table: users (Use Email for Login)
 -- ตาราง: ผู้ใช้งาน (ใช้อีเมลในการเข้าสู่ระบบ)
@@ -51,24 +91,26 @@ CREATE TABLE IF NOT EXISTS depreciation_settings (
     updated_by INT DEFAULT NULL, -- ผู้แก้ไขล่าสุด (FK -> users.id)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES asset_categories(id) ON DELETE CASCADE,
-    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_dep_settings_category FOREIGN KEY (category_id) REFERENCES asset_categories(id) ON DELETE CASCADE,
+    CONSTRAINT fk_dep_settings_user FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL,
     UNIQUE KEY uq_dep_setting_category (category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: sets (Level 1: ชุดครุภัณฑ์)
 -- ตาราง: ชุดครุภัณฑ์ (Grouping ของครุภัณฑ์ตามปี/ชุดจัดซื้อ)
+-- หมายเหตุ: name ไม่ใส่ UNIQUE ใน CREATE เพื่อรองรับข้อมูลจริงจาก if0 ที่มีชื่อซ้ำ (19 แถว, duplicate 1 ชื่อ)
+-- UNIQUE จะถูกเพิ่มแบบ conditional ท้ายไฟล์ (UPGRADE GUARDS) เฉพาะเมื่อไม่มี duplicate
 CREATE TABLE IF NOT EXISTS sets (
     id INT AUTO_INCREMENT PRIMARY KEY, -- รหัสชุด
     dept_id INT, -- อ้างอิงสาขา (Foreign Key -> dept.id)
-    name VARCHAR(255) NOT NULL UNIQUE, -- ชื่อชุดครุภัณฑ์
+    name VARCHAR(255) NOT NULL, -- ชื่อชุดครุภัณฑ์
     year VARCHAR(50) NOT NULL, -- ปีงบประมาณ (เช่น 2567)
     price DECIMAL(10, 2) DEFAULT 0.00, -- ราคารวมทั้งชุด
     price_remark TEXT, -- หมายเหตุราคา (เช่น ราคาเหมา 5 ล้านบาท)
     remark TEXT, -- หมายเหตุ
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (dept_id) REFERENCES dept(id) ON DELETE SET NULL
+    CONSTRAINT fk_sets_dept FOREIGN KEY (dept_id) REFERENCES dept(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: items (Level 2: รายการครุภัณฑ์)
@@ -87,8 +129,8 @@ CREATE TABLE IF NOT EXISTS items (
     remark TEXT, -- หมายเหตุ
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (set_id) REFERENCES sets(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES asset_categories(id) ON DELETE SET NULL
+    CONSTRAINT fk_items_set FOREIGN KEY (set_id) REFERENCES sets(id) ON DELETE CASCADE,
+    CONSTRAINT fk_items_category2 FOREIGN KEY (category_id) REFERENCES asset_categories(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: rooms (Master Data: ห้อง)
@@ -108,8 +150,8 @@ CREATE TABLE IF NOT EXISTS room_managers (
     user_id INT NOT NULL, -- อ้างอิงอาจารย์ (users.id)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_room_mgr_room FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
+    CONSTRAINT fk_room_mgr_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(room_id, user_id) -- ห้ามซ้ำคู่เดิม
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -119,27 +161,20 @@ CREATE TABLE IF NOT EXISTS equipment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     item_id INT NOT NULL, -- อ้างอิงรายการแม่แบบ (items.id)
     code VARCHAR(50) UNIQUE DEFAULT NULL, -- รหัสครุภัณฑ์ (Asset Code)
-    
-    -- Location & Status
     room_id INT DEFAULT NULL, -- สถานที่ตั้งปัจจุบัน (Foreign Key -> rooms.id)
-    status ENUM('available', 'repair', 'broken', 'disposed', 'pending_disposal') DEFAULT 'available', 
+    status ENUM('available', 'repair', 'broken', 'disposed', 'pending_disposal') DEFAULT 'available',
     -- สถานะ: ปกติ, ส่งซ่อม, ชำรุด, จำหน่ายออก, รอจำหน่าย
-    
-    -- Specific Details
     purchase_date DATE, -- วันที่จัดซื้อ
     check_date DATE, -- วันที่ตรวจเช็คเมื่อ
     price DECIMAL(10, 2) DEFAULT 0.00, -- ราคาจริงของชิ้นนี้
     price_remark TEXT, -- หมายเหตุราคา (กรณีพิเศษรายชิ้น)
-    
     remark TEXT, -- หมายเหตุเพิ่มเติม
-    
     holder_id INT, -- ผู้ถือครอง/ผู้รับผิดชอบปัจจุบัน (Foreign Key -> users.id)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
-    FOREIGN KEY (holder_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
+    CONSTRAINT fk_equipment_item FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
+    CONSTRAINT fk_equipment_holder FOREIGN KEY (holder_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_equipment_room FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: equipment_img (Multiple Photos)
@@ -151,7 +186,7 @@ CREATE TABLE IF NOT EXISTS equipment_img (
     type ENUM('purchase', 'current_condition') NOT NULL DEFAULT 'current_condition', -- ประเภทรูป: รูปตอนซื้อ, รูปสภาพปัจจุบัน
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE
+    CONSTRAINT fk_equip_img_equipment FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: repair (Maintenance Requests)
@@ -161,12 +196,12 @@ CREATE TABLE IF NOT EXISTS repair (
     equipment_id INT NOT NULL, -- ครุภัณฑ์ที่แจ้งซ่อม
     user_id INT NULL, -- ผู้แจ้ง (Link กับ users table)
     issue TEXT NOT NULL, -- อาการที่พบ/ปัญหา
-    status ENUM('pending', 'in_progress', 'completed', 'cannot_fix') DEFAULT 'pending', 
+    status ENUM('pending', 'in_progress', 'completed', 'cannot_fix') DEFAULT 'pending',
     -- สถานะซ่อม: รอดำเนินการ, กำลังซ่อม, เสร็จสิ้น, ซ่อมไม่ได้
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_repair_equipment FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE,
+    CONSTRAINT fk_repair_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: repair_img (Repair Photos)
@@ -177,7 +212,7 @@ CREATE TABLE IF NOT EXISTS repair_img (
     path VARCHAR(255) NOT NULL, -- path ไฟล์รูป
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE
+    CONSTRAINT fk_repair_img_repair FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: satisfaction_surveys (แบบประเมินความพึงพอใจหลังซ่อมเสร็จ — 1 ใบซ่อมประเมินได้ 1 ครั้ง)
@@ -189,8 +224,8 @@ CREATE TABLE IF NOT EXISTS satisfaction_surveys (
     comment TEXT, -- คำติชม/ข้อเสนอแนะ
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_satisfaction_repair FOREIGN KEY (repair_id) REFERENCES repair(id) ON DELETE CASCADE,
+    CONSTRAINT fk_satisfaction_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     UNIQUE KEY uq_survey_repair (repair_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -204,35 +239,53 @@ CREATE TABLE IF NOT EXISTS system_logs (
     ip_address VARCHAR(45), -- IP Address ผู้ใช้งาน
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ข้อมูลหมวดหมู่ครุภัณฑ์เริ่มต้น + เกณฑ์ค่าเสื่อม (อ้างอิงอายุการใช้งานตามหลักเกณฑ์ทั่วไป)
-INSERT INTO asset_categories (name, remark) VALUES
-('เครื่องคอมพิวเตอร์และอุปกรณ์ไอที', 'คอมพิวเตอร์ โน้ตบุ๊ก เซิร์ฟเวอร์ อุปกรณ์เครือข่าย'),
-('อุปกรณ์ทดลองวิทยาศาสตร์', 'เครื่องมือวิทยาศาสตร์/อุปกรณ์ห้องปฏิบัติการ'),
-('เครื่องจักรและเครื่องมือช่าง', 'เครื่องจักรกล เครื่องมือช่าง'),
-('เฟอร์นิเจอร์และของใช้สำนักงาน', 'โต๊ะ เก้าอี้ ตู้ เคาน์เตอร์'),
-('ยานพาหนะ', 'รถยนต์ รถตู้ รถจักรยานยนต์');
+-- ============================================================
+-- STARTER DATA — ข้อมูลเริ่มต้นสำหรับทดสอบระบบ
+-- รองรับภาษาไทย: UTF-8 / utf8mb4
+-- รหัสผ่านสำหรับทุกบัญชีเริ่มต้น: 123456
+-- ============================================================
 
-INSERT INTO depreciation_settings (category_id, useful_life_years, dep_rate, method) VALUES
-(1, 5, 20.00, 'straight_line'),
-(2, 10, 10.00, 'straight_line'),
-(3, 10, 10.00, 'straight_line'),
-(4, 10, 10.00, 'straight_line'),
-(5, 8, 12.50, 'straight_line');
+INSERT IGNORE INTO users
+    (sid, firstname, lastname, email, password, role, status, class)
+VALUES
+    (NULL, 'ผู้ดูแลระบบ', 'ทดสอบ', 'admin@rmutsb.ac.th',
+     '$2y$10$0oRIyPbbbKpeHSoXfnmiB.Vp9TIxynqZygTVJ3yJwIAFSbGSm0.mG',
+     'admin', 'approved', NULL),
+    (NULL, 'พนักงาน', 'ทดสอบ', 'staff@rmutsb.ac.th',
+     '$2y$10$0oRIyPbbbKpeHSoXfnmiB.Vp9TIxynqZygTVJ3yJwIAFSbGSm0.mG',
+     'staff', 'approved', NULL),
+    (NULL, 'อาจารย์', 'ทดสอบ', 'teacher@rmutsb.ac.th',
+     '$2y$10$0oRIyPbbbKpeHSoXfnmiB.Vp9TIxynqZygTVJ3yJwIAFSbGSm0.mG',
+     'teacher', 'approved', NULL),
+    (NULL, 'บัญชี', 'ทดสอบ', 'test@rmutsb.ac.th',
+     '$2y$10$0oRIyPbbbKpeHSoXfnmiB.Vp9TIxynqZygTVJ3yJwIAFSbGSm0.mG',
+     'student', 'approved', NULL);
 
--- ข้อมูลผู้ใช้เริ่มต้น (รหัสผ่านคือ 123456)
-INSERT INTO users (sid, email, password, firstname, lastname, role, status, class) VALUES
-(NULL, 'admin@rmutsb.ac.th', '$2y$10$O6hMD4KspNa0nAofyrSiuOo31Jd2L2UuUoDuI/CPxHLkDDsJ.Zaze', 'ผู้ดูแลระบบ', 'ทดสอบ', 'admin', 'approved', NULL),
-(NULL, 'staff@rmutsb.ac.th', '$2y$10$O6hMD4KspNa0nAofyrSiuOo31Jd2L2UuUoDuI/CPxHLkDDsJ.Zaze', 'พนักงาน', 'ทดสอบ', 'staff', 'approved', NULL),
-(NULL, 'teacher@rmutsb.ac.th', '$2y$10$O6hMD4KspNa0nAofyrSiuOo31Jd2L2UuUoDuI/CPxHLkDDsJ.Zaze', 'อาจารย์', 'ทดสอบ', 'teacher', 'approved', NULL),
-
--- ข้อมูลห้องเริ่มต้น
-INSERT INTO rooms (name) VALUES
-('6101'), ('6102'), ('6103'), ('6104'), ('6201'),
+-- ข้อมูลห้องเริ่มต้นสำหรับทดลองระบบ
+INSERT IGNORE INTO rooms (name) VALUES
+    ('6101'), ('6102'), ('6103'), ('6104'), ('6201'),
 ('6301'), ('6302'), ('6303'), ('6304'), ('6305'), ('6306'),
 ('6401'), ('6402'), ('6403'), ('6404'), ('6405'), ('6406'),
 ('6501'), ('6502'), ('6503'), ('6504'), ('6505'), ('6506'),
 ('6601'), ('6602'), ('6603'), ('6604'), ('6605'), ('6606');
 
+-- หมวดหมู่เริ่มต้นสำหรับทดลองระบบ
+INSERT IGNORE INTO asset_categories (id, name, remark) VALUES
+    (1, 'เครื่องคอมพิวเตอร์และอุปกรณ์ไอที',
+        'คอมพิวเตอร์ โน้ตบุ๊ก เซิร์ฟเวอร์ และอุปกรณ์เครือข่าย'),
+    (2, 'เฟอร์นิเจอร์และของใช้สำนักงาน',
+        'โต๊ะ เก้าอี้ ตู้ และอุปกรณ์สำนักงาน');
+
+-- เกณฑ์ค่าเสื่อมราคาเริ่มต้น
+INSERT IGNORE INTO depreciation_settings
+    (category_id, useful_life_years, dep_rate, method)
+VALUES
+    (1, 5, 20.00, 'straight_line'),
+    (2, 10, 10.00, 'straight_line');
+
+-- ============================================================
+-- END OF SCHEMA
+-- ============================================================

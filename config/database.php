@@ -65,7 +65,10 @@ function getDB() {
 
 // Application settings
 define('SITE_NAME', 'ระบบแจ้งซ่อมครุภัณฑ์');
-define('SITE_URL', env('SITE_URL', $isLocal ? 'http://localhost/P' : 'https://khuruphan-rus.free.je'));
+// Auto-detect base path from SCRIPT_NAME (e.g. /Project_2/index.php -> /Project_2)
+$__basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+if ($__basePath === '/' || $__basePath === '\\' || $__basePath === '.') $__basePath = '';
+define('SITE_URL', env('SITE_URL', $isLocal ? 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $__basePath : 'https://khuruphan-rus.free.je'));
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
 // Start session with secure settings
