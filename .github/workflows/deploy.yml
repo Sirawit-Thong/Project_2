@@ -212,6 +212,7 @@ jobs:
           esac
 
           echo "Production directory: $DIR"
+          printf '%s' "$DIR" | od -An -c | head -3
           echo "FTP_DIR_CLEAN=$DIR" >> "$GITHUB_ENV"
 
           timeout 60 lftp -e "
@@ -244,6 +245,14 @@ jobs:
             echo "Error: missing prepared FTP directory"
             exit 1
           fi
+          # กัน quote/space ปนใน path (ทำ mirror target เพี้ยน)
+          case "$DIR" in
+            ''|*[!a-zA-Z0-9_./-]*)
+              echo "Error: DIR contains unsafe characters"
+              printf '%s' "$DIR" | od -An -c | head -3
+              exit 1
+              ;;
+          esac
 
           echo "=========================================="
           echo "        PRODUCTION DEPLOY"
@@ -278,7 +287,8 @@ jobs:
               --exclude 'original website/' \
               --exclude backups/ \
               --exclude uploads/ \
-              . \"$DIR\";
+              --exclude server-backup/ \
+              . $DIR;
 
             quit
           "
