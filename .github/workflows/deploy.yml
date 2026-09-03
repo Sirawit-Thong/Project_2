@@ -56,10 +56,10 @@ jobs:
           FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
         run: |
           # ล้าง newline/ช่องว่างกัน 530 (รหัสผ่านตัดแค่ CR/LF ไม่ตัดช่องว่างหัวท้าย)
-          FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '\r\n' | xargs)"
-          FTP_SERVER="${FTP_SERVER#ftp://}"
-          FTP_SERVER="${FTP_SERVER#ftps://}"
-          FTP_SERVER="${FTP_SERVER%%/*}"
+          clean_host() {
+            printf '%s' "$1" | tr -d '\r\n' | xargs | sed -e 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##' -e 's#.*@##' -e 's#/.*$##' -e 's#:.*$##' | tr '[:upper:]' '[:lower:]' | xargs
+          }
+          FTP_SERVER="$(clean_host "$FTP_SERVER")"
           FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n' | xargs)"
           FTP_PASS="$(printf '%s' "$FTP_PASS" | tr -d '\r\n')"
           mkdir -p server-backup/backups || true
@@ -98,11 +98,11 @@ jobs:
           FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
           FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
-          # sanitize: ตัด protocol/path ออก เหลือแค่ hostname (กัน Name or service not known)
-          FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '\r\n' | xargs)"
-          FTP_SERVER="${FTP_SERVER#ftp://}"
-          FTP_SERVER="${FTP_SERVER#ftps://}"
-          FTP_SERVER="${FTP_SERVER%%/*}"
+          # sanitize: ตัด scheme/userinfo/path/port ออก เหลือแค่ hostname (กัน Name or service not known)
+          clean_host() {
+            printf '%s' "$1" | tr -d '\r\n' | xargs | sed -e 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##' -e 's#.*@##' -e 's#/.*$##' -e 's#:.*$##' | tr '[:upper:]' '[:lower:]' | xargs
+          }
+          FTP_SERVER="$(clean_host "$FTP_SERVER")"
           # ล้าง newline/ช่องว่างกัน 530 (รหัสผ่านตัดแค่ CR/LF ไม่ตัดช่องว่างหัวท้าย)
           FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n' | xargs)"
           FTP_PASS="$(printf '%s' "$FTP_PASS" | tr -d '\r\n')"
@@ -111,6 +111,12 @@ jobs:
             echo "Error: PROD_FTP_SERVER/USERNAME/PASSWORD secret ว่าง"
             exit 1
           fi
+          if ! printf '%s' "$FTP_SERVER" | grep -Eq '^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$'; then
+            echo "Error: PROD_FTP_SERVER ไม่ใช่ hostname ที่ถูกต้อง (ยาว ${#FTP_SERVER} ตัวอักษร) กรุณาใส่แค่ชื่อโฮสต์ เช่น ftpupload.net"
+            exit 1
+          fi
+          echo "Checking DNS (host length ${#FTP_SERVER})..."
+          getent hosts "$FTP_SERVER" | awk '{print "resolved: "$1}' || echo "WARNING: DNS lookup failed"
           # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
           echo "Deploying to PROD dir: $DIR"
