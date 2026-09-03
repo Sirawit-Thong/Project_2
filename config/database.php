@@ -41,7 +41,7 @@ if ($isLocal) {
     define('DB_USER', env('DB_USER', 'root'));
     define('DB_PASS', env('DB_PASS', ''));
 } else {
-    // Production: Host เดียว https://khuruphan-rus.free.nf (ชัยโหน่ง) อย่างเดียว
+    // Production: Host เดียว https://khuruphan-rus.free.nf อย่างเดียว
     define('DB_HOST', env('DB_HOST', 'sql103.infinityfree.com'));
     define('DB_NAME', env('DB_NAME', 'if0_40083938_invent_db'));
     define('DB_USER', env('DB_USER', 'if0_40083938'));
