@@ -44,6 +44,7 @@ class AdminController extends Controller
 
         // Get table info for display — ใช้ method กลางเพื่อความสอดคล้อง
         $tableInfo = $this->getTableInfo();
+        $detailedInfo = $this->getDetailedTableInfo();
 
         require __DIR__ . '/../Views/layouts/main.php';
     }
@@ -79,6 +80,45 @@ class AdminController extends Controller
     private function getBackupTables()
     {
         return $this->backupTables;
+    }
+
+    /**
+     * รายละเอียดครบทุกตาราง: จำนวนแถว, คอลัมน์, เวลาล่าสุด
+     * @return array [table => ['count'=>int, 'columns'=>array, 'latest'=>?string]]
+     */
+    public function getDetailedTableInfo()
+    {
+        $pdo = getDB();
+        $out = [];
+        foreach ($this->getBackupTables() as $table) {
+            $info = ['count'=>0, 'columns'=>[], 'latest'=>null];
+            try {
+                $info['count'] = (int)$pdo->query("SELECT COUNT(*) FROM `{$table}`")->fetchColumn();
+            } catch (Throwable $e) { $info['count']=0; }
+            try {
+                $stmt = $pdo->query("SHOW COLUMNS FROM `{$table}`");
+                $cols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $info['columns'] = array_column($cols, 'Field');
+            } catch (Throwable $e) { $info['columns']=[]; }
+            // เวลาล่าสุด: ลอง updated_at ก่อน ถ้าไม่มีลอง created_at
+            try {
+                $hasUpdated = in_array('updated_at', $info['columns']);
+                $hasCreated = in_array('created_at', $info['columns']);
+                if ($hasUpdated && $hasCreated) {
+                    $stmt = $pdo->query("SELECT GREATEST(MAX(updated_at), MAX(created_at)) FROM `{$table}`");
+                    $info['latest'] = $stmt->fetchColumn();
+                } elseif ($hasUpdated) {
+                    $stmt = $pdo->query("SELECT MAX(updated_at) FROM `{$table}`");
+                    $info['latest'] = $stmt->fetchColumn();
+                } elseif ($hasCreated) {
+                    $stmt = $pdo->query("SELECT MAX(created_at) FROM `{$table}`");
+                    $info['latest'] = $stmt->fetchColumn();
+                }
+                if ($info['latest'] === '0000-00-00 00:00:00') $info['latest']=null;
+            } catch (Throwable $e) { $info['latest']=null; }
+            $out[$table] = $info;
+        }
+        return $out;
     }
 
     /**
