@@ -20,9 +20,9 @@ class SystemLog extends Model
         $params = [];
 
         if ($search) {
-            $where = "WHERE sl.action LIKE ? OR sl.details LIKE ? OR CONCAT(u.firstname, ' ', u.lastname) LIKE ?";
+            $where = "WHERE sl.action LIKE ? OR sl.details LIKE ? OR CONCAT(u.firstname, ' ', u.lastname) LIKE ? OR sl.user_id LIKE ? OR u.email LIKE ? OR sl.ip_address LIKE ?";
             $like = "%{$search}%";
-            $params = [$like, $like, $like];
+            $params = [$like, $like, $like, $like, $like, $like];
         }
 
         $countSql = "
@@ -37,7 +37,9 @@ class SystemLog extends Model
         $sql = "
             SELECT
                 sl.*,
-                CONCAT(u.firstname, ' ', u.lastname) AS user_name
+                CONCAT(u.firstname, ' ', u.lastname) AS user_name,
+                u.email AS user_email,
+                u.role AS user_role
             FROM system_logs sl
             LEFT JOIN users u ON u.id = sl.user_id
             {$where}

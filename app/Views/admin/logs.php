@@ -15,7 +15,7 @@ $baseUrl = SITE_URL . '/logs?' . ($q !== '' ? 'q=' . urlencode($q) : '');
             <div class="col-md-8">
                 <label class="form-label">ค้นหา</label>
                 <input type="text" class="form-control" name="q" value="<?= htmlspecialchars($q) ?>"
-                    placeholder="ค้นหาจากชื่อผู้ใช้, การกระทำ, รายละเอียด, IP...">
+                    placeholder="ค้นหาจาก ID, ชื่อ, อีเมล, การกระทำ, รายละเอียด, IP...">
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-outline-primary w-100">
@@ -31,14 +31,15 @@ $baseUrl = SITE_URL . '/logs?' . ($q !== '' ? 'q=' . urlencode($q) : '');
     </div>
 </div>
 
-<div class="card">
+    <div class="card">
     <div class="card-header"><i class="bi bi-list me-2"></i>รายการบันทึกเหตุการณ์ (<?= number_format($pagination['total_items'] ?? 0) ?>)</div>
     <div class="card-body p-0">
+        <div class="table-responsive">
         <table class="table table-hover table-sm mb-0">
             <thead>
                 <tr>
                     <th width="150">เวลา</th>
-                    <th>ผู้ใช้</th>
+                    <th>ผู้ใช้ (ID)</th>
                     <th>การกระทำ</th>
                     <th class="hide-mobile">รายละเอียด</th>
                     <th class="hide-mobile">IP</th>
@@ -49,7 +50,20 @@ $baseUrl = SITE_URL . '/logs?' . ($q !== '' ? 'q=' . urlencode($q) : '');
                     <?php foreach ($rows as $row): ?>
                         <tr>
                             <td><small><?= formatDateTimeThai($row['created_at'] ?? '') ?></small></td>
-                            <td><?= !empty($row['user_name']) ? htmlspecialchars($row['user_name']) : '<span class="text-muted">ระบบ</span>' ?></td>
+                            <td>
+                                <?php if (!empty($row['user_id'])): ?>
+                                    <span class="badge bg-primary me-1">#<?= (int) $row['user_id'] ?></span>
+                                    <span><?= htmlspecialchars(trim($row['user_name'] ?? '') ?: '-') ?></span>
+                                    <?php if (!empty($row['user_email'])): ?>
+                                        <br><small class="text-muted"><?= htmlspecialchars($row['user_email']) ?><?php if (!empty($row['user_role'])): ?> (<?= htmlspecialchars(translateRole($row['user_role'])) ?>)<?php endif; ?></small>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span class="text-muted">ระบบ</span>
+                                    <?php if (!empty($row['user_name'])): ?>
+                                        <br><small class="text-muted"><?= htmlspecialchars($row['user_name']) ?></small>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </td>
                             <td><span class="badge bg-secondary"><?= htmlspecialchars($row['action'] ?? '') ?></span></td>
                             <td class="hide-mobile"><small><?= htmlspecialchars($row['details'] ?? '-') ?></small></td>
                             <td class="hide-mobile"><small><?= htmlspecialchars($row['ip_address'] ?? '') ?></small></td>
