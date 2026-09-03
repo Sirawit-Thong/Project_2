@@ -127,11 +127,6 @@ $router->get('/reports/export', 'AdminController@export');
 $router->get('/reports/export/{type}', 'AdminController@export');
 
 // ============================================
-// Cron Routes — Automated backup (token or CLI bypass)
-// ============================================
-$router->get('/cron/backup', 'AdminController@cronBackup');
-
-// ============================================
 // Dispatch
 // ============================================
 $method = $_SERVER['REQUEST_METHOD'];

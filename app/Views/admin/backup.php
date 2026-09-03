@@ -132,24 +132,14 @@ $totalRows = array_sum(array_map('intval', (array)$tableInfo));
                     </div>
                 </div>
 
-                <div class="backup-actions">
-                    <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="action" value="download">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-download me-2"></i>ดาวน์โหลด .sql
-                        </button>
-                        <small class="text-muted text-center mt-1">ไฟล์ปกติ อ่านง่าย</small>
-                    </form>
-                    <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="action" value="gzip">
-                        <button type="submit" class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-file-earmark-zip me-2"></i>ดาวน์โหลด .sql.gz
-                        </button>
-                        <small class="text-muted text-center mt-1">บีบอัด ประหยัด 60-80%</small>
-                    </form>
-                </div>
+                <form method="POST" action="<?= SITE_URL ?>/backup" class="d-grid">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="download">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-download me-2"></i>ดาวน์โหลด .sql
+                    </button>
+                    <small class="text-muted text-center mt-1">ไฟล์ .sql พร้อมนำไปใส่ถังข้อมูลใหม่ได้ทันที</small>
+                </form>
 
                 <div class="alert alert-light border small mb-0 d-flex gap-2">
                     <i class="bi bi-lightbulb text-warning fs-5"></i>
@@ -210,7 +200,7 @@ $totalRows = array_sum(array_map('intval', (array)$tableInfo));
                     <div class="col-md-6">
                         <h6 class="fw-bold"><i class="bi bi-arrow-counterclockwise text-primary me-1"></i>วิธีกู้คืน</h6>
                         <ol class="small mb-0 ps-3">
-                            <li>phpMyAdmin &gt; เลือก DB &gt; นำเข้า &gt; เลือก <code>.sql</code> หรือ <code>.sql.gz</code></li>
+                            <li>phpMyAdmin &gt; เลือก DB &gt; นำเข้า &gt; เลือก <code>.sql</code></li>
                             <li>หรือ CLI: <code>mysql -u root --default-character-set=utf8mb4 equipment_db &lt; backup.sql</code></li>
                             <li>ตรวจ <code>system_logs</code> ว่าไม่มี error</li>
                         </ol>
