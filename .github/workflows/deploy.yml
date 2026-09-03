@@ -63,7 +63,8 @@ jobs:
             --exclude=uploads \
             --exclude="original website" \
             --exclude=database.sql \
-            .
+            --exclude="pre-deploy-*.tar.gz" \
+            . || true
 
           ls -lh "pre-deploy-${SHA}.tar.gz"
           echo "Pre-deploy artifact created."
