@@ -41,17 +41,11 @@ if ($isLocal) {
     define('DB_USER', env('DB_USER', 'root'));
     define('DB_PASS', env('DB_PASS', ''));
 } else {
-    // Production: Host หลัก khuruphan-rus.free.nf อย่างเดียว
+    // Production: Host เดียว https://khuruphan-rus.free.nf (ชัยโหน่ง) อย่างเดียว
     define('DB_HOST', env('DB_HOST', 'sql103.infinityfree.com'));
     define('DB_NAME', env('DB_NAME', 'if0_40083938_invent_db'));
     define('DB_USER', env('DB_USER', 'if0_40083938'));
     define('DB_PASS', env('DB_PASS', 'tnRWdRx6inu7F'));
-    // ถ้าเผลอเข้า Host รอง (free.je) ให้ 307 ไป Host หลักทันที กันล็อค/เด้ง (307 คง POST)
-    if (strpos($__host, 'free.je') !== false || strpos($__host, 'khuruphan-rus.free.je') !== false) {
-        $redirectUrl = 'https://khuruphan-rus.free.nf' . ($_SERVER['REQUEST_URI'] ?? '/');
-        header('Location: ' . $redirectUrl, true, 307);
-        exit;
-    }
 }
 define('DB_CHARSET', 'utf8mb4');
 
