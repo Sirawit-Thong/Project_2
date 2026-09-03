@@ -142,7 +142,7 @@ class EquipmentController extends Controller
             $today = date('Y-m-d');
             if (!empty($data['purchase_date'])) {
                 if ($data['purchase_date'] > $today) {
-                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . $today . ')';
+                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . formatDateThai($today) . ')';
                 }
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['purchase_date']) || strtotime($data['purchase_date']) === false) {
                     $errors[] = 'รูปแบบวันที่จัดซื้อไม่ถูกต้อง';
@@ -150,10 +150,10 @@ class EquipmentController extends Controller
             }
             if (!empty($data['check_date'])) {
                 if ($data['check_date'] > $today) {
-                    $errors[] = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' . $today . ')';
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' . formatDateThai($today) . ')';
                 }
                 if (!empty($data['purchase_date']) && $data['check_date'] < $data['purchase_date']) {
-                    $errors[] = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' . $data['purchase_date'] . ')';
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' . formatDateThai($data['purchase_date']) . ')';
                 }
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['check_date']) || strtotime($data['check_date']) === false) {
                     $errors[] = 'รูปแบบวันที่ตรวจเช็คไม่ถูกต้อง';
@@ -244,7 +244,7 @@ class EquipmentController extends Controller
             $today = date('Y-m-d');
             if (!empty($data['purchase_date'])) {
                 if ($data['purchase_date'] > $today) {
-                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . $today . ')';
+                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . formatDateThai($today) . ')';
                 }
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['purchase_date']) || strtotime($data['purchase_date']) === false) {
                     $errors[] = 'รูปแบบวันที่จัดซื้อไม่ถูกต้อง';
@@ -252,10 +252,10 @@ class EquipmentController extends Controller
             }
             if (!empty($data['check_date'])) {
                 if ($data['check_date'] > $today) {
-                    $errors[] = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' . $today . ')';
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' . formatDateThai($today) . ')';
                 }
                 if (!empty($data['purchase_date']) && $data['check_date'] < $data['purchase_date']) {
-                    $errors[] = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' . $data['purchase_date'] . ')';
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' . formatDateThai($data['purchase_date']) . ')';
                 }
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['check_date']) || strtotime($data['check_date']) === false) {
                     $errors[] = 'รูปแบบวันที่ตรวจเช็คไม่ถูกต้อง';
@@ -381,7 +381,7 @@ class EquipmentController extends Controller
             if (!empty($purchaseDate)) {
                 $today = date('Y-m-d');
                 if ($purchaseDate > $today) {
-                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . $today . ')';
+                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . formatDateThai($today) . ')';
                 }
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $purchaseDate) || strtotime($purchaseDate) === false) {
                     $errors[] = 'รูปแบบวันที่จัดซื้อไม่ถูกต้อง';

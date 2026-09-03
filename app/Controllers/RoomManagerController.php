@@ -65,8 +65,8 @@ class RoomManagerController extends Controller
             $updated = RoomManager::syncHoldersOverwrite();
         }
 
-        logActivity(getCurrentUserId(), 'Sync Holders', 'ซิงค์ผู้ถือครอง: ' . $updated . ' รายการ');
-        $this->flash('success', "ซิงค์ผู้ถือครองสำเร็จ {$updated} รายการ");
+        logActivity(getCurrentUserId(), 'ประสานข้อมูลผู้ถือครอง', 'ประสานข้อมูลผู้ถือครอง: ' . $updated . ' รายการ');
+        $this->flash('success', "ประสานข้อมูลผู้ถือครองสำเร็จ {$updated} รายการ");
         $this->redirect(SITE_URL . '/room-managers');
     }
 }
