@@ -61,10 +61,10 @@ class ItemController extends Controller
 
                 if (!empty($id) && $id !== '0') {
                     Item::update($id, $data);
-                    logActivity(getCurrentUserId(), 'Edit Item', 'แก้ไขรายการ: ' . $data['name']);
+                    logActivity(getCurrentUserId(), 'แก้ไขรายการครุภัณฑ์', 'แก้ไขรายการ: ' . $data['name']);
                 } else {
                     Item::create($data);
-                    logActivity(getCurrentUserId(), 'Add Item', 'เพิ่มรายการ: ' . $data['name']);
+                    logActivity(getCurrentUserId(), 'เพิ่มรายการครุภัณฑ์', 'เพิ่มรายการ: ' . $data['name']);
                 }
                 $this->flash('success', 'บันทึกสำเร็จ');
                 $this->redirect(SITE_URL . '/items');
@@ -86,7 +86,7 @@ class ItemController extends Controller
         }
 
         Item::delete($id);
-        logActivity(getCurrentUserId(), 'Delete Item', 'ลบรายการ ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบรายการครุภัณฑ์', 'ลบรายการ รหัส: ' . $id);
         $this->flash('success', 'ลบรายการสำเร็จ');
         $this->redirect(SITE_URL . '/items');
     }

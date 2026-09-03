@@ -50,10 +50,10 @@ class SetController extends Controller
 
                 if (!empty($id) && $id !== '0') {
                     SetModel::update($id, $data);
-                    logActivity(getCurrentUserId(), 'Edit Set', 'แก้ไขชุดครุภัณฑ์: ' . $data['name']);
+                    logActivity(getCurrentUserId(), 'แก้ไขชุดครุภัณฑ์', 'แก้ไขชุดครุภัณฑ์: ' . $data['name']);
                 } else {
                     SetModel::create($data);
-                    logActivity(getCurrentUserId(), 'Add Set', 'เพิ่มชุดครุภัณฑ์: ' . $data['name']);
+                    logActivity(getCurrentUserId(), 'เพิ่มชุดครุภัณฑ์', 'เพิ่มชุดครุภัณฑ์: ' . $data['name']);
                 }
                 $this->flash('success', 'บันทึกสำเร็จ');
                 $this->redirect(SITE_URL . '/sets');
@@ -75,7 +75,7 @@ class SetController extends Controller
         }
 
         SetModel::delete($id);
-        logActivity(getCurrentUserId(), 'Delete Set', 'ลบชุดครุภัณฑ์ ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบชุดครุภัณฑ์', 'ลบชุดครุภัณฑ์ รหัส: ' . $id);
         $this->flash('success', 'ลบชุดครุภัณฑ์สำเร็จ');
         $this->redirect(SITE_URL . '/sets');
     }

@@ -215,7 +215,7 @@ class AuthController extends Controller
 
                 if (empty($errors)) {
                     User::updateWithPassword($userId, [], $newPassword);
-                    logActivity($userId, 'Change Password', 'เปลี่ยนรหัสผ่าน');
+                    logActivity($userId, 'เปลี่ยนรหัสผ่าน', 'เปลี่ยนรหัสผ่าน');
                     $this->flash('success', 'เปลี่ยนรหัสผ่านสำเร็จ');
                     $this->redirect(SITE_URL . '/profile');
                 }
@@ -250,7 +250,7 @@ class AuthController extends Controller
         }
 
         if (isLoggedIn()) {
-            logActivity(getCurrentUserId(), 'Logout', 'ออกจากระบบ');
+            logActivity(getCurrentUserId(), 'ออกจากระบบ', 'ออกจากระบบ');
         }
 
         session_destroy();
@@ -328,7 +328,7 @@ class AuthController extends Controller
         $_SESSION['user_name'] = $user['firstname'] . ' ' . $user['lastname'];
         $_SESSION['user_email'] = $user['email'];
 
-        logActivity($user['id'], 'Login', 'เข้าสู่ระบบสำเร็จ');
+        logActivity($user['id'], 'เข้าสู่ระบบ', 'เข้าสู่ระบบสำเร็จ');
 
         return ['success' => true, 'user' => $user];
     }
@@ -364,7 +364,7 @@ class AuthController extends Controller
             'class' => $data['class'] ?? null,
         ]);
 
-        logActivity(null, 'Register', 'สมัครสมาชิกใหม่: ' . $data['email']);
+        logActivity(null, 'ลงทะเบียน', 'สมัครสมาชิกใหม่: ' . $data['email']);
 
         return ['success' => true, 'message' => 'สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติจากผู้ดูแลระบบ'];
     }

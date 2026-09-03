@@ -66,11 +66,11 @@ class DepreciationController extends Controller
                     $this->flash('danger', 'กรุณาระบุชื่อหมวดหมู่');
                 } elseif ($id > 0) {
                     AssetCategory::updateCategory($id, $name, $remark);
-                    logActivity($userId, 'Update Asset Category', 'แก้ไขหมวดหมู่ ID: ' . $id . ' -> ' . $name);
+                    logActivity($userId, 'แก้ไขหมวดหมู่', 'แก้ไขหมวดหมู่ รหัส: ' . $id . ' เป็น ' . $name);
                     $this->flash('success', 'บันทึกหมวดหมู่สำเร็จ');
                 } else {
                     AssetCategory::createCategory($name, $remark);
-                    logActivity($userId, 'Add Asset Category', 'เพิ่มหมวดหมู่: ' . $name);
+                    logActivity($userId, 'เพิ่มหมวดหมู่', 'เพิ่มหมวดหมู่: ' . $name);
                     $this->flash('success', 'เพิ่มหมวดหมู่สำเร็จ');
                 }
             } elseif ($action === 'save_setting') {
@@ -90,12 +90,12 @@ class DepreciationController extends Controller
                         $saved++;
                     }
                 }
-                logActivity($userId, 'Update Depreciation Settings', 'บันทึกเกณฑ์ค่าเสื่อม ' . $saved . ' หมวดหมู่');
+                logActivity($userId, 'บันทึกเกณฑ์ค่าเสื่อมราคา', 'บันทึกเกณฑ์ค่าเสื่อม ' . $saved . ' หมวดหมู่');
                 $this->flash('success', 'บันทึกเกณฑ์ค่าเสื่อม ' . $saved . ' หมวดหมู่สำเร็จ');
             } elseif ($action === 'delete_category') {
                 $id = (int) ($_POST['id'] ?? 0);
                 AssetCategory::deleteCategory($id);
-                logActivity($userId, 'Delete Asset Category', 'ลบหมวดหมู่ ID: ' . $id);
+                logActivity($userId, 'ลบหมวดหมู่', 'ลบหมวดหมู่ รหัส: ' . $id);
                 $this->flash('success', 'ลบหมวดหมู่สำเร็จ (รายการที่ผูกไว้จะไม่ระบุหมวด)');
             }
 
@@ -145,7 +145,7 @@ class DepreciationController extends Controller
         $this->authorize(['admin', 'staff']);
         $type = $_GET['type'] ?? 'detail';
         $rows = DepreciationReport::getEquipmentRows($this->getFilters());
-        logActivity(getCurrentUserId(), 'Export Depreciation Report', 'type: ' . $type . ' (' . count($rows) . ' รายการ)');
+        logActivity(getCurrentUserId(), 'ส่งออกรายงานค่าเสื่อมราคา', 'ประเภท: ' . $type . ' (' . count($rows) . ' รายการ)');
 
         if ($type === 'summary') {
             $data = DepreciationReport::summarizeByYear($rows);
@@ -212,7 +212,7 @@ class DepreciationController extends Controller
         $this->authorize(['teacher']);
 
         $rows = DepreciationReport::getEquipmentRows([], getCurrentUserId());
-        logActivity(getCurrentUserId(), 'Export My Depreciation', count($rows) . ' รายการ');
+        logActivity(getCurrentUserId(), 'ส่งออกค่าเสื่อมราคาในความดูแล', count($rows) . ' รายการ');
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="my_depreciation_' . date('Y-m-d') . '.csv"');

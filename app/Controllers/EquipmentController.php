@@ -70,7 +70,7 @@ class EquipmentController extends Controller
             }
         }
 
-        logActivity(getCurrentUserId(), 'Delete Equipment', 'ลบครุภัณฑ์ ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบครุภัณฑ์', 'ลบครุภัณฑ์ รหัส: ' . $id);
         $this->flash('success', 'ลบครุภัณฑ์สำเร็จ');
         $this->redirect(SITE_URL . '/equipment');
     }
@@ -169,7 +169,7 @@ class EquipmentController extends Controller
 
                 $id = Equipment::create($data);
                 $uploadErrors = $this->saveImages($id);
-                logActivity(getCurrentUserId(), 'Add Equipment', 'เพิ่มครุภัณฑ์: ' . $data['code']);
+                logActivity(getCurrentUserId(), 'เพิ่มครุภัณฑ์', 'เพิ่มครุภัณฑ์: ' . $data['code']);
                 if (!empty($uploadErrors)) {
                     $this->flash('warning', 'เพิ่มครุภัณฑ์สำเร็จ แต่บางรูปไม่ถูกบันทึก:<br>' . implode('<br>', array_slice($uploadErrors, 0, 5)));
                 } else {
@@ -271,7 +271,7 @@ class EquipmentController extends Controller
 
                 Equipment::update($id, $data);
                 $uploadErrors = $this->saveImages($id);
-                logActivity(getCurrentUserId(), 'Edit Equipment', 'แก้ไขครุภัณฑ์: ' . $data['code']);
+                logActivity(getCurrentUserId(), 'แก้ไขครุภัณฑ์', 'แก้ไขครุภัณฑ์: ' . $data['code']);
                 if (!empty($uploadErrors)) {
                     $this->flash('warning', 'แก้ไขครุภัณฑ์สำเร็จ แต่บางรูปไม่ถูกบันทึก:<br>' . implode('<br>', array_slice($uploadErrors, 0, 5)));
                 } else {
@@ -415,7 +415,7 @@ class EquipmentController extends Controller
                     $added = Equipment::bulkCreate($rows);
                 }
 
-                logActivity(getCurrentUserId(), 'Bulk Add Equipment', 'เพิ่มครุภัณฑ์จำนวนมาก: ' . $added . ' รายการ');
+                logActivity(getCurrentUserId(), 'เพิ่มครุภัณฑ์จำนวนมาก', 'เพิ่มครุภัณฑ์จำนวนมาก: ' . $added . ' รายการ');
                 $msg = "เพิ่มครุภัณฑ์สำเร็จ {$added} รายการ";
                 if ($skipped > 0) {
                     $msg .= " (ข้าม {$skipped} รายการที่ซ้ำกัน)";
@@ -481,7 +481,7 @@ class EquipmentController extends Controller
                 }
             }
 
-            logActivity(getCurrentUserId(), 'Inspection', "ตรวจนับครุภัณฑ์: {$updated} รายการ");
+            logActivity(getCurrentUserId(), 'ตรวจนับครุภัณฑ์', "ตรวจนับครุภัณฑ์: {$updated} รายการ");
             $this->flash('success', 'บันทึกข้อมูลการตรวจนับเรียบร้อยแล้ว');
             $this->redirect(SITE_URL . '/equipment/inspection?room_id=' . $selectedRoom);
         }
@@ -548,7 +548,7 @@ class EquipmentController extends Controller
                 if ($checkStatus === 'broken') {
                     Equipment::updateStatus($eqId, 'broken');
                 }
-                logActivity($userId, 'Teacher Equipment Check', "ตรวจสอบครุภัณฑ์ ID: $eqId");
+                logActivity($userId, 'ตรวจสอบครุภัณฑ์', "ตรวจสอบครุภัณฑ์ รหัส: $eqId");
                 $this->flash('success', 'บันทึกการตรวจสอบสำเร็จ');
             } else {
                 $this->flash('danger', 'คุณไม่มีสิทธิ์ตรวจสอบครุภัณฑ์นี้');
@@ -594,15 +594,15 @@ class EquipmentController extends Controller
                 switch ($action) {
                     case 'propose':
                         Equipment::updateStatus($eqId, 'pending_disposal');
-                        logActivity(getCurrentUserId(), 'Propose Disposal', 'เสนอจำหน่ายครุภัณฑ์ ID: ' . $eqId);
+                        logActivity(getCurrentUserId(), 'เสนอจำหน่ายครุภัณฑ์', 'เสนอจำหน่ายครุภัณฑ์ รหัส: ' . $eqId);
                         break;
                     case 'dispose':
                         Equipment::dispose($eqId);
-                        logActivity(getCurrentUserId(), 'Dispose', 'จำหน่ายครุภัณฑ์ ID: ' . $eqId);
+                        logActivity(getCurrentUserId(), 'จำหน่ายครุภัณฑ์', 'จำหน่ายครุภัณฑ์ รหัส: ' . $eqId);
                         break;
                     case 'restore':
                         Equipment::updateStatus($eqId, 'available');
-                        logActivity(getCurrentUserId(), 'Restore Equipment', 'กู้คืนครุภัณฑ์ ID: ' . $eqId);
+                        logActivity(getCurrentUserId(), 'กู้คืนครุภัณฑ์', 'กู้คืนครุภัณฑ์ รหัส: ' . $eqId);
                         break;
                 }
             }
@@ -661,7 +661,7 @@ class EquipmentController extends Controller
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
-            logActivity(getCurrentUserId(), 'Delete Equipment Image', 'ลบรูปครุภัณฑ์ ID: ' . $id . ', Image ID: ' . $imageId);
+            logActivity(getCurrentUserId(), 'ลบรูปครุภัณฑ์', 'ลบรูปครุภัณฑ์ รหัสครุภัณฑ์: ' . $id . ', รหัสรูป: ' . $imageId);
             $this->flash('success', 'ลบรูปภาพสำเร็จ');
         } else {
             $this->flash('danger', 'ไม่พบรูปภาพ');

@@ -31,7 +31,7 @@ class RoomManagerController extends Controller
                         'room_id' => $roomId,
                         'user_id' => $userId,
                     ]);
-                    logActivity(getCurrentUserId(), 'Add Room Manager', 'เพิ่มผู้รับผิดชอบห้อง');
+                    logActivity(getCurrentUserId(), 'เพิ่มผู้รับผิดชอบห้อง', 'เพิ่มผู้รับผิดชอบห้อง');
                     $this->flash('success', 'เพิ่มผู้รับผิดชอบสำเร็จ');
                 }
                 $this->redirect(SITE_URL . '/room-managers');
@@ -48,7 +48,7 @@ class RoomManagerController extends Controller
         $this->validateCsrf();
 
         RoomManager::delete($id);
-        logActivity(getCurrentUserId(), 'Delete Room Manager', 'ลบผู้รับผิดชอบห้อง ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบผู้รับผิดชอบห้อง', 'ลบผู้รับผิดชอบห้อง รหัส: ' . $id);
         $this->flash('success', 'ลบสำเร็จ');
         $this->redirect(SITE_URL . '/room-managers');
     }

@@ -40,14 +40,14 @@ class RoomController extends Controller
                         $this->redirect(SITE_URL . '/rooms');
                     }
                     Room::update($id, ['name' => $name]);
-                    logActivity(getCurrentUserId(), 'Edit Room', 'แก้ไขห้อง: ' . $name);
+                    logActivity(getCurrentUserId(), 'แก้ไขห้อง', 'แก้ไขห้อง: ' . $name);
                 } else {
                     if (Room::isNameTaken($name)) {
                         $this->flash('danger', 'ชื่อห้องนี้มีในระบบแล้ว');
                         $this->redirect(SITE_URL . '/rooms');
                     }
                     Room::create(['name' => $name]);
-                    logActivity(getCurrentUserId(), 'Add Room', 'เพิ่มห้อง: ' . $name);
+                    logActivity(getCurrentUserId(), 'เพิ่มห้อง', 'เพิ่มห้อง: ' . $name);
                 }
                 $this->flash('success', 'บันทึกสำเร็จ');
                 $this->redirect(SITE_URL . '/rooms');
@@ -69,7 +69,7 @@ class RoomController extends Controller
         }
 
         Room::delete($id);
-        logActivity(getCurrentUserId(), 'Delete Room', 'ลบห้อง ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบห้อง', 'ลบห้อง รหัส: ' . $id);
         $this->flash('success', 'ลบห้องสำเร็จ');
         $this->redirect(SITE_URL . '/rooms');
     }

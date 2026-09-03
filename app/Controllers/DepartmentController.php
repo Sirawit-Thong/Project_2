@@ -32,14 +32,14 @@ class DepartmentController extends Controller
                         $this->redirect(SITE_URL . '/departments');
                     }
                     Department::update($id, ['name' => $name]);
-                    logActivity(getCurrentUserId(), 'Edit Department', 'แก้ไขสาขาวิชา: ' . $name);
+                    logActivity(getCurrentUserId(), 'แก้ไขสาขาวิชา', 'แก้ไขสาขาวิชา: ' . $name);
                 } else {
                     if (Department::isNameTaken($name)) {
                         $this->flash('danger', 'ชื่อสาขาวิชานี้มีในระบบแล้ว');
                         $this->redirect(SITE_URL . '/departments');
                     }
                     Department::create(['name' => $name]);
-                    logActivity(getCurrentUserId(), 'Add Department', 'เพิ่มสาขาวิชา: ' . $name);
+                    logActivity(getCurrentUserId(), 'เพิ่มสาขาวิชา', 'เพิ่มสาขาวิชา: ' . $name);
                 }
                 $this->flash('success', 'บันทึกสำเร็จ');
                 $this->redirect(SITE_URL . '/departments');
@@ -62,7 +62,7 @@ class DepartmentController extends Controller
         }
 
         Department::delete($id);
-        logActivity(getCurrentUserId(), 'Delete Department', 'ลบสาขาวิชา ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบสาขาวิชา', 'ลบสาขาวิชา รหัส: ' . $id);
         $this->flash('success', 'ลบสาขาวิชาสำเร็จ');
         $this->redirect(SITE_URL . '/departments');
     }

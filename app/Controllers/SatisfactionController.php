@@ -43,7 +43,7 @@ class SatisfactionController extends Controller
         }
 
         if (Satisfaction::createSurvey($repairId, getCurrentUserId(), $rating, $comment)) {
-            logActivity(getCurrentUserId(), 'Submit Satisfaction Survey', 'ประเมินใบซ่อม ID: ' . $repairId . ' คะแนน: ' . $rating);
+            logActivity(getCurrentUserId(), 'ประเมินความพึงพอใจ', 'ประเมินใบซ่อม รหัส: ' . $repairId . ' คะแนน: ' . $rating);
             $this->flash('success', 'ขอบคุณสำหรับการประเมิน ข้อมูลของท่านช่วยปรับปรุงคุณภาพการบริการบำรุงรักษาครุภัณฑ์');
         } else {
             $this->flash('warning', 'ท่านได้ประเมินใบแจ้งซ่อมนี้ไปแล้ว');
@@ -76,13 +76,13 @@ class SatisfactionController extends Controller
         $this->authorize(['admin', 'staff']);
 
         $rows = Satisfaction::getAllForExport();
-        logActivity(getCurrentUserId(), 'Export Satisfaction Surveys', count($rows) . ' รายการ');
+        logActivity(getCurrentUserId(), 'ส่งออกผลประเมินความพึงพอใจ', count($rows) . ' รายการ');
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="satisfaction_' . date('Y-m-d') . '.csv"');
         echo "\xEF\xBB\xBF";
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID', 'ใบซ่อม #', 'ครุภัณฑ์', 'รายการ', 'ผู้ประเมิน', 'บทบาท', 'คะแนน', 'ความคิดเห็น', 'วันที่ประเมิน']);
+        fputcsv($output, ['ลำดับ', 'ใบซ่อม #', 'ครุภัณฑ์', 'รายการ', 'ผู้ประเมิน', 'บทบาท', 'คะแนน', 'ความคิดเห็น', 'วันที่ประเมิน']);
         foreach ($rows as $r) {
             fputcsv($output, array_map('csvSafe', [
                 $r['id'], $r['repair_id'], $r['eq_code'], $r['item_name'],

@@ -139,7 +139,7 @@ class DashboardController extends Controller
         }
         unset($row);
 
-        logActivity($userId, 'Export', 'ส่งออกข้อมูลครุภัณฑ์: ' . ($room ?: 'ทั้งหมด'));
+        logActivity($userId, 'ส่งออกข้อมูล', 'ส่งออกข้อมูลครุภัณฑ์: ' . ($room ?: 'ทั้งหมด'));
 
         $filename = 'equipment_' . ($room ? $room . '_' : '') . date('Y-m-d') . '.xls';
         header('Content-Type: application/vnd.ms-excel; charset=utf-8');

@@ -58,7 +58,7 @@ class UserController extends Controller
 
             if (empty($errors)) {
                 User::createWithPassword($data);
-                logActivity(getCurrentUserId(), 'Add User', 'เพิ่มผู้ใช้: ' . $data['email']);
+                logActivity(getCurrentUserId(), 'เพิ่มผู้ใช้', 'เพิ่มผู้ใช้: ' . $data['email']);
                 $this->flash('success', 'เพิ่มผู้ใช้สำเร็จ');
                 $this->redirect(SITE_URL . '/users');
             }
@@ -106,7 +106,7 @@ class UserController extends Controller
 
             if (empty($errors)) {
                 User::updateWithPassword($id, $data, $password);
-                logActivity(getCurrentUserId(), 'Edit User', 'แก้ไขผู้ใช้: ' . $data['email']);
+                logActivity(getCurrentUserId(), 'แก้ไขผู้ใช้', 'แก้ไขผู้ใช้: ' . $data['email']);
                 $this->flash('success', 'แก้ไขผู้ใช้สำเร็จ');
                 $this->redirect(SITE_URL . '/users');
             }
@@ -136,7 +136,7 @@ class UserController extends Controller
         $this->validateCsrf();
 
         User::approve($id);
-        logActivity(getCurrentUserId(), 'Approve User', 'อนุมัติผู้ใช้ ID: ' . $id);
+        logActivity(getCurrentUserId(), 'อนุมัติผู้ใช้', 'อนุมัติผู้ใช้ รหัส: ' . $id);
         $this->flash('success', 'อนุมัติผู้ใช้สำเร็จ');
         $this->redirect(SITE_URL . '/users/pending');
     }
@@ -148,7 +148,7 @@ class UserController extends Controller
         $this->validateCsrf();
 
         User::rejectPending($id);
-        logActivity(getCurrentUserId(), 'Reject User', 'ปฏิเสธผู้ใช้ ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ปฏิเสธผู้ใช้', 'ปฏิเสธผู้ใช้ รหัส: ' . $id);
         $this->flash('success', 'ปฏิเสธผู้ใช้สำเร็จ');
         $this->redirect(SITE_URL . '/users/pending');
     }
@@ -165,7 +165,7 @@ class UserController extends Controller
         }
 
         User::delete($id);
-        logActivity(getCurrentUserId(), 'Delete User', 'ลบผู้ใช้ ID: ' . $id);
+        logActivity(getCurrentUserId(), 'ลบผู้ใช้', 'ลบผู้ใช้ รหัส: ' . $id);
         $this->flash('success', 'ลบผู้ใช้สำเร็จ');
         $this->redirect(SITE_URL . '/users');
     }

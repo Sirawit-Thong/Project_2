@@ -76,7 +76,7 @@ class RepairController extends Controller
                     }
                 }
 
-                logActivity(getCurrentUserId(), 'Submit Repair', 'แจ้งซ่อม ID: ' . $repairId);
+                logActivity(getCurrentUserId(), 'แจ้งซ่อม', 'แจ้งซ่อม รหัส: ' . $repairId);
                 if (!empty($uploadErrors)) {
                     $this->flash('warning', 'แจ้งซ่อมสำเร็จ แต่บางรูปไม่ถูกบันทึก:<br>' . implode('<br>', array_slice($uploadErrors, 0, 5)));
                 } else {
@@ -134,7 +134,7 @@ class RepairController extends Controller
 
             if ($newStatus && in_array($newStatus, $validStatuses)) {
                 Repair::updateStatus($id, $newStatus);
-                logActivity($userId, 'Update Repair Status', 'เปลี่ยนสถานะซ่อม ID: ' . $id . ' → ' . $newStatus);
+                logActivity($userId, 'เปลี่ยนสถานะการซ่อม', 'เปลี่ยนสถานะการซ่อม รหัส: ' . $id . ' เป็น ' . translateRepairStatus($newStatus));
                 $this->flash('success', 'อัปเดตสถานะสำเร็จ');
             } else {
                 $this->flash('danger', 'สถานะไม่ถูกต้อง');
