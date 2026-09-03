@@ -81,6 +81,6 @@ jobs:
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
-            mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
+            mirror -R --verbose --only-newer --continue --no-perms --delete --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
             quit
           "
