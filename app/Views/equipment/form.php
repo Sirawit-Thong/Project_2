@@ -210,12 +210,7 @@ $today = date('Y-m-d'); // ใช้จำกัด max ไม่เกินว
                                             <div class="position-relative img-thumb">
                                                 <img src="<?= SITE_URL ?>/uploads/<?= sanitize($img['path']) ?>"
                                                     class="rounded" style="width: 100px; height: 80px; object-fit: cover;">
-                                                <form method="POST" action="<?= SITE_URL ?>/equipment/delete-image/<?= $equipment['id'] ?>"
-                                                    onsubmit="return confirm('ลบรูปนี้?');">
-                                                    <?= csrf_field() ?>
-                                                    <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                                                    <button type="submit" class="btn-delete-img" title="ลบรูปนี้" aria-label="ลบรูปนี้">×</button>
-                                                </form>
+                                                <button type="submit" form="del-purchase-<?= $img['id'] ?>" class="btn-delete-img" title="ลบรูปนี้" aria-label="ลบรูปนี้" onclick="return confirm('ลบรูปนี้?')">×</button>
                                             </div>
                                         <?php endforeach; ?>
                                         <?php if (empty($purchaseImages)): ?>
@@ -250,12 +245,7 @@ $today = date('Y-m-d'); // ใช้จำกัด max ไม่เกินว
                                             <div class="position-relative img-thumb">
                                                 <img src="<?= SITE_URL ?>/uploads/<?= sanitize($img['path']) ?>"
                                                     class="rounded" style="width: 100px; height: 80px; object-fit: cover;">
-                                                <form method="POST" action="<?= SITE_URL ?>/equipment/delete-image/<?= $equipment['id'] ?>"
-                                                    onsubmit="return confirm('ลบรูปนี้?');">
-                                                    <?= csrf_field() ?>
-                                                    <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
-                                                    <button type="submit" class="btn-delete-img" title="ลบรูปนี้" aria-label="ลบรูปนี้">×</button>
-                                                </form>
+                                                <button type="submit" form="del-current-<?= $img['id'] ?>" class="btn-delete-img" title="ลบรูปนี้" aria-label="ลบรูปนี้" onclick="return confirm('ลบรูปนี้?')">×</button>
                                             </div>
                                         <?php endforeach; ?>
                                         <?php if (empty($currentImages)): ?>
@@ -328,6 +318,20 @@ $today = date('Y-m-d'); // ใช้จำกัด max ไม่เกินว
                         </button>
                     </div>
                 </form>
+                <?php if ($isEdit): ?>
+                    <?php foreach (array_filter($existingImages, fn($img) => ($img['type'] ?? '') === 'purchase') as $img): ?>
+                        <form id="del-purchase-<?= $img['id'] ?>" method="POST" action="<?= SITE_URL ?>/equipment/delete-image/<?= $equipment['id'] ?>" class="d-none">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
+                        </form>
+                    <?php endforeach; ?>
+                    <?php foreach (array_filter($existingImages, fn($img) => ($img['type'] ?? '') === 'current_condition') as $img): ?>
+                        <form id="del-current-<?= $img['id'] ?>" method="POST" action="<?= SITE_URL ?>/equipment/delete-image/<?= $equipment['id'] ?>" class="d-none">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
+                        </form>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>

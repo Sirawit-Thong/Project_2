@@ -272,7 +272,7 @@ function uploadErrorMessage($code)
     }
 }
 
-function uploadImage($file, $folder = 'equipment')
+function uploadImage($file, $folder = 'equipment', $prefix = '')
 {
     $maxSize = 5 * 1024 * 1024; // 5MB
 
@@ -312,9 +312,28 @@ function uploadImage($file, $folder = 'equipment')
         mkdir($uploadDir, 0755, true);
     }
 
-    // Random filename with correct extension (no original filename)
+    // สร้างชื่อไฟล์จำง่าย: {prefix}_{YmdHis}_{rand}.{ext} (ไม่เอาชื่อเดิมตามคำขอ)
     $ext = $allowedMimes[$realMime];
-    $filename = bin2hex(random_bytes(16)) . '.' . $ext;
+
+    $cleanPrefix = '';
+    if ($prefix !== '' && $prefix !== null) {
+        $cleanPrefix = preg_replace('/[^a-zA-Z0-9ก-๙_\-]+/u', '_', (string) $prefix);
+        $cleanPrefix = preg_replace('/[_-]+/', '_', $cleanPrefix);
+        $cleanPrefix = trim($cleanPrefix, '_-');
+        $cleanPrefix = mb_substr($cleanPrefix, 0, 40, 'UTF-8');
+    }
+
+    $timePart = date('Ymd_His');
+    $randPart = bin2hex(random_bytes(3)); // 6 ตัวอักษร พอไม่ซ้ำ
+    $parts = array_filter([$cleanPrefix, $timePart, $randPart]);
+    $filename = implode('_', $parts) . '.' . $ext;
+    // กันชื่อยาวเกิน 100 ตัว (รวม .ext) - ตัด prefix ถ้าจำเป็น
+    if (strlen($filename) > 100) {
+        $excess = strlen($filename) - 100;
+        $cleanPrefix = mb_substr($cleanPrefix, 0, max(10, 40 - $excess), 'UTF-8');
+        $parts = array_filter([$cleanPrefix, $timePart, $randPart]);
+        $filename = implode('_', $parts) . '.' . $ext;
+    }
     $filepath = $uploadDir . $filename;
 
     if (move_uploaded_file($file['tmp_name'], $filepath)) {

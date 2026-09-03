@@ -674,6 +674,14 @@ class EquipmentController extends Controller
     {
         $errors = [];
         $typeLabels = ['purchase' => 'ภาพตอนซื้อ', 'current_condition' => 'ภาพสภาพปัจจุบัน'];
+        // ดึง code มาทำ prefix ให้ชื่อไฟล์บอกได้ว่าเป็นของครุภัณฑ์ชิ้นไหน
+        $eq = Equipment::find($equipmentId);
+        $codeSlug = '';
+        if ($eq && !empty($eq['code'])) {
+            $codeSlug = preg_replace('/[^a-zA-Z0-9]+/', '-', $eq['code']);
+            $codeSlug = trim($codeSlug, '-');
+            $codeSlug = substr($codeSlug, 0, 20);
+        }
 
         foreach (['purchase' => 'purchase_images', 'current_condition' => 'current_images'] as $type => $field) {
             if (empty($_FILES[$field]['name'][0])) continue;
@@ -692,7 +700,9 @@ class EquipmentController extends Controller
                     'error' => $_FILES[$field]['error'][$key],
                 ];
 
-                $result = uploadImage($file, 'equipment');
+                // prefix จำง่าย: EQ{ID}_{code}_{type} เช่น EQ885_7440-001_purchase
+                $prefix = 'EQ' . $equipmentId . ($codeSlug ? '_' . $codeSlug : '') . '_' . $type;
+                $result = uploadImage($file, 'equipment', $prefix);
                 if ($result['success']) {
                     Equipment::addImage($equipmentId, $result['path'], $type);
                 } else {

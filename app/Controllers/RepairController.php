@@ -50,7 +50,7 @@ class RepairController extends Controller
             if (empty($errors)) {
                 $repairId = Repair::createRepair($equipmentId, getCurrentUserId(), $issue);
 
-                // Handle image uploads
+                // Handle image uploads - ชื่อไฟล์จำง่าย: RP{repairId}_{ชื่อเดิม}_{เวลา}
                 $uploadErrors = [];
                 if (!empty($_FILES['images']['name'][0])) {
                     foreach ($_FILES['images']['name'] as $key => $name) {
@@ -66,7 +66,8 @@ class RepairController extends Controller
                             'size' => $_FILES['images']['size'][$key],
                             'error' => $_FILES['images']['error'][$key],
                         ];
-                        $result = uploadImage($file, 'repairs');
+                        $prefix = 'RP' . $repairId;
+                        $result = uploadImage($file, 'repairs', $prefix);
                         if ($result['success']) {
                             Repair::addImage($repairId, $result['path']);
                         } else {
