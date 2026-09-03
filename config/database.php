@@ -33,11 +33,27 @@ $isLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])
     || php_sapi_name() === 'cli'
     || empty($_SERVER['HTTP_HOST'] ?? '') && !empty($_SERVER['argv'] ?? null);
 
-// ค่าเริ่มต้นของโปรเจค — override ได้ผ่าน env vars (env('KEY', default))
-define('DB_HOST', env('DB_HOST', $isLocal ? 'localhost' : 'sql103.infinityfree.com'));
-define('DB_NAME', env('DB_NAME', $isLocal ? 'equipment_db' : 'if0_40083938_equipment_db'));
-define('DB_USER', env('DB_USER', $isLocal ? 'root' : 'if0_40083938'));
-define('DB_PASS', env('DB_PASS', $isLocal ? '' : 'tnRWdRx6inu7F'));
+// ค่าเริ่มต้นของโปรเจค — แยก 2 DB ตาม Host (หลัก invent_db / รอง equipment_db)
+$__host = $_SERVER['HTTP_HOST'] ?? '';
+$__isProdNf = strpos($__host, 'khuruphan-rus.free.nf') !== false || strpos($__host, 'free.nf') !== false;
+if ($isLocal) {
+    define('DB_HOST', env('DB_HOST', 'localhost'));
+    define('DB_NAME', env('DB_NAME', 'equipment_db'));
+    define('DB_USER', env('DB_USER', 'root'));
+    define('DB_PASS', env('DB_PASS', ''));
+} elseif ($__isProdNf) {
+    // Host หลัก khuruphan-rus.free.nf
+    define('DB_HOST', env('DB_HOST', 'sql103.infinityfree.com'));
+    define('DB_NAME', env('DB_NAME', 'if0_40083938_invent_db'));
+    define('DB_USER', env('DB_USER', 'if0_40083938'));
+    define('DB_PASS', env('DB_PASS', 'tnRWdRx6inu7F'));
+} else {
+    // Host รอง / Test
+    define('DB_HOST', env('DB_HOST', 'sql103.infinityfree.com'));
+    define('DB_NAME', env('DB_NAME', 'if0_40083938_equipment_db'));
+    define('DB_USER', env('DB_USER', 'if0_40083938'));
+    define('DB_PASS', env('DB_PASS', 'tnRWdRx6inu7F'));
+}
 define('DB_CHARSET', 'utf8mb4');
 
 // ตรวจว่าเป็น HTTPS หรือไม่ (ใช้กำหนด cookie_secure และ SITE_URL)
@@ -81,7 +97,13 @@ define('SITE_NAME', 'ระบบแจ้งซ่อมครุภัณฑ�
 // Auto-detect base path from SCRIPT_NAME (e.g. /Project_2/index.php -> /Project_2)
 $__basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 if ($__basePath === '/' || $__basePath === '\\' || $__basePath === '.') $__basePath = '';
-define('SITE_URL', env('SITE_URL', $isLocal ? 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $__basePath : 'https://khuruphan-rus.free.je'));
+if ($isLocal) {
+    define('SITE_URL', env('SITE_URL', 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $__basePath));
+} elseif ($__isProdNf) {
+    define('SITE_URL', env('SITE_URL', 'https://khuruphan-rus.free.nf'));
+} else {
+    define('SITE_URL', env('SITE_URL', 'https://khuruphan-rus.free.je'));
+}
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
 // Start session with secure settings
