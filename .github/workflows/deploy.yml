@@ -198,21 +198,21 @@ jobs:
 
           DIR="$(printf '%s' "$FTP_SERVER_DIR" | tr -d '\r\n' | xargs)"
 
+          # Default + normalize: รับ htdocs | /htdocs | /htdocs/ → /htdocs/
           if [ -z "$DIR" ]; then
             DIR="/htdocs/"
           fi
-
           case "$DIR" in
-            /*)
-              ;;
-            *)
-              echo "ERROR: PROD_FTP_SERVER_DIR must be an absolute path"
-              echo "Example: /htdocs/"
-              exit 1
-              ;;
+            /*) ;;
+            *) DIR="/$DIR" ;;
+          esac
+          case "$DIR" in
+            */) ;;
+            *) DIR="$DIR/" ;;
           esac
 
           echo "Production directory: $DIR"
+          echo "FTP_DIR_CLEAN=$DIR" >> "$GITHUB_ENV"
 
           timeout 60 lftp -e "
             set ftp:ssl-allow yes;
@@ -225,6 +225,8 @@ jobs:
             set net:max-retries 1;
             set dns:order inet;
             open $FTP_HOST_CLEAN;
+            pwd;
+            cls;
             cls "$DIR";
             quit
           "
@@ -233,15 +235,14 @@ jobs:
       # 8. Deploy
       # --------------------------------------------------
       - name: Deploy via FTPS
-        env:
-          FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
           set -euo pipefail
 
-          DIR="$(printf '%s' "$FTP_SERVER_DIR" | tr -d '\r\n' | xargs)"
-
+          # ใช้ค่าที่ normalize แล้วจาก validate step (กันสอง step คำนวณไม่ตรงกัน)
+          DIR="${FTP_DIR_CLEAN:-}"
           if [ -z "$DIR" ]; then
-            DIR="/htdocs/"
+            echo "Error: missing prepared FTP directory"
+            exit 1
           fi
 
           echo "=========================================="
