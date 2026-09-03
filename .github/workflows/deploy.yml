@@ -6,24 +6,55 @@ on:
   workflow_dispatch:
 
 env:
-  BACKUP_RETENTION_DAYS: '7'
+  BACKUP_RETENTION_DAYS: "7"
+  DEFAULT_REMOTE_DIR: "/htdocs/"
 
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
+
     steps:
+      # ------------------------------------------------------------
+      # 1. Checkout source
+      # ------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ------------------------------------------------------------
+      # 2. Install FTP client once
+      # ------------------------------------------------------------
+      - name: Install lftp
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+          echo "lftp version:"
+          lftp --version
+
+      # ------------------------------------------------------------
+      # 3. Create pre-deploy backup artifact
+      # ------------------------------------------------------------
       - name: Create pre-deploy backup artifact
         run: |
+          set -euo pipefail
+
           mkdir -p backups
-          TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)
+
+          TIMESTAMP="$(date -u +%Y%m%d_%H%M%S)"
           SHA="${{ github.sha }}"
           ACTOR="${{ github.actor }}"
           REF="${{ github.ref }}"
-          echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Deploy PROD start: sha=${SHA} actor=${ACTOR} ref=${REF}" >> backups/deploy.log
-          echo "Backup retention days: ${{ env.BACKUP_RETENTION_DAYS }}" >> backups/deploy.log
+
+          echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Deploy PROD start" \
+            >> backups/deploy.log
+          echo "SHA: ${SHA}" >> backups/deploy.log
+          echo "Actor: ${ACTOR}" >> backups/deploy.log
+          echo "Ref: ${REF}" >> backups/deploy.log
+          echo "Backup retention days: ${{ env.BACKUP_RETENTION_DAYS }}" \
+            >> backups/deploy.log
+
           tar -czf "pre-deploy-${SHA}.tar.gz" \
             --exclude=.git \
             --exclude=.github \
@@ -32,28 +63,157 @@ jobs:
             --exclude=uploads \
             --exclude="original website" \
             --exclude=database.sql \
-            . || true
-          ls -lh pre-deploy-*.tar.gz || true
+            .
 
-      - name: Attempt to download latest server backups (PROD)
-        continue-on-error: true
+          ls -lh "pre-deploy-${SHA}.tar.gz"
+          echo "Pre-deploy artifact created."
+
+      # ------------------------------------------------------------
+      # 4. Validate FTP configuration
+      # ------------------------------------------------------------
+      - name: Validate FTP configuration
         env:
           FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
           FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
           FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
-          sudo apt-get update && sudo apt-get install -y lftp
-          mkdir -p server-backup/backups || true
-          lftp -e "
-            set ftp:ssl-allow yes;
-            set ssl:verify-certificate no;
-            set ftp:passive-mode yes;
-            open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
-            mirror --verbose --no-perms --only-newer /htdocs/backups ./server-backup/backups || echo 'No remote backups dir';
-            quit
-          " || echo "Server backup download skipped"
-          ls -lh server-backup/ 2>&1 || true
+          set -euo pipefail
 
+          # Remove accidental CR/LF/leading/trailing whitespace.
+          FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '\r\n' | xargs)"
+          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n')"
+          FTP_SERVER_DIR="$(printf '%s' "$FTP_SERVER_DIR" | tr -d '\r\n' | xargs)"
+
+          if [ -z "$FTP_SERVER" ]; then
+            echo "::error::PROD_FTP_SERVER is empty."
+            exit 1
+          fi
+
+          if [ -z "$FTP_USER" ]; then
+            echo "::error::PROD_FTP_USERNAME is empty."
+            exit 1
+          fi
+
+          if [ -z "$FTP_PASS" ]; then
+            echo "::error::PROD_FTP_PASSWORD is empty."
+            exit 1
+          fi
+
+          if [ -z "$FTP_SERVER_DIR" ]; then
+            FTP_SERVER_DIR="${DEFAULT_REMOTE_DIR}"
+          fi
+
+          echo "FTP server configured: yes"
+          echo "FTP user configured: yes"
+          echo "FTP password configured: yes"
+          echo "Remote directory configured: yes"
+          echo "FTP host length: ${#FTP_SERVER}"
+          echo "Remote directory: ${FTP_SERVER_DIR}"
+
+          echo "FTP_SERVER=$FTP_SERVER" >> "$GITHUB_ENV"
+          echo "FTP_USER=$FTP_USER" >> "$GITHUB_ENV"
+          echo "FTP_PASS=$FTP_PASS" >> "$GITHUB_ENV"
+          echo "FTP_SERVER_DIR=$FTP_SERVER_DIR" >> "$GITHUB_ENV"
+
+      # ------------------------------------------------------------
+      # 5. Test DNS + FTPS connection
+      # ------------------------------------------------------------
+      - name: Test FTPS connection
+        env:
+          FTP_SERVER: ${{ env.FTP_SERVER }}
+          FTP_USER: ${{ env.FTP_USER }}
+          FTP_PASS: ${{ env.FTP_PASS }}
+        run: |
+          set -euo pipefail
+
+          echo "========================================"
+          echo "Testing FTP DNS resolution"
+          echo "========================================"
+
+          getent hosts "$FTP_SERVER"
+
+          echo "DNS resolution: OK"
+
+          echo "========================================"
+          echo "Testing FTPS login"
+          echo "========================================"
+
+          timeout 120 lftp -d -e "
+            set net:timeout 30;
+            set net:max-retries 2;
+            set net:reconnect-interval-base 5;
+
+            set ftp:passive-mode yes;
+
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ftp:ssl-protect-data yes;
+            set ftp:ssl-protect-list yes;
+
+            set ssl:verify-certificate no;
+
+            open ftp://$FTP_SERVER;
+            user \"$FTP_USER\" \"$FTP_PASS\";
+
+            pwd;
+            ls;
+
+            quit;
+          "
+
+          echo "FTPS login: OK"
+
+      # ------------------------------------------------------------
+      # 6. Attempt to download latest server backups
+      # ------------------------------------------------------------
+      - name: Download latest server backups
+        continue-on-error: true
+        env:
+          FTP_SERVER: ${{ env.FTP_SERVER }}
+          FTP_USER: ${{ env.FTP_USER }}
+          FTP_PASS: ${{ env.FTP_PASS }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p server-backup/backups
+
+          echo "Downloading remote backups..."
+
+          timeout 180 lftp -e "
+            set net:timeout 30;
+            set net:max-retries 2;
+            set net:reconnect-interval-base 5;
+
+            set ftp:passive-mode yes;
+
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ftp:ssl-protect-data yes;
+            set ftp:ssl-protect-list yes;
+
+            set ssl:verify-certificate no;
+
+            open ftp://$FTP_SERVER;
+            user \"$FTP_USER\" \"$FTP_PASS\";
+
+            mirror \
+              --verbose \
+              --no-perms \
+              --only-newer \
+              /htdocs/backups \
+              ./server-backup/backups;
+
+            quit;
+          " || echo "Remote backup download skipped."
+
+          echo "Downloaded server backup contents:"
+          find server-backup -maxdepth 4 -type f -print \
+            2>/dev/null || true
+
+      # ------------------------------------------------------------
+      # 7. Upload GitHub artifact
+      # ------------------------------------------------------------
       - name: Upload pre-deploy backup artifact
         uses: actions/upload-artifact@v4
         with:
@@ -65,22 +225,91 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Deploy via FTPS to PROD (lftp)
+      # ------------------------------------------------------------
+      # 8. Deploy incrementally
+      #
+      # IMPORTANT:
+      # - NO --delete
+      # - uploads excluded
+      # - backups excluded
+      # - unchanged files are skipped by mirror comparison
+      # - changed files are overwritten without deleting first
+      # ------------------------------------------------------------
+      - name: Deploy via FTPS to PROD
         env:
-          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
-          FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
-          FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
+          FTP_SERVER: ${{ env.FTP_SERVER }}
+          FTP_USER: ${{ env.FTP_USER }}
+          FTP_PASS: ${{ env.FTP_PASS }}
+          FTP_SERVER_DIR: ${{ env.FTP_SERVER_DIR }}
         run: |
-          sudo apt-get update && sudo apt-get install -y lftp
-          # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
-          DIR="${FTP_SERVER_DIR:-/htdocs/}"
-          echo "Deploying to PROD dir: $DIR"
-          lftp -e "
-            set ftp:ssl-allow yes;
-            set ssl:verify-certificate no;
+          set -euo pipefail
+
+          echo "========================================"
+          echo "DEPLOY PRODUCTION"
+          echo "========================================"
+
+          echo "FTP Host     : ${FTP_SERVER}"
+          echo "Remote Dir   : ${FTP_SERVER_DIR}"
+          echo "Strategy     : incremental"
+          echo "Delete Mode  : disabled"
+          echo "Uploads      : protected"
+          echo "Backups      : protected"
+
+          echo ""
+          echo "Starting incremental mirror..."
+
+          timeout 900 lftp -e "
+            set net:timeout 30;
+            set net:max-retries 3;
+            set net:reconnect-interval-base 5;
+
             set ftp:passive-mode yes;
-            open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
-            mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
-            quit
+
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ftp:ssl-protect-data yes;
+            set ftp:ssl-protect-list yes;
+
+            set ssl:verify-certificate no;
+
+            open ftp://$FTP_SERVER;
+            user \"$FTP_USER\" \"$FTP_PASS\";
+
+            pwd;
+
+            mirror \
+              --reverse \
+              --verbose=2 \
+              --overwrite \
+              --no-perms \
+              --exclude-glob .git/ \
+              --exclude-glob .github/ \
+              --exclude-glob node_modules/ \
+              --exclude-glob database.sql \
+              --exclude-glob README.md \
+              --exclude-glob 'original website/' \
+              --exclude-glob backups/ \
+              --exclude-glob uploads/ \
+              . \
+              \"$FTP_SERVER_DIR\";
+
+            quit;
           "
+
+          echo ""
+          echo "========================================"
+          echo "DEPLOY COMPLETED"
+          echo "========================================"
+
+      # ------------------------------------------------------------
+      # 9. Deployment summary
+      # ------------------------------------------------------------
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "========================================"
+          echo "GitHub SHA : ${{ github.sha }}"
+          echo "Branch     : ${{ github.ref_name }}"
+          echo "Actor      : ${{ github.actor }}"
+          echo "Status     : ${{ job.status }}"
+          echo "========================================"
