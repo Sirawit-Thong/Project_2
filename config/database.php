@@ -100,10 +100,18 @@ if ($__basePath === '/' || $__basePath === '\\' || $__basePath === '.') $__baseP
 if ($isLocal) {
     define('SITE_URL', env('SITE_URL', 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $__basePath));
 } else {
-    // Production: ใช้ host ปัจจุบันจริง ๆ เพื่อกันเด้งสลับ host (free.nf <-> free.je)
+    // Production: ล็อกตาม host ปัจจุบันจริง ๆ ห้ามให้ env พาเด้งสลับ host
     $scheme = $isHttps ? 'https' : 'http';
     $hostForUrl = $__host ?: 'khuruphan-rus.free.nf';
-    define('SITE_URL', env('SITE_URL', $scheme . '://' . $hostForUrl));
+    // อย่าให้ env('SITE_URL') ที่ตั้งเป็น free.je พา free.nf เด้งไป free.je
+    $envUrl = env('SITE_URL', null);
+    if ($envUrl && strpos($envUrl, $__host) === false && strpos($envUrl, 'free.je') !== false && strpos($__host, 'free.nf') !== false) {
+        $envUrl = null;
+    }
+    if ($envUrl && strpos($envUrl, $__host) === false && strpos($envUrl, 'free.nf') !== false && strpos($__host, 'free.je') !== false) {
+        $envUrl = null;
+    }
+    define('SITE_URL', $envUrl ?: $scheme . '://' . $hostForUrl);
 }
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
