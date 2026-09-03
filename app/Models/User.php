@@ -31,8 +31,9 @@ class User extends Model
         $params = [];
 
         if ($search !== '' && $search !== null) {
-            $where[] = "(firstname LIKE ? OR lastname LIKE ? OR email LIKE ? OR sid LIKE ?)";
+            $where[] = "(id LIKE ? OR firstname LIKE ? OR lastname LIKE ? OR email LIKE ? OR sid LIKE ?)";
             $like = "%{$search}%";
+            $params[] = $like;
             $params[] = $like;
             $params[] = $like;
             $params[] = $like;

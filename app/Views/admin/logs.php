@@ -52,7 +52,7 @@ $baseUrl = SITE_URL . '/logs?' . ($q !== '' ? 'q=' . urlencode($q) : '');
                             <td><small><?= formatDateTimeThai($row['created_at'] ?? '') ?></small></td>
                             <td>
                                 <?php if (!empty($row['user_id'])): ?>
-                                    <span class="badge bg-primary me-1">#<?= (int) $row['user_id'] ?></span>
+                                    <a href="<?= SITE_URL ?>/users?search=<?= urlencode($row['user_email'] ?? $row['user_id']) ?>" class="text-primary text-decoration-none fw-bold font-monospace me-1" title="ดูผู้ใช้ #<?= (int) $row['user_id'] ?> ในหน้าจัดการบัญชี"><?= htmlspecialchars('#' . (int) $row['user_id']) ?></a>
                                     <span><?= htmlspecialchars(trim($row['user_name'] ?? '') ?: '-') ?></span>
                                     <?php if (!empty($row['user_email'])): ?>
                                         <br><small class="text-muted"><?= htmlspecialchars($row['user_email']) ?><?php if (!empty($row['user_role'])): ?> (<?= htmlspecialchars(translateRole($row['user_role'])) ?>)<?php endif; ?></small>
