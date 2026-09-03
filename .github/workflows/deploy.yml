@@ -159,7 +159,8 @@ jobs:
             set ftp:passive-mode yes;
             set net:timeout 15;
             set net:max-retries 1;
-            open \"$FTP_HOST_CLEAN\";
+            set dns:order inet;
+            open $FTP_HOST_CLEAN;
             mirror \
               --verbose \
               --no-perms \
@@ -222,8 +223,9 @@ jobs:
             set ftp:passive-mode yes;
             set net:timeout 15;
             set net:max-retries 1;
-            open \"$FTP_HOST_CLEAN\";
-            cls \"$DIR\";
+            set dns:order inet;
+            open $FTP_HOST_CLEAN;
+            cls "$DIR";
             quit
           "
 
@@ -260,8 +262,9 @@ jobs:
             set net:timeout 20;
             set net:max-retries 2;
             set net:reconnect-interval-base 5;
+            set dns:order inet;
 
-            open \"$FTP_HOST_CLEAN\";
+            open $FTP_HOST_CLEAN;
 
             mirror -R \
               --verbose \
