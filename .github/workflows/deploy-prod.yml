@@ -1,31 +1,32 @@
-name: Deploy Test (Host ทดสอบ)
+name: Deploy Production (Host หลัก)
 
 on:
   push:
-    branches: [main]
+    branches: [production]
   workflow_dispatch:
 
-# Global env for backup retention (days) — used by backup artifacts
 env:
   BACKUP_RETENTION_DAYS: '7'
 
 jobs:
-  deploy:
+  deploy-prod:
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - name: Checkout
+      - name: Checkout (production)
         uses: actions/checkout@v4
+        with:
+          ref: production
 
-      - name: Create pre-deploy backup artifact (tar + deployment log)
+      - name: Create pre-deploy backup artifact
         run: |
           mkdir -p backups
           TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)
           SHA="${{ github.sha }}"
           ACTOR="${{ github.actor }}"
           REF="${{ github.ref }}"
-          echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Deploy start: sha=${SHA} actor=${ACTOR} ref=${REF}" >> backups/deploy.log
+          echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Deploy PROD start: sha=${SHA} actor=${ACTOR} ref=${REF}" >> backups/deploy.log
           echo "Backup retention days: ${{ env.BACKUP_RETENTION_DAYS }}" >> backups/deploy.log
-          # Tar current code as artifact (exclude dirs that must not be deployed/deleted on server)
           tar -czf "pre-deploy-${SHA}.tar.gz" \
             --exclude=.git \
             --exclude=.github \
@@ -36,14 +37,13 @@ jobs:
             --exclude=database.sql \
             . || true
           ls -lh pre-deploy-*.tar.gz || true
-          ls -lh backups/ || true
 
-      - name: Attempt to download latest server backups (TEST)
+      - name: Attempt to download latest server backups (PROD)
         continue-on-error: true
         env:
-          FTP_SERVER: ${{ secrets.TEST_FTP_SERVER || secrets.FTP_SERVER }}
-          FTP_USER: ${{ secrets.TEST_FTP_USERNAME || secrets.FTP_USERNAME }}
-          FTP_PASS: ${{ secrets.TEST_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
+          FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
           mkdir -p server-backup/backups || true
@@ -52,16 +52,15 @@ jobs:
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
-            mirror --verbose --no-perms --only-newer /htdocs/backups ./server-backup/backups || echo 'No remote backups dir or empty';
+            mirror --verbose --no-perms --only-newer /htdocs/backups ./server-backup/backups || echo 'No remote backups dir';
             quit
-          " || echo "Server backup download skipped (no dir or connection issue)"
+          " || echo "Server backup download skipped"
           ls -lh server-backup/ 2>&1 || true
-          ls -lh server-backup/backups/ 2>&1 || true
 
       - name: Upload pre-deploy backup artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pre-deploy-backup-${{ github.sha }}
+          name: pre-deploy-prod-${{ github.sha }}
           path: |
             pre-deploy-${{ github.sha }}.tar.gz
             backups/deploy.log
@@ -69,17 +68,17 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Deploy via FTPS to TEST (lftp)
+      - name: Deploy via FTPS to PROD (lftp)
         env:
-          FTP_SERVER: ${{ secrets.TEST_FTP_SERVER || secrets.FTP_SERVER }}
-          FTP_USER: ${{ secrets.TEST_FTP_USERNAME || secrets.FTP_USERNAME }}
-          FTP_PASS: ${{ secrets.TEST_FTP_PASSWORD || secrets.FTP_PASSWORD }}
-          FTP_SERVER_DIR: ${{ secrets.TEST_FTP_SERVER_DIR }}
-          BACKUP_RETENTION_DAYS: ${{ env.BACKUP_RETENTION_DAYS }}
+          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
+          FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
+          # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
-          echo "Deploying to TEST dir: $DIR (retention $BACKUP_RETENTION_DAYS)"
+          echo "Deploying to PROD dir: $DIR"
           lftp -e "
             set ftp:ssl-allow yes;
             set ssl:verify-certificate no;
