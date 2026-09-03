@@ -79,9 +79,18 @@ jobs:
           FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
+          # sanitize: ตัด protocol/path ออก เหลือแค่ hostname (กัน Name or service not known)
+          FTP_SERVER="${FTP_SERVER#ftp://}"
+          FTP_SERVER="${FTP_SERVER#ftps://}"
+          FTP_SERVER="${FTP_SERVER%%/*}"
+          FTP_SERVER="$(echo "$FTP_SERVER" | xargs)"
+          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
+            echo "Error: PROD_FTP_SERVER/USERNAME/PASSWORD secret ว่าง"
+            exit 1
+          fi
           # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
-          echo "Deploying to PROD dir: $DIR"
+          echo "Deploying to PROD (host length ${#FTP_SERVER}) dir set: $([ -n \"$FTP_SERVER_DIR\" ] && echo yes || echo default)"
           timeout 150 lftp -e "
             set ftp:ssl-allow yes;
             set ftp:ssl-force yes;
