@@ -33,26 +33,25 @@ $isLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])
     || php_sapi_name() === 'cli'
     || empty($_SERVER['HTTP_HOST'] ?? '') && !empty($_SERVER['argv'] ?? null);
 
-// ค่าเริ่มต้นของโปรเจค — แยก 2 DB ตาม Host (หลัก invent_db / รอง equipment_db)
+// ค่าเริ่มต้นของโปรเจค — ล็อก Host หลักอย่างเดียว (free.nf)
 $__host = $_SERVER['HTTP_HOST'] ?? '';
-$__isProdNf = strpos($__host, 'khuruphan-rus.free.nf') !== false || strpos($__host, 'free.nf') !== false;
 if ($isLocal) {
     define('DB_HOST', env('DB_HOST', 'localhost'));
     define('DB_NAME', env('DB_NAME', 'equipment_db'));
     define('DB_USER', env('DB_USER', 'root'));
     define('DB_PASS', env('DB_PASS', ''));
-} elseif ($__isProdNf) {
-    // Host หลัก khuruphan-rus.free.nf
+} else {
+    // Production: Host หลัก khuruphan-rus.free.nf อย่างเดียว
     define('DB_HOST', env('DB_HOST', 'sql103.infinityfree.com'));
     define('DB_NAME', env('DB_NAME', 'if0_40083938_invent_db'));
     define('DB_USER', env('DB_USER', 'if0_40083938'));
     define('DB_PASS', env('DB_PASS', 'tnRWdRx6inu7F'));
-} else {
-    // Host รอง / Test
-    define('DB_HOST', env('DB_HOST', 'sql103.infinityfree.com'));
-    define('DB_NAME', env('DB_NAME', 'if0_40083938_equipment_db'));
-    define('DB_USER', env('DB_USER', 'if0_40083938'));
-    define('DB_PASS', env('DB_PASS', 'tnRWdRx6inu7F'));
+    // ถ้าเผลอเข้า Host รอง (free.je) ให้ 301 ไป Host หลักทันที กันล็อค/เด้ง
+    if (strpos($__host, 'free.je') !== false || strpos($__host, 'khuruphan-rus.free.je') !== false) {
+        $redirectUrl = 'https://khuruphan-rus.free.nf' . ($_SERVER['REQUEST_URI'] ?? '/');
+        header('Location: ' . $redirectUrl, true, 301);
+        exit;
+    }
 }
 define('DB_CHARSET', 'utf8mb4');
 
@@ -100,11 +99,8 @@ if ($__basePath === '/' || $__basePath === '\\' || $__basePath === '.') $__baseP
 if ($isLocal) {
     define('SITE_URL', env('SITE_URL', 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $__basePath));
 } else {
-    // Production: Best practice — SITE_URL ห้าม override host ที่ผู้ใช้กำลังเข้าอยู่
-    // ใช้ host ปัจจุบันตรง ๆ ป้องกันทุก alias/domain พาเด้งข้าม host
-    $scheme = $isHttps ? 'https' : 'http';
-    $hostForUrl = $__host ?: 'khuruphan-rus.free.nf';
-    define('SITE_URL', $scheme . '://' . $hostForUrl);
+    // Production: ล็อก Host หลักอย่างเดียว
+    define('SITE_URL', env('SITE_URL', 'https://khuruphan-rus.free.nf'));
 }
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
