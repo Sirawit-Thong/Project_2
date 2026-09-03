@@ -11,7 +11,6 @@ env:
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,7 +37,6 @@ jobs:
 
       - name: Attempt to download latest server backups (PROD)
         continue-on-error: true
-        timeout-minutes: 4
         env:
           FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
           FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
@@ -46,17 +44,14 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
           mkdir -p server-backup/backups || true
-          timeout 90 lftp -e "
+          lftp -e "
             set ftp:ssl-allow yes;
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
-            set net:timeout 20;
-            set net:max-retries 2;
-            set net:reconnect-interval-base 5;
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
             mirror --verbose --no-perms --only-newer /htdocs/backups ./server-backup/backups || echo 'No remote backups dir';
             quit
-          " || echo "Server backup download skipped (timeout or connection issue)"
+          " || echo "Server backup download skipped"
           ls -lh server-backup/ 2>&1 || true
 
       - name: Upload pre-deploy backup artifact
@@ -71,7 +66,6 @@ jobs:
           retention-days: 7
 
       - name: Deploy via FTPS to PROD (lftp)
-        timeout-minutes: 8
         env:
           FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
           FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
@@ -79,30 +73,14 @@ jobs:
           FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
-          # sanitize: ตัด protocol/path ออก เหลือแค่ hostname (กัน Name or service not known)
-          FTP_SERVER="${FTP_SERVER#ftp://}"
-          FTP_SERVER="${FTP_SERVER#ftps://}"
-          FTP_SERVER="${FTP_SERVER%%/*}"
-          FTP_SERVER="$(echo "$FTP_SERVER" | xargs)"
-          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
-            echo "Error: PROD_FTP_SERVER/USERNAME/PASSWORD secret ว่าง"
-            exit 1
-          fi
           # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
-          echo "Deploying to PROD (host length ${#FTP_SERVER}) dir set: $([ -n \"$FTP_SERVER_DIR\" ] && echo yes || echo default)"
-          timeout 150 lftp -e "
+          echo "Deploying to PROD dir: $DIR"
+          lftp -e "
             set ftp:ssl-allow yes;
-            set ftp:ssl-force yes;
-            set ftp:ssl-protect-data yes;
-            set ftp:ssl-protect-list yes;
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
-            set net:timeout 15;
-            set net:max-retries 1;
-            set net:reconnect-interval-base 5;
-            open -u \"${FTP_USER},${FTP_PASS}\" \"${FTP_SERVER}\";
-            ls \"$DIR\" || exit 1;
-            mirror -R --verbose --only-newer --continue --no-perms --delete --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
+            open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
+            mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
             quit
           "
