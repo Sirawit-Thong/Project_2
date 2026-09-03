@@ -90,7 +90,7 @@ class Repair extends Model
             $date = new DateTime();
             $date->modify("-{$i} months");
             $yearMonth = $date->format('Y-m');
-            $label = $date->format('M Y');
+            $label = chartMonthYearThai($date);
 
             $stats[] = [
                 'month' => $yearMonth,

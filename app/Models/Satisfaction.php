@@ -55,7 +55,7 @@ class Satisfaction extends Model
             $ym = $date->format('Y-m');
             $stats[] = [
                 'month'      => $ym,
-                'label'      => $date->format('M Y'),
+                'label'      => chartMonthYearThai($date),
                 'avg_rating' => $found[$ym]['avg'] ?? 0.0,
                 'count'      => $found[$ym]['cnt'] ?? 0,
             ];
