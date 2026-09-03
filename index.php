@@ -19,6 +19,7 @@ $router->post('/register/student', 'AuthController@registerStudent');
 $router->get('/register/teacher', 'AuthController@registerTeacher');
 $router->post('/register/teacher', 'AuthController@registerTeacher');
 $router->post('/logout', 'AuthController@logout');
+$router->get('/logout', 'AuthController@logout'); // รองรับ ?i=1 และ redirect 307 ที่แปลง POST→GET
 // ============================================
 // Authenticated Routes — Profile
 // ============================================
