@@ -228,7 +228,7 @@ $deptStats = $deptStats ?? [];
     new Chart(document.getElementById('monthlyChart'), {
         type: 'bar',
         data: {
-            labels: <?= json_encode(array_column($monthlyData, 'month'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+            labels: <?= json_encode(array_column($monthlyData, 'label'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
             datasets: [{
                 label: 'จำนวนแจ้งซ่อม',
                 data: <?= json_encode(array_column($monthlyData, 'count')) ?>,
