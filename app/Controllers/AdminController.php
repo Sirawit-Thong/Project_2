@@ -412,7 +412,7 @@ class AdminController extends Controller
         $page = max(1, (int)($_GET['page'] ?? 1));
 
         $result = SystemLog::getFiltered($search, $page);
-        $pageTitle = 'ประวัติการใช้งานระบบ (Logs)';
+        $pageTitle = 'ประวัติการใช้งานระบบ';
         $viewPath = 'admin/logs';
 
         require __DIR__ . '/../Views/layouts/main.php';

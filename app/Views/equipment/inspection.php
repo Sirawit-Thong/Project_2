@@ -145,7 +145,7 @@ $pageTitle = $pageTitle ?? 'ระบบตรวจนับครุภัณ�
                                         <td>
                                             <?php if ($item['check_date']): ?>
                                                 <span class="<?= $isInspectedThisYear ? 'text-success fw-bold' : 'text-muted' ?>">
-                                                    <?= date('d/m/Y', strtotime($item['check_date'])) ?>
+                                                    <?= formatDateThai($item['check_date']) ?>
                                                 </span>
                                                 <?php if (!$isInspectedThisYear): ?>
                                                     <i class="bi bi-exclamation-circle text-warning" title="ยังไม่ได้ตรวจปีนี้"></i>

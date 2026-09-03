@@ -6,7 +6,7 @@ $baseUrl = SITE_URL . '/logs?' . ($q !== '' ? 'q=' . urlencode($q) : '');
 ?>
 
 <div class="page-header">
-    <h1><i class="bi bi-journal-text me-2"></i>ประวัติการใช้งานระบบ (Logs)</h1>
+    <h1><i class="bi bi-journal-text me-2"></i>ประวัติการใช้งานระบบ</h1>
 </div>
 
 <div class="card shadow-sm mb-3">

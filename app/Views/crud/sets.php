@@ -169,7 +169,7 @@ $paginationBaseUrl = SITE_URL . '/sets?dept_id=' . urlencode($deptFilter) . '&pe
                         <div class="col-md-6 mb-3">
                             <label class="form-label">ปีงบประมาณ <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="year" required placeholder="เช่น 2567"
-                                value="<?= date('Y') + 543 ?>">
+                                value="<?= date('Y') + 543 ?>"><!-- ปี พ.ศ. ปัจจุบัน -->
                         </div>
                         <div class="col-md-5 mb-3">
                             <label class="form-label">มูลค่ารวมทั้งสิ้น (บาท)</label>
