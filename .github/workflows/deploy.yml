@@ -27,6 +27,37 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
 
+      - name: Prepare FTPS credentials (netrc)
+        env:
+          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
+          FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
+        run: |
+          # sanitize hostname: ตัด scheme/userinfo/path/port ออก (กัน Name or service not known)
+          clean_host() {
+            printf '%s' "$1" | tr -d '\r\n' | xargs | sed -e 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##' -e 's#.*@##' -e 's#/.*$##' -e 's#:.*$##' | tr '[:upper:]' '[:lower:]' | xargs
+          }
+          FTP_SERVER="$(clean_host "$FTP_SERVER")"
+          # ล้าง newline/ช่องว่างกัน 530 (รหัสผ่านตัดแค่ CR/LF ไม่ตัดช่องว่างหัวท้าย)
+          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n' | xargs)"
+          FTP_PASS="$(printf '%s' "$FTP_PASS" | tr -d '\r\n')"
+          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
+            echo "Error: PROD_FTP_SERVER/USERNAME/PASSWORD secret ว่าง"
+            exit 1
+          fi
+          if ! printf '%s' "$FTP_SERVER" | grep -Eq '^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$'; then
+            echo "Error: PROD_FTP_SERVER ไม่ใช่ hostname ที่ถูกต้อง (ยาว ${#FTP_SERVER} ตัวอักษร) กรุณาใส่แค่ชื่อโฮสต์ เช่น ftpupload.net"
+            exit 1
+          fi
+          # เขียน ~/.netrc ด้วย printf (ค่าถูกส่งเป็น argument ไม่ผ่านการ parse
+          # รหัสมี " $ ` \ ; @ : / หรือช่องว่างก็ไม่พัง และไม่โผล่ใน command line)
+          printf 'machine %s login %s password %s\n' "$FTP_SERVER" "$FTP_USER" "$FTP_PASS" > ~/.netrc
+          chmod 600 ~/.netrc
+          # ส่ง hostname ที่ล้างแล้วให้ step ถัดไป
+          echo "FTP_HOST_CLEAN=$FTP_SERVER" >> "$GITHUB_ENV"
+          echo "Checking DNS (host length ${#FTP_SERVER})..."
+          getent hosts "$FTP_SERVER" | awk '{print "resolved: "$1}' || echo "WARNING: DNS lookup failed"
+
       - name: Create pre-deploy backup artifact
         run: |
           mkdir -p backups
@@ -50,18 +81,11 @@ jobs:
       - name: Attempt to download latest server backups (PROD)
         continue-on-error: true
         timeout-minutes: 4
-        env:
-          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
-          FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
-          FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
         run: |
-          # ล้าง newline/ช่องว่างกัน 530 (รหัสผ่านตัดแค่ CR/LF ไม่ตัดช่องว่างหัวท้าย)
-          clean_host() {
-            printf '%s' "$1" | tr -d '\r\n' | xargs | sed -e 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##' -e 's#.*@##' -e 's#/.*$##' -e 's#:.*$##' | tr '[:upper:]' '[:lower:]' | xargs
-          }
-          FTP_SERVER="$(clean_host "$FTP_SERVER")"
-          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n' | xargs)"
-          FTP_PASS="$(printf '%s' "$FTP_PASS" | tr -d '\r\n')"
+          if [ -z "${FTP_HOST_CLEAN:-}" ]; then
+            echo "Missing prepared FTP host, skipping"
+            exit 1
+          fi
           mkdir -p server-backup/backups || true
           timeout 90 lftp -e "
             set ftp:ssl-allow yes;
@@ -73,7 +97,7 @@ jobs:
             set net:timeout 20;
             set net:max-retries 2;
             set net:reconnect-interval-base 5;
-            open -u \"${FTP_USER},${FTP_PASS}\" \"${FTP_SERVER}\";
+            open \"${FTP_HOST_CLEAN}\";
             mirror --verbose --no-perms --only-newer /htdocs/backups ./server-backup/backups || echo 'No remote backups dir';
             quit
           " || echo "Server backup download skipped (timeout or connection issue)"
@@ -93,30 +117,13 @@ jobs:
       - name: Deploy via FTPS to PROD (lftp)
         timeout-minutes: 8
         env:
-          FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
-          FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
-          FTP_PASS: ${{ secrets.PROD_FTP_PASSWORD }}
           FTP_SERVER_DIR: ${{ secrets.PROD_FTP_SERVER_DIR }}
         run: |
-          # sanitize: ตัด scheme/userinfo/path/port ออก เหลือแค่ hostname (กัน Name or service not known)
-          clean_host() {
-            printf '%s' "$1" | tr -d '\r\n' | xargs | sed -e 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##' -e 's#.*@##' -e 's#/.*$##' -e 's#:.*$##' | tr '[:upper:]' '[:lower:]' | xargs
-          }
-          FTP_SERVER="$(clean_host "$FTP_SERVER")"
-          # ล้าง newline/ช่องว่างกัน 530 (รหัสผ่านตัดแค่ CR/LF ไม่ตัดช่องว่างหัวท้าย)
-          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n' | xargs)"
-          FTP_PASS="$(printf '%s' "$FTP_PASS" | tr -d '\r\n')"
+          if [ -z "${FTP_HOST_CLEAN:-}" ]; then
+            echo "Error: missing prepared FTP host"
+            exit 1
+          fi
           FTP_SERVER_DIR="$(printf '%s' "$FTP_SERVER_DIR" | tr -d '\r\n' | xargs)"
-          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
-            echo "Error: PROD_FTP_SERVER/USERNAME/PASSWORD secret ว่าง"
-            exit 1
-          fi
-          if ! printf '%s' "$FTP_SERVER" | grep -Eq '^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$'; then
-            echo "Error: PROD_FTP_SERVER ไม่ใช่ hostname ที่ถูกต้อง (ยาว ${#FTP_SERVER} ตัวอักษร) กรุณาใส่แค่ชื่อโฮสต์ เช่น ftpupload.net"
-            exit 1
-          fi
-          echo "Checking DNS (host length ${#FTP_SERVER})..."
-          getent hosts "$FTP_SERVER" | awk '{print "resolved: "$1}' || echo "WARNING: DNS lookup failed"
           # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
           echo "Deploying to PROD dir: $DIR"
@@ -130,7 +137,7 @@ jobs:
             set net:timeout 15;
             set net:max-retries 1;
             set net:reconnect-interval-base 5;
-            open -u \"${FTP_USER},${FTP_PASS}\" \"${FTP_SERVER}\";
+            open \"${FTP_HOST_CLEAN}\";
             ls \"$DIR\" || exit 1;
             mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
             quit
