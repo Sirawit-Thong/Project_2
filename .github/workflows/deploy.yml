@@ -83,7 +83,8 @@ jobs:
 
           # Remove accidental CR/LF/leading/trailing whitespace.
           FTP_SERVER="$(printf '%s' "$FTP_SERVER" | tr -d '\r\n' | xargs)"
-          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n')"
+          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '\r\n' | xargs)"
+          FTP_PASS="$(printf '%s' "$FTP_PASS" | tr -d '\r\n')"
           FTP_SERVER_DIR="$(printf '%s' "$FTP_SERVER_DIR" | tr -d '\r\n' | xargs)"
 
           if [ -z "$FTP_SERVER" ]; then
