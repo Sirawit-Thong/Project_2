@@ -82,14 +82,18 @@ jobs:
           # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
           echo "Deploying to PROD dir: $DIR"
-          timeout 300 lftp -e "
+          timeout 150 lftp -e "
             set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ftp:ssl-protect-data yes;
+            set ftp:ssl-protect-list yes;
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
-            set net:timeout 30;
-            set net:max-retries 2;
+            set net:timeout 15;
+            set net:max-retries 1;
             set net:reconnect-interval-base 5;
-            open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
+            open -u \"${FTP_USER},${FTP_PASS}\" \"${FTP_SERVER}\";
+            ls \"$DIR\" || exit 1;
             mirror -R --verbose --only-newer --continue --no-perms --delete --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
             quit
           "
