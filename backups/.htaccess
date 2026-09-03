@@ -1,0 +1,24 @@
+# ป้องกันการเข้าถึงไฟล์สำรองผ่านเว็บโดยตรง
+# Backups contain sensitive database dumps - deny all web access
+
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+
+# ป้องกันการเข้าถึงไฟล์ .sql, .sql.gz, .zip, .log
+<FilesMatch "\.(sql|sql\.gz|zip|log|gz)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>

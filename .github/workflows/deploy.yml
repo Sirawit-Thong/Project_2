@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Global env for backup retention (days) — used by backup artifacts
+env:
+  BACKUP_RETENTION_DAYS: '7'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,13 +16,69 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy via FTPS (lftp)
+      - name: Create pre-deploy backup artifact (tar + deployment log)
+        run: |
+          mkdir -p backups
+          TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)
+          SHA="${{ github.sha }}"
+          ACTOR="${{ github.actor }}"
+          REF="${{ github.ref }}"
+          echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Deploy start: sha=${SHA} actor=${ACTOR} ref=${REF}" >> backups/deploy.log
+          echo "Backup retention days: ${{ env.BACKUP_RETENTION_DAYS }}" >> backups/deploy.log
+          # Tar current code as artifact (exclude dirs that must not be deployed/deleted on server)
+          tar -czf "pre-deploy-${SHA}.tar.gz" \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=node_modules \
+            --exclude=backups \
+            --exclude=uploads \
+            --exclude="original website" \
+            --exclude=database.sql \
+            . || true
+          ls -lh pre-deploy-*.tar.gz || true
+          ls -lh backups/ || true
+
+      - name: Attempt to download latest server backups (best-effort via lftp)
+        continue-on-error: true
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
+          mkdir -p server-backup/backups || true
+          # Download remote backups/ if exists — does NOT fail deployment if missing
+          lftp -e "
+            set ftp:ssl-allow yes;
+            set ssl:verify-certificate no;
+            set ftp:passive-mode yes;
+            open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
+            mirror --verbose --no-perms --only-newer /khuruphan-rus.free.je/htdocs/backups ./server-backup/backups || echo 'No remote backups dir or empty';
+            quit
+          " || echo "Server backup download skipped (no dir or connection issue)"
+          ls -lh server-backup/ 2>&1 || true
+          ls -lh server-backup/backups/ 2>&1 || true
+
+      - name: Upload pre-deploy backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-deploy-backup-${{ github.sha }}
+          path: |
+            pre-deploy-${{ github.sha }}.tar.gz
+            backups/deploy.log
+            server-backup/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Deploy via FTPS (lftp)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          BACKUP_RETENTION_DAYS: ${{ env.BACKUP_RETENTION_DAYS }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y lftp
+          echo "Backup retention days: $BACKUP_RETENTION_DAYS"
           lftp -e "
             set ftp:ssl-allow yes;
             set ssl:verify-certificate no;
@@ -26,7 +86,7 @@ jobs:
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
             ls;
             pwd;
-            mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .git --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' . /khuruphan-rus.free.je/htdocs/;
+            mirror -R --verbose --delete --no-perms --exclude .git/ --exclude .git --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude backups --exclude uploads/ --exclude uploads . /khuruphan-rus.free.je/htdocs/;
             ls /khuruphan-rus.free.je/htdocs/;
             quit
           "

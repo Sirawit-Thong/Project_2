@@ -276,8 +276,10 @@ function uploadImage($file, $folder = 'equipment')
 {
     $maxSize = 5 * 1024 * 1024; // 5MB
 
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        return ['success' => false, 'error' => uploadErrorMessage($file['error'])];
+    // กันกรณี caller ไม่ส่ง error key (เช่น EquipmentController saveImages เดิม) - ถือว่า OK ถ้าไม่ระบุ
+    $fileError = $file['error'] ?? UPLOAD_ERR_OK;
+    if ($fileError !== UPLOAD_ERR_OK) {
+        return ['success' => false, 'error' => uploadErrorMessage($fileError)];
     }
 
     if ($file['size'] > $maxSize) {

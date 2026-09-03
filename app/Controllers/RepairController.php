@@ -64,6 +64,7 @@ class RepairController extends Controller
                             'type' => $_FILES['images']['type'][$key],
                             'tmp_name' => $_FILES['images']['tmp_name'][$key],
                             'size' => $_FILES['images']['size'][$key],
+                            'error' => $_FILES['images']['error'][$key],
                         ];
                         $result = uploadImage($file, 'repairs');
                         if ($result['success']) {

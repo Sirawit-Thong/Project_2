@@ -1,0 +1,69 @@
+name: Scheduled Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  BACKUP_RETENTION_DAYS: '7'
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql
+          coverage: none
+
+      - name: Generate backup artifact (PHP fallback dump)
+        env:
+          BACKUP_CRON_TOKEN: ${{ secrets.BACKUP_CRON_TOKEN }}
+          BACKUP_RETENTION_DAYS: ${{ env.BACKUP_RETENTION_DAYS }}
+        run: |
+          mkdir -p backups
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Scheduled backup workflow run ${{ github.run_id }} at ${TIMESTAMP}" >> backups/backup.log
+          echo "Retention days: $BACKUP_RETENTION_DAYS" >> backups/backup.log
+          # Try standalone cron script (will log to cron.log and backup.log, fallback to PHP dump if mysqldump unavailable)
+          # In CI there is no real DB, so this may warn but should not fail the workflow
+          php scripts/cron_backup.php --token="$BACKUP_CRON_TOKEN" || echo "PHP cron_backup skipped (no DB in CI, expected)"
+          # Ensure at least an artifact exists: if no .sql was created (e.g., no DB), create code archive
+          if ! ls backups/backup_*.sql 1> /dev/null 2>&1; then
+            echo "No SQL backup generated — creating code archive as fallback artifact"
+            tar -czf "backups/code-backup-${TIMESTAMP}.tar.gz" \
+              --exclude=.git \
+              --exclude=.github \
+              --exclude=node_modules \
+              --exclude=backups \
+              --exclude=uploads \
+              --exclude="original website" \
+              . || true
+            echo "[${TIMESTAMP}] Fallback code archive created" >> backups/backup.log
+          fi
+          # Also create a tar of current code for extra safety
+          tar -czf "backups/scheduled-${TIMESTAMP}.tar.gz" \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=node_modules \
+            --exclude=backups \
+            --exclude=uploads \
+            --exclude="original website" \
+            . || true
+          ls -lh backups/ || true
+          cat backups/backup.log || true
+          cat backups/cron.log || true
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scheduled-backup-${{ github.run_id }}
+          path: backups/
+          retention-days: 7
+          if-no-files-found: warn

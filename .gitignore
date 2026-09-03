@@ -14,3 +14,10 @@ uploads/repairs/*
 .env
 config/*.local.php
 docs/*
+!docs/BACKUP.md
+
+# Backups — กันไฟล์สำรองขึ้น repo แต่เก็บโครงสร้างโฟลเดอร์ไว้
+backups/*
+!backups/.htaccess
+!backups/README.md
+*.sql.gz

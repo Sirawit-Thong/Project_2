@@ -24,8 +24,11 @@ if (!function_exists('env')) {
 }
 
 // Auto-detect: local (XAMPP) หรือ production (InfinityFree)
+// เพิ่ม CLI detection เพื่อให้ cron / scripts ทำงานบน local ได้โดยไม่ต้อง spoof $_SERVER
 $isLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])
-    || strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false;
+    || strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
+    || php_sapi_name() === 'cli'
+    || empty($_SERVER['HTTP_HOST'] ?? '') && !empty($_SERVER['argv'] ?? null);
 
 // ค่าเริ่มต้นของโปรเจค — override ได้ผ่าน env vars (env('KEY', default))
 define('DB_HOST', env('DB_HOST', $isLocal ? 'localhost' : 'sql103.infinityfree.com'));

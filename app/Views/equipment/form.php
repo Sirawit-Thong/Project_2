@@ -17,6 +17,7 @@ $formData = [
     'holder_id' => $_POST['holder_id'] ?? ($equipment['holder_id'] ?? ''),
     'remark' => $_POST['remark'] ?? ($equipment['remark'] ?? ''),
 ];
+$today = date('Y-m-d'); // ใช้จำกัด max ไม่เกินวันนี้ (server date)
 ?>
 
 <!-- Page Header -->
@@ -124,9 +125,12 @@ $formData = [
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">วันที่จัดซื้อ</label>
-                            <input type="date" class="form-control" name="purchase_date"
-                                value="<?= sanitize($formData['purchase_date']) ?>">
+                            <label class="form-label" for="purchaseDate">วันที่จัดซื้อ</label>
+                            <input type="date" class="form-control" name="purchase_date" id="purchaseDate"
+                                value="<?= sanitize($formData['purchase_date']) ?>" max="<?= $today ?>"
+                                aria-describedby="purchaseDateHelp purchaseDateError">
+                            <div id="purchaseDateHelp" class="form-text">ต้องไม่เกินวันนี้ (<?= $today ?>)</div>
+                            <div id="purchaseDateError" class="invalid-feedback" aria-live="polite"></div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">ราคา (บาท) <span id="priceSourceLabel"
@@ -150,9 +154,12 @@ $formData = [
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">วันที่ตรวจเช็คล่าสุด</label>
-                            <input type="date" class="form-control" name="check_date"
-                                value="<?= sanitize($formData['check_date']) ?>">
+                            <label class="form-label" for="checkDate">วันที่ตรวจเช็คล่าสุด</label>
+                            <input type="date" class="form-control" name="check_date" id="checkDate"
+                                value="<?= sanitize($formData['check_date']) ?>" max="<?= $today ?>"
+                                aria-describedby="checkDateHelp checkDateError">
+                            <div id="checkDateHelp" class="form-text">ต้องไม่เกินวันนี้และไม่ก่อนวันที่จัดซื้อ</div>
+                            <div id="checkDateError" class="invalid-feedback" aria-live="polite"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">ผู้รับผิดชอบดูแล</label>
@@ -503,6 +510,89 @@ $formData = [
         // Trigger cascade and qty on load
         if (itemSelect.value) {
             itemSelect.dispatchEvent(new Event('change'));
+        }
+
+        // === Date constraints: ไม่เกินวันนี้ + ตรวจวันหลังไม่ก่อนวันซื้อ ===
+        const purchaseDate = document.getElementById('purchaseDate');
+        const checkDate = document.getElementById('checkDate');
+        const todayStr = new Date().toISOString().split('T')[0]; // client today (UTC) - server max also set
+        // sync max with client today (กัน clock skew server vs client)
+        if (purchaseDate) purchaseDate.max = todayStr;
+        if (checkDate) checkDate.max = todayStr;
+
+        function validatePurchaseDate() {
+            if (!purchaseDate) return true;
+            purchaseDate.setCustomValidity('');
+            const errEl = document.getElementById('purchaseDateError');
+            if (errEl) errEl.textContent = '';
+            purchaseDate.classList.remove('is-invalid');
+            if (purchaseDate.value && purchaseDate.value > todayStr) {
+                const msg = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' + todayStr + ')';
+                purchaseDate.setCustomValidity(msg);
+                if (errEl) errEl.textContent = msg;
+                purchaseDate.classList.add('is-invalid');
+                return false;
+            }
+            // ถ้าวันซื้อเปลี่ยน ต้อง revalidate วันตรวจ
+            if (checkDate && checkDate.value) validateCheckDate();
+            // sync min of checkDate
+            if (checkDate && purchaseDate.value) {
+                checkDate.min = purchaseDate.value;
+            } else if (checkDate) {
+                checkDate.removeAttribute('min');
+            }
+            return true;
+        }
+
+        function validateCheckDate() {
+            if (!checkDate) return true;
+            checkDate.setCustomValidity('');
+            const errEl = document.getElementById('checkDateError');
+            if (errEl) errEl.textContent = '';
+            checkDate.classList.remove('is-invalid');
+            if (!checkDate.value) return true;
+            if (checkDate.value > todayStr) {
+                const msg = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' + todayStr + ')';
+                checkDate.setCustomValidity(msg);
+                if (errEl) errEl.textContent = msg;
+                checkDate.classList.add('is-invalid');
+                return false;
+            }
+            if (purchaseDate && purchaseDate.value && checkDate.value < purchaseDate.value) {
+                const msg = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' + purchaseDate.value + ')';
+                checkDate.setCustomValidity(msg);
+                if (errEl) errEl.textContent = msg;
+                checkDate.classList.add('is-invalid');
+                return false;
+            }
+            return true;
+        }
+
+        if (purchaseDate) {
+            purchaseDate.addEventListener('input', () => { purchaseDate.setCustomValidity(''); validatePurchaseDate(); });
+            purchaseDate.addEventListener('blur', validatePurchaseDate);
+            purchaseDate.addEventListener('change', validatePurchaseDate);
+        }
+        if (checkDate) {
+            checkDate.addEventListener('input', () => { checkDate.setCustomValidity(''); validateCheckDate(); });
+            checkDate.addEventListener('blur', validateCheckDate);
+            checkDate.addEventListener('change', validateCheckDate);
+        }
+        // initial sync min/max
+        validatePurchaseDate();
+        validateCheckDate();
+
+        // block submit if dates invalid (Constraint Validation API)
+        const equipmentForm = document.getElementById('equipmentForm');
+        if (equipmentForm) {
+            equipmentForm.addEventListener('submit', (e) => {
+                const v1 = validatePurchaseDate();
+                const v2 = validateCheckDate();
+                if (!v1 || !v2) {
+                    e.preventDefault();
+                    ( !v1 ? purchaseDate : checkDate ).reportValidity();
+                }
+            });
         }
 
         // Cancel button - go back to referrer

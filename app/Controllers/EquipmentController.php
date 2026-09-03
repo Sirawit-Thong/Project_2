@@ -105,6 +105,24 @@ class EquipmentController extends Controller
                 'holder_id' => null, 'remark' => null,
             ]);
 
+            // Normalize FK + nullable fields กัน SQLSTATE 1452 / ''. ใช้ null แทนค่าว่าง
+            $data['room_id'] = !empty($data['room_id']) ? (int) $data['room_id'] : null;
+            if ($data['room_id'] !== null && !Model::find('rooms', $data['room_id'])) {
+                $data['room_id'] = null;
+            }
+            $data['holder_id'] = !empty($data['holder_id']) ? (int) $data['holder_id'] : null;
+            if ($data['holder_id'] !== null && !Model::find('users', $data['holder_id'])) {
+                $data['holder_id'] = null;
+            }
+            $data['purchase_date'] = !empty($data['purchase_date']) ? $data['purchase_date'] : null;
+            $data['check_date'] = !empty($data['check_date']) ? $data['check_date'] : null;
+            $data['price'] = ($data['price'] !== '' && $data['price'] !== null) ? $data['price'] : null;
+            $data['price_remark'] = !empty($data['price_remark']) ? $data['price_remark'] : null;
+            $data['remark'] = !empty($data['remark']) ? $data['remark'] : null;
+            if (!empty($data['item_id'])) {
+                $data['item_id'] = (int) $data['item_id'];
+            }
+
             $errors = [];
             if (empty($data['code'])) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์';
             if (empty($data['item_id'])) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
@@ -117,6 +135,28 @@ class EquipmentController extends Controller
                 $limit = Equipment::checkQtyLimit($data['item_id']);
                 if ($limit['qty'] > 0 && $limit['exceeded']) {
                     $errors[] = 'ไม่สามารถเพิ่มได้ รายการ "' . $limit['name'] . '" มีจำนวน ' . $limit['qty'] . ' ชิ้น ลงทะเบียนครบแล้ว';
+                }
+            }
+
+            // Validate dates: ไม่เกินวันนี้ + check_date ไม่ก่อน purchase_date
+            $today = date('Y-m-d');
+            if (!empty($data['purchase_date'])) {
+                if ($data['purchase_date'] > $today) {
+                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . $today . ')';
+                }
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['purchase_date']) || strtotime($data['purchase_date']) === false) {
+                    $errors[] = 'รูปแบบวันที่จัดซื้อไม่ถูกต้อง';
+                }
+            }
+            if (!empty($data['check_date'])) {
+                if ($data['check_date'] > $today) {
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' . $today . ')';
+                }
+                if (!empty($data['purchase_date']) && $data['check_date'] < $data['purchase_date']) {
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' . $data['purchase_date'] . ')';
+                }
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['check_date']) || strtotime($data['check_date']) === false) {
+                    $errors[] = 'รูปแบบวันที่ตรวจเช็คไม่ถูกต้อง';
                 }
             }
 
@@ -175,11 +215,51 @@ class EquipmentController extends Controller
                 'holder_id' => null, 'remark' => null,
             ]);
 
+            // Normalize FK + nullable fields กัน SQLSTATE 1452 เหมือน add()
+            $data['room_id'] = !empty($data['room_id']) ? (int) $data['room_id'] : null;
+            if ($data['room_id'] !== null && !Model::find('rooms', $data['room_id'])) {
+                $data['room_id'] = null;
+            }
+            $data['holder_id'] = !empty($data['holder_id']) ? (int) $data['holder_id'] : null;
+            if ($data['holder_id'] !== null && !Model::find('users', $data['holder_id'])) {
+                $data['holder_id'] = null;
+            }
+            $data['purchase_date'] = !empty($data['purchase_date']) ? $data['purchase_date'] : null;
+            $data['check_date'] = !empty($data['check_date']) ? $data['check_date'] : null;
+            $data['price'] = ($data['price'] !== '' && $data['price'] !== null) ? $data['price'] : null;
+            $data['price_remark'] = !empty($data['price_remark']) ? $data['price_remark'] : null;
+            $data['remark'] = !empty($data['remark']) ? $data['remark'] : null;
+            if (!empty($data['item_id'])) {
+                $data['item_id'] = (int) $data['item_id'];
+            }
+
             $errors = [];
             if (empty($data['code'])) $errors[] = 'กรุณากรอกรหัสครุภัณฑ์';
             if (empty($data['item_id'])) $errors[] = 'กรุณาเลือกรายการครุภัณฑ์';
             if (!empty($data['code']) && Equipment::isCodeTaken($data['code'], $id)) {
                 $errors[] = 'รหัสครุภัณฑ์นี้มีในระบบแล้ว';
+            }
+
+            // Validate dates: ไม่เกินวันนี้ + check_date ไม่ก่อน purchase_date
+            $today = date('Y-m-d');
+            if (!empty($data['purchase_date'])) {
+                if ($data['purchase_date'] > $today) {
+                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . $today . ')';
+                }
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['purchase_date']) || strtotime($data['purchase_date']) === false) {
+                    $errors[] = 'รูปแบบวันที่จัดซื้อไม่ถูกต้อง';
+                }
+            }
+            if (!empty($data['check_date'])) {
+                if ($data['check_date'] > $today) {
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่เกินวันนี้ (' . $today . ')';
+                }
+                if (!empty($data['purchase_date']) && $data['check_date'] < $data['purchase_date']) {
+                    $errors[] = 'วันที่ตรวจเช็คต้องไม่ก่อนวันที่จัดซื้อ (' . $data['purchase_date'] . ')';
+                }
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['check_date']) || strtotime($data['check_date']) === false) {
+                    $errors[] = 'รูปแบบวันที่ตรวจเช็คไม่ถูกต้อง';
+                }
             }
 
             if (empty($errors)) {
@@ -260,6 +340,22 @@ class EquipmentController extends Controller
             $purchaseDate = !empty($_POST['purchase_date']) ? $_POST['purchase_date'] : null;
             $price = ($_POST['price'] ?? '') !== '' ? $_POST['price'] : null;
 
+            // Normalize FK กัน 1452 เหมือน add()
+            $itemId = !empty($itemId) ? (int) $itemId : null;
+            $roomId = !empty($roomId) ? (int) $roomId : null;
+            if ($roomId !== null && !Model::find('rooms', $roomId)) {
+                $roomId = null;
+            }
+            $holderId = !empty($holderId) ? (int) $holderId : null;
+            if ($holderId !== null && !Model::find('users', $holderId)) {
+                $holderId = null;
+            }
+            if (!empty($remark)) {
+                $remark = trim($remark);
+            } else {
+                $remark = null;
+            }
+
             $errors = [];
             $validCodes = array_values(array_unique(array_map('trim', $codes)));
 
@@ -278,6 +374,17 @@ class EquipmentController extends Controller
                     if (count($validCodes) > $remaining) {
                         $errors[] = 'ไม่สามารถเพิ่มได้ รายการ "' . $itemInfo['name'] . '" มีจำนวน ' . $itemInfo['qty'] . ' ชิ้น ลงทะเบียนแล้ว ' . $existingCount . ' ชิ้น เพิ่มได้อีก ' . $remaining . ' ชิ้น (คุณกำลังเพิ่ม ' . count($validCodes) . ' ชิ้น)';
                     }
+                }
+            }
+
+            // Validate purchase_date ไม่เกินวันนี้
+            if (!empty($purchaseDate)) {
+                $today = date('Y-m-d');
+                if ($purchaseDate > $today) {
+                    $errors[] = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' . $today . ')';
+                }
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $purchaseDate) || strtotime($purchaseDate) === false) {
+                    $errors[] = 'รูปแบบวันที่จัดซื้อไม่ถูกต้อง';
                 }
             }
 
@@ -582,6 +689,7 @@ class EquipmentController extends Controller
                     'type' => $_FILES[$field]['type'][$key],
                     'tmp_name' => $tmpName,
                     'size' => $_FILES[$field]['size'][$key],
+                    'error' => $_FILES[$field]['error'][$key],
                 ];
 
                 $result = uploadImage($file, 'equipment');

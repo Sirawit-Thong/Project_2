@@ -1,6 +1,7 @@
 <?php
 $pageTitle = $pageTitle ?? 'เพิ่มครุภัณฑ์หลายรายการ';
 $errors = $errors ?? [];
+$today = date('Y-m-d');
 ?>
 
 <!-- Page Header -->
@@ -120,8 +121,10 @@ $errors = $errors ?? [];
 
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <label class="form-label">วันที่จัดซื้อ</label>
-                            <input type="date" class="form-control" name="purchase_date">
+                            <label class="form-label" for="bulkPurchaseDate">วันที่จัดซื้อ</label>
+                            <input type="date" class="form-control" name="purchase_date" id="bulkPurchaseDate" max="<?= $today ?>" aria-describedby="bulkPurchaseHelp bulkPurchaseError">
+                            <div id="bulkPurchaseHelp" class="form-text">ต้องไม่เกินวันนี้ (<?= $today ?>)</div>
+                            <div id="bulkPurchaseError" class="invalid-feedback" aria-live="polite"></div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">ราคาต่อชิ้น (บาท) <span id="priceSourceLabel"
@@ -433,5 +436,32 @@ $errors = $errors ?? [];
                 holderInfo.innerHTML = '';
             }
         });
+
+        // === Bulk purchase date: max today ===
+        const bulkPurchaseDate = document.getElementById('bulkPurchaseDate');
+        const bulkPurchaseError = document.getElementById('bulkPurchaseError');
+        const todayStrBulk = new Date().toISOString().split('T')[0];
+        if (bulkPurchaseDate) bulkPurchaseDate.max = todayStrBulk;
+        function validateBulkPurchase() {
+            if (!bulkPurchaseDate) return true;
+            bulkPurchaseDate.setCustomValidity('');
+            if (bulkPurchaseError) bulkPurchaseError.textContent = '';
+            bulkPurchaseDate.classList.remove('is-invalid');
+            if (bulkPurchaseDate.value && bulkPurchaseDate.value > todayStrBulk) {
+                const msg = 'วันที่จัดซื้อต้องไม่เกินวันนี้ (' + todayStrBulk + ')';
+                bulkPurchaseDate.setCustomValidity(msg);
+                if (bulkPurchaseError) bulkPurchaseError.textContent = msg;
+                bulkPurchaseDate.classList.add('is-invalid');
+                return false;
+            }
+            return true;
+        }
+        if (bulkPurchaseDate) {
+            bulkPurchaseDate.addEventListener('input', () => { bulkPurchaseDate.setCustomValidity(''); validateBulkPurchase(); });
+            bulkPurchaseDate.addEventListener('blur', validateBulkPurchase);
+            bulkPurchaseDate.addEventListener('change', validateBulkPurchase);
+            const bulkForm = document.getElementById('bulkAddForm');
+            if (bulkForm) bulkForm.addEventListener('submit', (e) => { if (!validateBulkPurchase()) { e.preventDefault(); bulkPurchaseDate.reportValidity(); } });
+        }
     });
 </script>
