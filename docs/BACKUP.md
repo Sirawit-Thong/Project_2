@@ -192,6 +192,14 @@ chmod +x scripts/backup.sh scripts/restore.sh
 
 ---
 
+## วิธีที่ 4: ดาวน์โหลดผ่าน FTP (แนะนำ InfinityFree)
+- FileZilla: Host ftpupload.net, User/Pass จาก InfinityFree
+- ดาวน์โหลด: `mirror uploads/` หรือลาก `uploads/` ลงเครื่อง
+- ตรวจครบ: `jq '.files | length' backups/private/manifest_*.json`
+- Restore: FTP อัปโหลดกลับไปที่ `htdocs/uploads/` + phpMyAdmin Import `database.sql`
+
+---
+
 ## การกู้คืนข้อมูล
 
 ### ⚠️ คำเตือน

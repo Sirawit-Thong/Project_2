@@ -82,6 +82,12 @@ if ($dbSize !== null) {
     </div>
 </div>
 
+<div class="card mb-4"><div class="card-body text-center">
+  <i class="bi bi-files fs-1 text-warning"></i>
+  <p>สำรองรูปจำนวนมากแบบทีละไฟล์ (InfinityFree)</p>
+  <a href="<?= SITE_URL ?>/backup/filebyfile" class="btn btn-warning">ไปหน้าสำรองทีละไฟล์</a>
+</div></div>
+
 <div class="row g-4">
     <!-- Card 1: ดาวน์โหลด Backup SQL + GZIP -->
     <div class="col-lg-6">
