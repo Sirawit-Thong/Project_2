@@ -11,6 +11,7 @@ env:
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,6 +38,7 @@ jobs:
 
       - name: Attempt to download latest server backups (PROD)
         continue-on-error: true
+        timeout-minutes: 4
         env:
           FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
           FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
@@ -44,14 +46,17 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y lftp
           mkdir -p server-backup/backups || true
-          lftp -e "
+          timeout 90 lftp -e "
             set ftp:ssl-allow yes;
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
+            set net:timeout 20;
+            set net:max-retries 2;
+            set net:reconnect-interval-base 5;
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
             mirror --verbose --no-perms --only-newer /htdocs/backups ./server-backup/backups || echo 'No remote backups dir';
             quit
-          " || echo "Server backup download skipped"
+          " || echo "Server backup download skipped (timeout or connection issue)"
           ls -lh server-backup/ 2>&1 || true
 
       - name: Upload pre-deploy backup artifact
@@ -66,6 +71,7 @@ jobs:
           retention-days: 7
 
       - name: Deploy via FTPS to PROD (lftp)
+        timeout-minutes: 8
         env:
           FTP_SERVER: ${{ secrets.PROD_FTP_SERVER }}
           FTP_USER: ${{ secrets.PROD_FTP_USERNAME }}
@@ -76,10 +82,13 @@ jobs:
           # fallback ถ้าไม่ได้ตั้ง SERVER_DIR ให้ใช้ /htdocs/
           DIR="${FTP_SERVER_DIR:-/htdocs/}"
           echo "Deploying to PROD dir: $DIR"
-          lftp -e "
+          timeout 300 lftp -e "
             set ftp:ssl-allow yes;
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
+            set net:timeout 30;
+            set net:max-retries 2;
+            set net:reconnect-interval-base 5;
             open ftp://${FTP_USER}:${FTP_PASS}@${FTP_SERVER};
             mirror -R --verbose --only-newer --continue --no-perms --delete --exclude .git/ --exclude .github/ --exclude node_modules/ --exclude database.sql --exclude README.md --exclude 'original website/' --exclude backups/ --exclude uploads/ . $DIR;
             quit
