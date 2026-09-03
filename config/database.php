@@ -99,10 +99,11 @@ $__basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 if ($__basePath === '/' || $__basePath === '\\' || $__basePath === '.') $__basePath = '';
 if ($isLocal) {
     define('SITE_URL', env('SITE_URL', 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $__basePath));
-} elseif ($__isProdNf) {
-    define('SITE_URL', env('SITE_URL', 'https://khuruphan-rus.free.nf'));
 } else {
-    define('SITE_URL', env('SITE_URL', 'https://khuruphan-rus.free.je'));
+    // Production: ใช้ host ปัจจุบันจริง ๆ เพื่อกันเด้งสลับ host (free.nf <-> free.je)
+    $scheme = $isHttps ? 'https' : 'http';
+    $hostForUrl = $__host ?: 'khuruphan-rus.free.nf';
+    define('SITE_URL', env('SITE_URL', $scheme . '://' . $hostForUrl));
 }
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 
