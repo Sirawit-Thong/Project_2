@@ -21,11 +21,14 @@ body {
     min-height: 100vh;
 }
 
-/* Skip to content link (accessibility) */
+/* Skip to content link (accessibility) — ซ่อนจากสายตา แต่ให้ screen reader และ keyboard focus เห็น */
 .skip-link {
     position: absolute;
-    top: -60px;
-    left: 10px;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
     z-index: 3000;
     background: var(--primary-color);
     color: #fff;
@@ -33,11 +36,19 @@ body {
     border-radius: 0 0 8px 8px;
     text-decoration: none;
     font-weight: 600;
-    transition: top 0.2s ease;
 }
 
-.skip-link:focus {
-    top: 0;
+.skip-link:focus,
+.skip-link:active {
+    left: 10px;
+    top: 10px;
+    width: auto;
+    height: auto;
+    overflow: visible;
+}
+
+@media print {
+    .skip-link { display: none !important; }
 }
 
 /* เวลากระโดดมาที่เนื้อหาหลัก ให้เว้นระยะไม่ให้ navbar ทับ */
