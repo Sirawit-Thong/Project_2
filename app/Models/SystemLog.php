@@ -6,11 +6,15 @@ class SystemLog extends Model
     public static function log($userId, $action, $details = null)
     {
         $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        // ใช้เวลาประเทศไทยชัดเจน กัน MySQL TIMESTAMP ช้ากว่า 14 ชม. บน InfinityFree
+        $now = date('Y-m-d H:i:s');
         return self::create([
             'user_id' => $userId,
             'action' => $action,
             'details' => $details,
             'ip_address' => $ip,
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
     }
 

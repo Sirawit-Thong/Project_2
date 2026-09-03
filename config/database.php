@@ -1,4 +1,7 @@
 <?php
+// ตั้งเวลาประเทศไทยเป็นค่าเริ่มต้นทั้งระบบ กัน InfinityFree (UTC) ช้า 7-14 ชม.
+date_default_timezone_set('Asia/Bangkok');
+
 /**
  * Database Configuration
  * การตั้งค่าเชื่อมต่อฐานข้อมูล
@@ -58,6 +61,13 @@ function getDB() {
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            // บังคับ MySQL session ให้เป็น +07:00 (Bangkok) กัน TIMESTAMP DEFAULT ช้า
+            try {
+                $pdo->exec("SET time_zone = '+07:00'");
+            } catch (PDOException $e) {
+                // InfinityFree บางแผนอาจไม่อนุญาต SET time_zone ให้ fallback เป็น UTC+7 แบบ manual
+                // ไม่ throw เพื่อไม่ให้เว็บล่ม
+            }
         } catch (PDOException $e) {
             die("การเชื่อมต่อฐานข้อมูลล้มเหลว: " . $e->getMessage());
         }

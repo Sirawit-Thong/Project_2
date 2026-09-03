@@ -1,4 +1,7 @@
 <?php
+// บังคับเวลาประเทศไทยทุก request กัน InfinityFree ช้า 14 ชม.
+date_default_timezone_set('Asia/Bangkok');
+
 /**
  * Application Bootstrap
  * ไฟล์เริ่มต้นระบบที่โหลดทุกสิ่งที่จำเป็น

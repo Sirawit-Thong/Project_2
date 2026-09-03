@@ -1,3 +1,11 @@
+# ตั้งเวลาไทย กัน InfinityFree (UTC) ช้ากว่า 7-14 ชม.
+<IfModule mod_php.c>
+    php_value date.timezone "Asia/Bangkok"
+</IfModule>
+<IfModule mod_php7.c>
+    php_value date.timezone "Asia/Bangkok"
+</IfModule>
+
 RewriteEngine On
 
 # Handle requests that don't match existing files or directories
