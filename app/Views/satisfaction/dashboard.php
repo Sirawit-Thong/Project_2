@@ -90,7 +90,7 @@
             responsive: true,
             scales: {
                 y:  { min: 0, max: 5, position: 'left', title: { display: true, text: 'คะแนนเฉลี่ย (1-5)' } },
-                y1: { min: 0, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'จำนวน (ครั้ง)' } }
+                y1: { min: 0, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'จำนวน (ครั้ง)' }, ticks: { precision: 0 } }
             }
         }
     });

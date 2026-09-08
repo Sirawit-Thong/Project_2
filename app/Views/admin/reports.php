@@ -263,7 +263,7 @@ $deptStats = $deptStats ?? [];
                 y: {
                     beginAtZero: true,
                     grid: { borderDash: [2], drawBorder: false, color: "rgb(234, 236, 244)" },
-                    ticks: { padding: 10 }
+                    ticks: { padding: 10, precision: 0 }
                 },
                 x: {
                     grid: { display: false, drawBorder: false },
